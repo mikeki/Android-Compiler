@@ -1,0 +1,29 @@
+%union{ 
+int integer; 
+float float_n;
+char *str; 
+} 
+%token ADELANTE ATRAS ROTADERECHA ROTAIZQUIERDA TOMARTESORO TOPA
+%token VERPISTA SI SINO MIENTRAS FUNCION ENTERO FLOTANTE SELECCIONA CUANDO
+%token REGRESA LOGICO PALABRA ESCRIBE LEE PRINCIPAL VACIO VERDADERO FALSO
+%token Y O NO PROGRAMA CARACTER COMA PUNTOCOMA IGUALP ALLAVE CLLAVE
+%token IGUALR MAYORQUE MENORQUE DIFERENTE APARENTESIS CPARENTESIS
+%token MAS MENOS POR ENTRE CONCA
+%token <float_n> CTF
+%token <str> CTESTRING
+%token <str> ID
+%token <str> CAR
+%token <integer> CTE
+
+%start program
+
+%% 
+program: ;
+
+%% 
+main() { 
+  yyparse(); 
+}
+
+yyerror(){
+}

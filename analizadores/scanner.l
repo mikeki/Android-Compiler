@@ -1,13 +1,12 @@
 %{
 #include <stdlib.h>
-//#include "y.tab.h"
+#include "parser.tab.h"
 
 %}
 
 id		[a-zA-Z]([a-zA-Z0-9]|[_])*
 ctei		[0-9]+
 ctef		[0-9]+"."[0-9]+
-ctes		\" [.+|\n]* \"
 
 %%
 
@@ -41,11 +40,16 @@ ctes		\" [.+|\n]* \"
 "programa" {return PROGRAMA;}
 "caracter" {return CARACTER;}
 
-{ctei} {return CTE;}
-{ctef} {return CTF;}
-{ctes} {return CTESTRING;}
-[A-Za-z] {return car;}
-{id} {return ID;}
+{ctei} {yylval.integer = atoi(yytext);
+        return CTE;}
+{ctef} {yylval.float_n = atof(yytext);
+        return CTF;}
+"\""[.+|"\n"]*"\"" {yylval.str = strdup(yytext);
+                    return CTESTRING;}
+[A-Za-z] {yylval.str = strdup(yytext);
+          return CAR;}
+{id} {yylval.str = strdup(yytext);
+      return ID;}
 
 
 "," {return COMA;}
@@ -65,7 +69,9 @@ ctes		\" [.+|\n]* \"
 "/" {return ENTRE;}
 "." {return CONCA;}
 
-"//" .* | "**" [.+|\n]* "**" ;
+["//".* | "**"(.+|\n)*"**"] ;
+
+. ;
 
 %%
 
