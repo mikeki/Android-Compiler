@@ -1,0 +1,97 @@
+**
+Estos son comentairos del usuario
+Creador: Juan Perez
+**
+
+programa holamundo:
+
+
+//Comentarios de las variables
+entero h = 123;
+
+**
+Comentarios de la funcion
+**
+funcion uno(){
+	entero a = 1 + 1;
+	flotante b = 1.123;
+
+	flotante c = a * b;
+	
+	c  += h;
+	regresa c;
+}
+
+funcion dos(entero rec){
+	
+	matriz a [2][2];
+	entero i = 0;
+	mientras(i < rec){
+		adelante();
+		i++;
+	}
+	escribe("me movi arriba 2 posiciones");
+	regresa vacio;
+}
+
+funcion tres(){
+	entero a = 1 + 1;
+	flotante b = 1.123;
+
+	flotante c = a * b;
+	regresa vacio;
+}
+
+funcion cuatro(entero rec){
+	
+	matriz a [2][2];
+	entero i = 0;
+	mientras(i < rec){
+		atras();
+		i++;
+	}
+	escribe("me movi abajo 2 posiciones");
+	regresa vacio;
+}
+
+principal(){
+	arreglo a = [4];
+	a = {1,1,1,1};
+	
+	a[1] = 1;
+	entero j = 0;
+	mientras(j < longitud(a){
+		selecciona(a[j]){
+			cuando 1 => { 
+				flotante u = uno();
+			}
+			cuando 2 => { 
+				dos(1);
+			}
+			cuando 3 => { 
+				tres();
+			}
+			cuando 4 => { 
+				cuatro(2);
+			}
+		}		
+		j+=;
+	}
+	
+	//Se preguntara si quiere checar si gano o no.
+	escribe("¿Quieres checar que ganste? verdadero o falso \n");
+	logico b = lee();
+	si(b){
+		si(topa()){
+			si(tomartesoro()){
+				escribe("ganaste!!!");
+			}
+			sino{
+				escribe("Perdiste");
+			}	
+		}sino{
+			escribe("Perdiste");
+		}	
+	}
+	
+}
