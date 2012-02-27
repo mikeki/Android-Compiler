@@ -1,0 +1,11 @@
+programa hola:
+
+
+entero a;
+**
+entero b = 1;
+logico c = verdadero;
+**
+principal{
+
+}

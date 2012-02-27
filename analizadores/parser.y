@@ -20,21 +20,21 @@ char *str;
 %% 
 programa: PROGRAMA ID IGUALP programap main;
 programap: programapp programappp;
-programapp: 	vars 
+programapp: 	vars programapp
 		| ;
 programappp: funcion programappp
 		| ;
 
-vars: tipo ID varsp PUNTOCOMA varspp;
-varspp: vars
-	| ;
-varsp: varsppp
-	| lv;
-varsppp: IGUALR lv
-	| COMA ID varr;
-lv:	lectura
-	|varcte;
-varr:	varsppp 
+vars: tipo ID varsp;
+varsp: lva
+	|varid;
+lva: IGUALR lvap;
+lvap: lectura PUNTOCOMA
+	| varcte PUNTOCOMA
+	| accion;
+varid: COMA ID varidp
+	| PUNTOCOMA;
+varidp: varid 
 	| ;
 
 funcion: FUNCION ID APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE;
@@ -62,7 +62,8 @@ varcte: ID
 	| VACIO
 	| VERPISTA
 	| VERDADERO
-	| FALSO;
+	| FALSO
+	| accionsi;
 
 estatutofuncion: asignacion
 		|condicion
@@ -84,21 +85,22 @@ estatuto: asignacion
 
 regresa: REGRESA mmexp PUNTOCOMA;
 
-asignacion: ID asignacionp PUNTOCOMA;
-asignacionp: IGUALR asignacionpp 
-		| asignacionppp;
-asignacionpp: lectura
-		|exp
+asignacion: 	ID asignacionp;
+asignacionp: 	asigp
+		| asigpp;
+asigp: 		IGUALR lea;
+lea: 		lectura PUNTOCOMA
+		|exp PUNTOCOMA
 		| accion;
-asignacionppp: a
-		|ap;
-a: 	MAS MAS 
-	| MENOS MENOS;
-ap: 	MAS IGUALR app
-	| MENOS IGUALR app;
-app: 	CTE
-	| CTF
-	| ID;
+asigpp:		ap 
+		| app;
+ap:		MAS MAS PUNTOCOMA
+		|MENOS MENOS PUNTOCOMA;
+app:		MAS IGUALR atipo PUNTOCOMA
+		| MENOS IGUALR atipo PUNTOCOMA;
+atipo:		CTE
+		| CTF
+		| ID;
 
 condicion: c
 	|  cp;
@@ -126,6 +128,7 @@ ciclo: MIENTRAS APARENTESIS mmexp CPARENTESIS ALLAVE bloque CLLAVE;
 accion: acciones APARENTESIS accionp CPARENTESIS PUNTOCOMA;
 accionp: params2 
 	| ;
+accionsi: acciones APARENTESIS accionp CPARENTESIS;
 acciones: ADELANTE
 	| ATRAS
 	| ROTADERECHA
