@@ -10,6 +10,9 @@ ctef		[0-9]+"."[0-9]+
 
 %%
 
+"**"[^*]*"**" {;}
+"//".*	{;}
+
 "adelante" {return ADELANTE;}
 "atras" {return ATRAS;}
 "rotaderecha" {return ROTADERECHA;}
@@ -44,9 +47,9 @@ ctef		[0-9]+"."[0-9]+
         return CTE;}
 {ctef} {yylval.float_n = atof(yytext);
         return CTF;}
-"\""[.+|"\n"]*"\"" {yylval.str = strdup(yytext);
+\"[^\"]*\" {yylval.str = strdup(yytext);
                     return CTESTRING;}
-[A-Za-z] {yylval.str = strdup(yytext);
+"'"[A-Za-z]"'" {yylval.str = strdup(yytext);
           return CAR;}
 {id} {yylval.str = strdup(yytext);
       return ID;}
@@ -69,7 +72,6 @@ ctef		[0-9]+"."[0-9]+
 "/" {return ENTRE;}
 "." {return CONCA;}
 
-["//".* | "**"(.+|\n)*"**"] ;
 
 . ;
 

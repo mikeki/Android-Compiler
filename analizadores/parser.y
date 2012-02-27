@@ -19,27 +19,34 @@ char *str;
 
 %% 
 programa: PROGRAMA ID IGUALP programap main;
-programap: vars programapp
-	| programapp
+programap: programapp programappp;
+programapp: 	vars 
+		| ;
+programappp: funcion programappp
+		| ;
+
+vars: tipo ID varsp PUNTOCOMA varspp;
+varspp: vars
 	| ;
-programapp: funcion programapp
+varsp: varsppp
+	| lv;
+varsppp: IGUALR lv
+	| COMA ID varr;
+lv:	lectura
+	|varcte;
+varr:	varsppp 
 	| ;
 
-vars:	tipo ID varsp PUNTOCOMA vars
-	| ;
-varsp:	IGUALR varspp 
-	| varsppp;
-varspp:	lectura 
-	| varcte;
-varsppp: COMA ID varspppp;
-varspppp: varsppp
-	| ;
-
-funcion: ID APARENTESIS params CPARENTESIS ALLAVE funcionp CLLAVE;
+funcion: FUNCION ID APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE;
 funcionp: estatutofuncion funcionp
+	| ;
+funcionpp: params 
 	| ;
 
 main: PRINCIPAL ALLAVE bloque CLLAVE;
+
+bloque: estatuto bloque
+	| ;
 
 tipo:	 ENTERO
 	|FLOTANTE
@@ -49,11 +56,13 @@ tipo:	 ENTERO
 
 varcte: ID
 	| CTE
-	| CTS
+	| CTESTRING
 	| CTF
 	| CAR
 	| VACIO
-	| VERPISTA;
+	| VERPISTA
+	| VERDADERO
+	| FALSO;
 
 estatutofuncion: asignacion
 		|condicion
@@ -72,17 +81,15 @@ estatuto: asignacion
 		|funcion
 		|vars;
 
-bloque: bloquep;
-bloquep: estatuto bloquep
-	| ;
 
-regresa: REGRESA mmexp;
+regresa: REGRESA mmexp PUNTOCOMA;
 
-asignacion: ID asignacionp;
+asignacion: ID asignacionp PUNTOCOMA;
 asignacionp: IGUALR asignacionpp 
 		| asignacionppp;
 asignacionpp: lectura
-		|exp;
+		|exp
+		| accion;
 asignacionppp: a
 		|ap;
 a: 	MAS MAS 
@@ -179,5 +186,6 @@ main() {
   yyparse(); 
 }
 
-yyerror(){
+yyerror(char *s){
+       printf("%s \n", s);
 }

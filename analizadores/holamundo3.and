@@ -1,0 +1,75 @@
+//nsudfhgidfb
+//nsbufdogh
+
+programa hola: 
+**sndufhut
+wendiofh
+
+**
+
+entero h, j , k;
+flotante i = 1.23;
+
+entero p = 8;
+
+caracter c = 'a';
+
+palabra s ="dfg";
+
+logico b = verdadero;
+
+
+funcion uno(){}
+
+funcion uno(entero a){
+	escribe("wbedui");
+}
+funcion uno(logico b){
+	entero h = lee();
+	entero a = 1;
+	flotante b = 1.123;
+	caracter c = 'a';
+	palabra s = "dfg";
+	
+	
+	mientras(i < rec){
+		atras();
+		i++;
+		
+	}
+
+	regresa vacio;
+	regresa 1; 
+	
+	
+}
+
+
+
+principal{
+//wi
+
+	entero j = 0;
+	
+	mientras(j < 10){
+		
+		selecciona(j){
+			cuando 1 => { 
+				flotante u = uno();;
+			}
+			cuando 2 => { 
+				dos(1);
+			}
+			cuando 3 => { 
+				//tres();
+			}
+			cuando 4 => { 
+				//cuatro(2);
+			}
+		}
+				
+		j+=1;
+	}
+	
+
+}
