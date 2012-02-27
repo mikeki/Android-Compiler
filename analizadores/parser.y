@@ -30,8 +30,7 @@ varsp: lva
 	|varid;
 lva: IGUALR lvap;
 lvap: lectura PUNTOCOMA
-	| varcte PUNTOCOMA
-	| accion;
+	| mmexp PUNTOCOMA;
 varid: COMA ID varidp
 	| PUNTOCOMA;
 varidp: varid 
@@ -90,8 +89,7 @@ asignacionp: 	asigp
 		| asigpp;
 asigp: 		IGUALR lea;
 lea: 		lectura PUNTOCOMA
-		|exp PUNTOCOMA
-		| accion;
+		|mmexp PUNTOCOMA;
 asigpp:		ap 
 		| app;
 ap:		MAS MAS PUNTOCOMA

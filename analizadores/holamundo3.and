@@ -23,7 +23,18 @@ funcion uno(){
 	entero a = 1 + 1;
 	flotante b = 1.123;
 
-	//flotante c = a * b;
+	//flotante
+	
+	logico c = verdadero o (verdadero y falso);
+	
+	entero a = 1 + 1;
+	flotante b = 1.123;
+
+	flotante c = a * b;
+	
+	c  += h;
+	regresa c;
+
 	
 }
 

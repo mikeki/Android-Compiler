@@ -67,7 +67,7 @@ principal{
 				cuatro(2);
 			}
 		}		
-		j+=;
+		j+=1;
 	}
 	
 	
@@ -85,5 +85,7 @@ principal{
 			escribe("Perdiste");
 		}	
 	}
+
+	
 	
 }
