@@ -1,0 +1,6 @@
+program fcngh_1;
+ var a: float;b : float; a: float;
+	{
+	a = 1;
+	
+	}

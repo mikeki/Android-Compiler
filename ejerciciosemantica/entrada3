@@ -1,0 +1,6 @@
+program fcngh; var josd: int;
+	{
+		if(a<b){
+			write("holamundo");
+		};	
+	}
