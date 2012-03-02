@@ -69,7 +69,6 @@ estatutofuncion: asignacion
 		|escritura
 		|ciclo
 		|accion
-		|funcion
 		|vars
 		|regresa;
 
@@ -78,7 +77,6 @@ estatuto: asignacion
 		|escritura
 		|ciclo
 		|accion
-		|funcion
 		|vars;
 
 
