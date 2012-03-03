@@ -3,4 +3,4 @@ default:
 		bison -d parser.y
 		bison parser.y
 		flex scanner.l
-		gcc -o android parser.tab.c lex.yy.c -lfl
+		gcc -o android -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -lglib-2.0 parser.tab.c lex.yy.c -lfl

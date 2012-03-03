@@ -1,3 +1,76 @@
+%{
+#include <stdio.h>
+#include <string.h>
+#include <glib.h>
+
+static GHashTable *dir_procs;
+static char *proc_actual;
+
+/*
+Estructuras para las tabalase de procedimientos y tabla de variables
+*/
+typedef struct{
+GHashTable *var_table;
+}funcion;
+
+typedef struct{
+char *tipo;
+char *nombre;
+}variable;
+
+/*
+Descripcion: Inicializa la tabla de dir_procs (directorio de procedimientos)
+
+Parametros: void
+Salida:void
+*/
+void create_dir_table(){
+	dir_procs = g_hash_table_new(g_str_hash, g_str_equal);
+}
+
+/*
+Descripcion: Funcion que se encarga de insetrar un procedimiento, programa global
+y la rutina principal
+
+Parametros: char * name
+Salida:void
+*/
+void insert_proc_to_table(char *name){
+	if(g_hash_table_lookup(dir_procs,(gpointer)name) != NULL){
+		printf("Error de Semantica funcion %s redeclarada\n",name);
+		exit(1);
+	}else{
+	funcion *temp = g_slice_new(funcion);
+	funcion->var_table = g_hash_table_new(g_str_hash, g_str_equal);
+	g_hash_table_insert(dir_procs,(gpointer)name,(gpointer)temp);
+	}
+}	
+/*
+Descripcion: Inserta una variable en el proceso actual en su tabla de 
+variables correspondiente.
+
+Parametros: char *name
+Salida:void
+*/	
+void insert_var_to_table(char *name){
+	
+}
+
+/*
+Descripcion: Imprime el resultado de lo que se guardo en una tabla
+
+Parametros: GHashTable *a
+Salida:void
+*/
+void imprime(GHashTable *a){
+	printf("Lista:");
+	g_hash_table_foreach(a,(GHFunc)printf,NULL);
+	printf("\n");
+	
+	
+}
+
+%}
 %union{ 
 int integer; 
 float float_n;
@@ -18,7 +91,7 @@ char *str;
 %start programa
 
 %% 
-programa: PROGRAMA ID IGUALP programap main;
+programa: PROGRAMA ID{insert_proc_to_table(yylval.str);} IGUALP programap main;
 programap: programapp programappp;
 programapp: 	vars programapp
 		| ;
@@ -36,13 +109,13 @@ varid: COMA ID varidp
 varidp: varid 
 	| ;
 
-funcion: FUNCION ID APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE;
+funcion: FUNCION ID{insert_proc_to_table(yylval.str);} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE;
 funcionp: estatutofuncion funcionp
 	| ;
 funcionpp: params 
 	| ;
 
-main: PRINCIPAL ALLAVE bloque CLLAVE;
+main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE bloque CLLAVE;
 
 bloque: estatuto bloque
 	| ;

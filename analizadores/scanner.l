@@ -33,7 +33,7 @@ ctef		[0-9]+"."[0-9]+
 "palabra" {return PALABRA;}
 "escribe" {return ESCRIBE;}
 "lee" {return LEE;}
-"principal" {return PRINCIPAL;}
+"principal" {yylval.str = "principal";return PRINCIPAL;}
 "vacio" {return VACIO;}
 "verdadero" {return VERDADERO;}
 "falso" {return FALSO;}
