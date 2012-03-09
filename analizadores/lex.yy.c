@@ -975,7 +975,7 @@ YY_RULE_SETUP
 case 23:
 YY_RULE_SETUP
 #line 36 "scanner.l"
-{return PRINCIPAL;}
+{yylval.str = "principal";return PRINCIPAL;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP

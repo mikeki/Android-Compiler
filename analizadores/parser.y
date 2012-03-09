@@ -41,7 +41,7 @@ void insert_proc_to_table(char *name){
 		exit(1);
 	}else{
 	funcion *temp = g_slice_new(funcion);
-	funcion->var_table = g_hash_table_new(g_str_hash, g_str_equal);
+	temp->var_table = g_hash_table_new(g_str_hash, g_str_equal);
 	g_hash_table_insert(dir_procs,(gpointer)name,(gpointer)temp);
 	}
 }	
@@ -255,7 +255,10 @@ varselecciona: ID
 
 %% 
 main() { 
+create_dir_table();
   yyparse(); 
+imprime(dir_procs);
+free(dir_procs);
 }
 
 yyerror(char *s){

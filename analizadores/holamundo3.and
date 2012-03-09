@@ -38,10 +38,10 @@ funcion uno(){
 	
 }
 
-funcion uno(entero a){
+funcion dos(entero a){
 	escribe("wbedui");
 }
-funcion uno(logico b){
+funcion tres(logico b){
 	entero h = lee();
 	entero a = 1;
 	flotante b = 1.123;
