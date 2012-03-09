@@ -5,7 +5,7 @@
 
 static GHashTable *dir_procs;
 static char *proc_actual;
-
+static char *tipo_actual;
 /*
 Estructuras para las tabalase de procedimientos y tabla de variables
 */
@@ -43,6 +43,7 @@ void insert_proc_to_table(char *name){
 	funcion *temp = g_slice_new(funcion);
 	temp->var_table = g_hash_table_new(g_str_hash, g_str_equal);
 	g_hash_table_insert(dir_procs,(gpointer)name,(gpointer)temp);
+	proc_actual = name;
 	}
 }	
 /*
@@ -53,7 +54,18 @@ Parametros: char *name
 Salida:void
 */	
 void insert_var_to_table(char *name){
-	
+	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+	//printf("%s", tabla->var_table);
+	if(g_hash_table_lookup(tabla->var_table,(gpointer)name) != NULL){
+		printf("Error de Semantica variable %s redeclarada\n",name);
+		exit(1);
+	}else{
+	variable *temp = g_slice_new(variable);
+	temp->tipo = tipo_actual;
+	temp->nombre = name;
+	g_hash_table_insert(tabla->var_table,(gpointer)name,(gpointer)temp);
+	g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
+	}
 }
 
 /*
@@ -65,6 +77,8 @@ Salida:void
 void imprime(GHashTable *a){
 	printf("Lista:");
 	g_hash_table_foreach(a,(GHFunc)printf,NULL);
+	
+	
 	printf("\n");
 	
 	
@@ -98,13 +112,13 @@ programapp: 	vars programapp
 programappp: funcion programappp
 		| ;
 
-vars: tipo ID varsp;
+vars: tipo ID{insert_var_to_table(yylval.str);} varsp;
 varsp: lva
 	|varid;
 lva: IGUALR lvap;
 lvap: lectura PUNTOCOMA
 	| mmexp PUNTOCOMA;
-varid: COMA ID varidp
+varid: COMA ID{insert_var_to_table(yylval.str);} varidp
 	| PUNTOCOMA;
 varidp: varid 
 	| ;
@@ -120,11 +134,11 @@ main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE bloque CLLAVE;
 bloque: estatuto bloque
 	| ;
 
-tipo:	 ENTERO
-	|FLOTANTE
-	| CARACTER
-	| PALABRA
-	| LOGICO ;
+tipo:	 ENTERO {tipo_actual= "entero";}
+	|FLOTANTE {tipo_actual= "flotante";}
+	| CARACTER {tipo_actual= "caracter";}
+	| PALABRA {tipo_actual= "string";}
+	| LOGICO {tipo_actual= "logico";};
 
 varcte: ID
 	| CTE
