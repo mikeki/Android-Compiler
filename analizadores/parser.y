@@ -19,6 +19,165 @@ char *nombre;
 }variable;
 
 /*
+CUBO SEMANTICO
+*/
+char cubo[6][6][19] =
+	{
+		{//SUMA(+)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//RESTA(-)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MULTIPLICACION(*)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//DIVISION(/)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//CONCATENACION(.)
+			{'E','E','S','S','E','E'},
+			{'E','E','S','S','E','E'},
+			{'S','S','S','S','E','E'},
+			{'S','S','S','S','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MAYORQUE(>)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MENORQUE(<)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//DIFERENTE(<>)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
+			{'E','E','L','L','E','E'},
+			{'E','E','L','L','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MASMAS(++)
+			{'E','E','E','E','E','I'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MENOSMENOS(--)
+			{'E','E','E','E','E','I'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MAYORIGUAL(>=)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MENORIGUAL(<=)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MASIGUAL(+=)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MENOSIGUAL(-=)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//Y(Y)
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','L','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//O(O)
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','L','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//NOT(NO)
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','L'},
+			{'E','E','E','E','E','E'}
+		},
+		{//IGUAL(=)
+			{'I','I','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','S','S','E','E'},
+			{'E','E','S','C','E','E'},
+			{'E','E','E','E','L','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//IGUALIGUAL(==)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
+			{'E','E','L','L','E','E'},
+			{'E','E','L','L','E','E'},
+			{'E','E','E','E','L','E'},
+			{'E','E','E','E','E','E'}
+		}
+	} 
+
+/*
 Descripcion: Inicializa la tabla de dir_procs (directorio de procedimientos)
 
 Parametros: void
@@ -60,14 +219,49 @@ void insert_var_to_table(char *name){
 		printf("Error de Semantica variable %s redeclarada\n",name);
 		exit(1);
 	}else{
-	variable *temp = g_slice_new(variable);
-	temp->tipo = tipo_actual;
-	temp->nombre = name;
-	g_hash_table_insert(tabla->var_table,(gpointer)name,(gpointer)temp);
-	g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
+		variable *temp = g_slice_new(variable);
+		temp->tipo = tipo_actual;
+		temp->nombre = name;
+		g_hash_table_insert(tabla->var_table,(gpointer)name,(gpointer)temp);
+		g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
 	}
+	
+}
+/*
+Descripcion: Verificar en la tabla de variablas del procedimiento actual 
+si existe la variable declarada(en la tabla).Regresa error de semantica
+si no cumple.
+
+Parametros: char *name
+Salida: void
+*/
+void verifica_existe_var(char *name){
+	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+	if(g_hash_table_lookup(tabla->var_table,(gpointer)name) == NULL){
+		funcion *tabla = g_hash_table_lookup(dir_procs,"programa");
+		if(g_hash_table_lookup(tabla->var_table,(gpointer)name) == NULL){
+			printf("Error de Semantica variable %s no declarada\n",name);
+			exit(1);
+		}
+	}
+	
+	
 }
 
+/*
+Descripcion: Verificar en el directorio de procedimientos si existe el procedimiento
+mandado como parametro.Regresa error de semantica si no cumple.
+
+Parametros: char *name
+Salida: void
+*/
+void verifica_existe_procs(char *name){
+	if(g_hash_table_lookup(dir_procs,(gpointer)name) == NULL){
+		printf("Error de Semantica funcion %s no declarada\n",name);
+		exit(1);
+	}
+	
+}
 /*
 Descripcion: Imprime el resultado de lo que se guardo en una tabla
 
@@ -105,7 +299,7 @@ char *str;
 %start programa
 
 %% 
-programa: PROGRAMA ID{insert_proc_to_table(yylval.str);} IGUALP programap main;
+programa: PROGRAMA ID{insert_proc_to_table("programa");} IGUALP programap main;
 programap: programapp programappp;
 programapp: 	vars programapp
 		| ;
@@ -140,7 +334,7 @@ tipo:	 ENTERO {tipo_actual= "entero";}
 	| PALABRA {tipo_actual= "string";}
 	| LOGICO {tipo_actual= "logico";};
 
-varcte: ID
+varcte: ID{verifica_existe_var(yylval.str);}
 	| CTE
 	| CTESTRING
 	| CTF
@@ -169,7 +363,7 @@ estatuto: asignacion
 
 regresa: REGRESA mmexp PUNTOCOMA;
 
-asignacion: 	ID asignacionp;
+asignacion: 	ID{verifica_existe_var(yylval.str);} asignacionp;
 asignacionp: 	asigp
 		| asigpp;
 asigp: 		IGUALR lea;
@@ -183,7 +377,7 @@ app:		MAS IGUALR atipo PUNTOCOMA
 		| MENOS IGUALR atipo PUNTOCOMA;
 atipo:		CTE
 		| CTF
-		| ID;
+		| ID{verifica_existe_var(yylval.str);};
 
 condicion: c
 	|  cp;
@@ -218,10 +412,10 @@ acciones: ADELANTE
 	| ROTAIZQUIERDA
 	| TOMARTESORO
 	| TOPA
-	| ID;
+	| ID{verifica_existe_procs(yylval.str);};
 
 params: tipo paramsp;
-paramsp: ID paramspp;
+paramsp: ID{insert_var_to_table(yylval.str);} paramspp;
 paramspp: COMA paramsp
 	| params
 	| ;
@@ -262,7 +456,7 @@ factorpp: f varcte;
 f: 	MENOS 
 	| ;
 
-varselecciona: ID
+varselecciona: ID{verifica_existe_var(yylval.str);}
 		|CTE
 		|CAR;
  

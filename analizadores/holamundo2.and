@@ -17,7 +17,7 @@ funcion uno(){
 }
 
 funcion dos(entero rec){
-	
+	uno();
 	entero i = 0;
 	mientras(i < rec){
 		adelante();
