@@ -176,7 +176,7 @@ char cubo[6][6][19] =
 			{'E','E','E','E','L','E'},
 			{'E','E','E','E','E','E'}
 		}
-	} 
+	};
 
 /*
 Descripcion: Inicializa la tabla de dir_procs (directorio de procedimientos)
@@ -346,20 +346,25 @@ varcte: CTE
 estatutofuncion: estatuto
 		|regresa;
 
-estatuto: asignacion
+estatuto: empieza_id
 		|condicion
 		|escritura
 		|ciclo
 		|accion
-		|vars
-		|ejecuta_funcion;
+		|vars;
 		
-ejecuta_funcion: ID{verifica_existe_procs(yylval.str);} APARENTESIS params2 CPARENTESIS;
+empieza_id: ID{id_a_verificar=yylval.str;} empieza_idp;
+empieza_idp: ejecuta_funcion
+            | asignacion;
 
+ejecuta_funcion:  APARENTESIS paramsf CPARENTESIS{verifica_existe_procs(id_a_verificar);} PUNTOCOMA;
+
+paramsf: params2
+          | ;
 
 regresa: REGRESA mmexp PUNTOCOMA;
 
-asignacion: 	ID{verifica_existe_var(yylval.str);} asignacionp PUNTOCOMA;
+asignacion:  asignacionp{verifica_existe_var(id_a_verificar);} PUNTOCOMA;
 asignacionp: 	asigp
 		| asigpp;
 asigp: 		IGUALR lea;
@@ -457,7 +462,7 @@ f: 	MENOS
 	| NO
 	| ;
 factorppp: ID{id_a_verificar=yylval.str;} fun_var;
-fun_var: APARENTESIS params2 CPARENTESIS{verifica_existe_procs(id_a_verificar);}
+fun_var: APARENTESIS paramsf CPARENTESIS{verifica_existe_procs(id_a_verificar);}
          | {verifica_existe_var(id_a_verificar);};
 	
 varselecciona: ID{verifica_existe_var(yylval.str);}

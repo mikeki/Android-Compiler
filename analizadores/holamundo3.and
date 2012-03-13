@@ -21,16 +21,16 @@ logico b = verdadero;
 
 funcion uno(){
 	entero a = 1 + 1;
-	flotante b = 1.123;
+	flotante yu = 1.123;
 
 	//flotante
 	
-	logico c = verdadero o (verdadero y falso);
+	logico tu = verdadero o (verdadero y falso);
 	
-	entero a = 1 + 1;
-	flotante b = 1.123;
+	entero d = 1 + 1;
+	flotante e = 1.123;
 
-	flotante c = a * b;
+	flotante f = a * b;
 	
 	c  += h;
 	regresa c;
@@ -44,7 +44,7 @@ funcion dos(entero a){
 funcion tres(logico b){
 	entero h = lee();
 	entero a = 1;
-	flotante b = 1.123;
+	flotante po = 1.123;
 	caracter c = 'a';
 	palabra s = "dfg";
 	

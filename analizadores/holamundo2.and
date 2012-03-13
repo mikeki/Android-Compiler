@@ -20,6 +20,7 @@ funcion dos(entero rec){
 	uno();
 	entero i = 0;
 	mientras(i < rec){
+	  entero u = 9;
 		adelante();
 		i++;
 	}
@@ -40,6 +41,7 @@ funcion cuatro(entero rec){
 	
 	entero i = 0;
 	mientras(i < rec){
+	  flotante ku = 0;
 		atras();
 		i++;
 	}
@@ -55,6 +57,7 @@ principal{
 	mientras(j < 10){
 		selecciona(j){
 			cuando 1 => { 
+  		  flotante ku = uno();
 				flotante u = uno();
 			}
 			cuando 2 => { 
