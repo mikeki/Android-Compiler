@@ -6,7 +6,6 @@
 static GHashTable *dir_procs;
 static char *proc_actual;
 static char *tipo_actual;
-static char *id_a_verificar;
 /*
 Estructuras para las tabalase de procedimientos y tabla de variables
 */
@@ -307,15 +306,16 @@ programapp: 	vars programapp
 programappp: funcion programappp
 		| ;
 
-vars: tipo vars_id PUNTOCOMA;
-vars_id: ID{insert_var_to_table(yylval.str);} varsip;
-varsip: COMA vars_id
-        | IGUALR var_init var_initp
-        | ;
-var_init: lectura
-          | mmexp;
-var_initp: COMA vars_id
-           | ;
+vars: tipo ID{insert_var_to_table(yylval.str);} varsp;
+varsp: lva
+	|varid;
+lva: IGUALR lvap;
+lvap: lectura PUNTOCOMA
+	| mmexp PUNTOCOMA;
+varid: COMA ID{insert_var_to_table(yylval.str);} varidp
+	| PUNTOCOMA;
+varidp: varid 
+	| ;
 
 funcion: FUNCION ID{insert_proc_to_table(yylval.str);} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE;
 funcionp: estatutofuncion funcionp
@@ -334,16 +334,23 @@ tipo:	 ENTERO {tipo_actual= "entero";}
 	| PALABRA {tipo_actual= "string";}
 	| LOGICO {tipo_actual= "logico";};
 
-varcte: CTE
+varcte: ID{verifica_existe_var(yylval.str);}
+	| CTE
 	| CTESTRING
 	| CTF
 	| CAR
 	| VACIO
 	| VERPISTA
 	| VERDADERO
-	| FALSO;
+	| FALSO
+	| accionsi;
 
-estatutofuncion: estatuto
+estatutofuncion: asignacion
+		|condicion
+		|escritura
+		|ciclo
+		|accion
+		|vars
 		|regresa;
 
 estatuto: asignacion
@@ -351,35 +358,30 @@ estatuto: asignacion
 		|escritura
 		|ciclo
 		|accion
-		|vars
-		|ejecuta_funcion;
-		
-ejecuta_funcion: ID{verifica_existe_procs(yylval.str);} APARENTESIS params2 CPARENTESIS;
+		|vars;
 
 
 regresa: REGRESA mmexp PUNTOCOMA;
 
-asignacion: 	ID{verifica_existe_var(yylval.str);} asignacionp PUNTOCOMA;
+asignacion: 	ID{verifica_existe_var(yylval.str);} asignacionp;
 asignacionp: 	asigp
 		| asigpp;
 asigp: 		IGUALR lea;
-lea: 	lectura
-		  |mmexp;
+lea: 		lectura PUNTOCOMA
+		|mmexp PUNTOCOMA;
 asigpp:		ap 
 		| app;
-ap:		MAS MAS
-		|MENOS MENOS;
-app:		MAS IGUALR atipo
-		| MENOS IGUALR atipo;
+ap:		MAS MAS PUNTOCOMA
+		|MENOS MENOS PUNTOCOMA;
+app:		MAS IGUALR atipo PUNTOCOMA
+		| MENOS IGUALR atipo PUNTOCOMA;
 atipo:		CTE
 		| CTF
 		| ID{verifica_existe_var(yylval.str);};
 
 condicion: c
 	|  cp;
-c:	SI APARENTESIS condicion_exp CPARENTESIS ALLAVE bloque CLLAVE sip;
-condicion_exp: mmexp
-               | accionsi;
+c:	SI APARENTESIS mmexp CPARENTESIS ALLAVE bloque CLLAVE sip;
 sip:	SINO sipp
 	| ;
 sipp: 	condicion
@@ -409,7 +411,8 @@ acciones: ADELANTE
 	| ROTADERECHA
 	| ROTAIZQUIERDA
 	| TOMARTESORO
-	| TOPA;
+	| TOPA
+	| ID{verifica_existe_procs(yylval.str);};
 
 params: tipo paramsp;
 paramsp: ID{insert_var_to_table(yylval.str);} paramspp;
@@ -420,24 +423,22 @@ params2: exp params2p;
 params2p: COMA params2
 	| ;
 
-mmexp: mexp mmexpp;
-
-mmexpp: O mmexp 
+mmexp: nop mexp mmexpp;
+nop: 	NO
 	| ;
-	
-mexp: expresion mexpp;
-mexpp: Y mexp
+mmexpp: O mexp 
 	| ;
-	
-expresion: exp expresionp;
-expresionp: ep expresion 
+mexp: nop expresion mexpp;
+mexpp: Y expresion
+	| ;
+expresion: nop exp expresionp;
+expresionp: ep exp 
 		| ;
 ep: 	MAYORQUE epp
 	|MENORQUE epp
 	| DIFERENTE;
 epp: IGUALR 
 	| ;
-	
 exp: termino expp;
 expp: MAS exp
 	| MENOS exp 
@@ -449,17 +450,12 @@ terminop: POR termino
 	| ;
 
 factor: factorp 
-	| factorpp
-	| factorppp;
+	| factorpp;
 factorp: APARENTESIS mmexp CPARENTESIS;
 factorpp: f varcte;
 f: 	MENOS 
-	| NO
 	| ;
-factorppp: ID{id_a_verificar=yylval.str;} fun_var;
-fun_var: APARENTESIS params2 CPARENTESIS{verifica_existe_procs(id_a_verificar);}
-         | {verifica_existe_var(id_a_verificar);};
-	
+
 varselecciona: ID{verifica_existe_var(yylval.str);}
 		|CTE
 		|CAR;
@@ -469,7 +465,7 @@ varselecciona: ID{verifica_existe_var(yylval.str);}
 main() { 
 create_dir_table();
   yyparse(); 
-imprime(dir_procs); 
+imprime(dir_procs);
 free(dir_procs);
 }
 

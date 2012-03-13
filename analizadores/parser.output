@@ -1,0 +1,2886 @@
+State 79 conflicts: 8 shift/reduce
+State 161 conflicts: 8 shift/reduce
+
+
+Grammar
+
+    0 $accept: programa $end
+
+    1 $@1: /* empty */
+
+    2 programa: PROGRAMA ID $@1 IGUALP programap main
+
+    3 programap: programapp programappp
+
+    4 programapp: vars programapp
+    5           | /* empty */
+
+    6 programappp: funcion programappp
+    7            | /* empty */
+
+    8 vars: tipo vars_id PUNTOCOMA
+
+    9 $@2: /* empty */
+
+   10 vars_id: ID $@2 varsip
+
+   11 varsip: COMA vars_id
+   12       | IGUALR var_init var_initp
+   13       | /* empty */
+
+   14 var_init: lectura
+   15         | mmexp
+
+   16 var_initp: COMA vars_id
+   17          | /* empty */
+
+   18 $@3: /* empty */
+
+   19 funcion: FUNCION ID $@3 APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE
+
+   20 funcionp: estatutofuncion funcionp
+   21         | /* empty */
+
+   22 funcionpp: params
+   23          | /* empty */
+
+   24 $@4: /* empty */
+
+   25 main: PRINCIPAL $@4 ALLAVE bloque CLLAVE
+
+   26 bloque: estatuto bloque
+   27       | /* empty */
+
+   28 tipo: ENTERO
+   29     | FLOTANTE
+   30     | CARACTER
+   31     | PALABRA
+   32     | LOGICO
+
+   33 varcte: CTE
+   34       | CTESTRING
+   35       | CTF
+   36       | CAR
+   37       | VACIO
+   38       | VERPISTA
+   39       | VERDADERO
+   40       | FALSO
+
+   41 estatutofuncion: estatuto
+   42                | regresa
+
+   43 estatuto: asignacion
+   44         | condicion
+   45         | escritura
+   46         | ciclo
+   47         | accion
+   48         | vars
+   49         | ejecuta_funcion
+
+   50 $@5: /* empty */
+
+   51 ejecuta_funcion: ID $@5 APARENTESIS params2 CPARENTESIS
+
+   52 regresa: REGRESA mmexp PUNTOCOMA
+
+   53 $@6: /* empty */
+
+   54 asignacion: ID $@6 asignacionp PUNTOCOMA
+
+   55 asignacionp: asigp
+   56            | asigpp
+
+   57 asigp: IGUALR lea
+
+   58 lea: lectura
+   59    | mmexp
+
+   60 asigpp: ap
+   61       | app
+
+   62 ap: MAS MAS
+   63   | MENOS MENOS
+
+   64 app: MAS IGUALR atipo
+   65    | MENOS IGUALR atipo
+
+   66 atipo: CTE
+   67      | CTF
+   68      | ID
+
+   69 condicion: c
+   70          | cp
+
+   71 c: SI APARENTESIS condicion_exp CPARENTESIS ALLAVE bloque CLLAVE sip
+
+   72 condicion_exp: mmexp
+   73              | accionsi
+
+   74 sip: SINO sipp
+   75    | /* empty */
+
+   76 sipp: condicion
+   77     | ALLAVE bloque CLLAVE
+
+   78 cp: SELECCIONA APARENTESIS exp CPARENTESIS ALLAVE cuandop CLLAVE
+
+   79 cuandop: CUANDO varselecciona IGUALR MAYORQUE ALLAVE bloque CLLAVE cuandopp
+
+   80 cuandopp: cuandop
+   81         | /* empty */
+
+   82 escritura: ESCRIBE APARENTESIS escriturap CPARENTESIS PUNTOCOMA
+
+   83 escriturap: escriturapp
+
+   84 escriturapp: varcte e
+   85            | exp e
+
+   86 e: CONCA escriturapp
+   87  | /* empty */
+
+   88 lectura: LEE APARENTESIS CPARENTESIS
+
+   89 ciclo: MIENTRAS APARENTESIS mmexp CPARENTESIS ALLAVE bloque CLLAVE
+
+   90 accion: acciones APARENTESIS accionp CPARENTESIS PUNTOCOMA
+
+   91 accionp: params2
+   92        | /* empty */
+
+   93 accionsi: acciones APARENTESIS accionp CPARENTESIS
+
+   94 acciones: ADELANTE
+   95         | ATRAS
+   96         | ROTADERECHA
+   97         | ROTAIZQUIERDA
+   98         | TOMARTESORO
+   99         | TOPA
+
+  100 params: tipo paramsp
+
+  101 $@7: /* empty */
+
+  102 paramsp: ID $@7 paramspp
+
+  103 paramspp: COMA paramsp
+  104         | params
+  105         | /* empty */
+
+  106 params2: exp params2p
+
+  107 params2p: COMA params2
+  108         | /* empty */
+
+  109 mmexp: mexp mmexpp
+
+  110 mmexpp: O mmexp
+  111       | /* empty */
+
+  112 mexp: expresion mexpp
+
+  113 mexpp: Y mexp
+  114      | /* empty */
+
+  115 expresion: exp expresionp
+
+  116 expresionp: ep expresion
+  117           | /* empty */
+
+  118 ep: MAYORQUE epp
+  119   | MENORQUE epp
+  120   | DIFERENTE
+
+  121 epp: IGUALR
+  122    | /* empty */
+
+  123 exp: termino expp
+
+  124 expp: MAS exp
+  125     | MENOS exp
+  126     | /* empty */
+
+  127 termino: factor terminop
+
+  128 terminop: POR termino
+  129         | ENTRE termino
+  130         | /* empty */
+
+  131 factor: factorp
+  132       | factorpp
+  133       | factorppp
+
+  134 factorp: APARENTESIS mmexp CPARENTESIS
+
+  135 factorpp: f varcte
+
+  136 f: MENOS
+  137  | NO
+  138  | /* empty */
+
+  139 $@8: /* empty */
+
+  140 factorppp: ID $@8 fun_var
+
+  141 fun_var: APARENTESIS params2 CPARENTESIS
+  142        | /* empty */
+
+  143 varselecciona: ID
+  144              | CTE
+  145              | CAR
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+ADELANTE (258) 94
+ATRAS (259) 95
+ROTADERECHA (260) 96
+ROTAIZQUIERDA (261) 97
+TOMARTESORO (262) 98
+TOPA (263) 99
+VERPISTA (264) 38
+SI (265) 71
+SINO (266) 74
+MIENTRAS (267) 89
+FUNCION (268) 19
+ENTERO (269) 28
+FLOTANTE (270) 29
+SELECCIONA (271) 78
+CUANDO (272) 79
+REGRESA (273) 52
+LOGICO (274) 32
+PALABRA (275) 31
+ESCRIBE (276) 82
+LEE (277) 88
+PRINCIPAL (278) 25
+VACIO (279) 37
+VERDADERO (280) 39
+FALSO (281) 40
+Y (282) 113
+O (283) 110
+NO (284) 137
+PROGRAMA (285) 2
+CARACTER (286) 30
+COMA (287) 11 16 103 107
+PUNTOCOMA (288) 8 52 54 82 90
+IGUALP (289) 2
+ALLAVE (290) 19 25 71 77 78 79 89
+CLLAVE (291) 19 25 71 77 78 79 89
+IGUALR (292) 12 57 64 65 79 121
+MAYORQUE (293) 79 118
+MENORQUE (294) 119
+DIFERENTE (295) 120
+APARENTESIS (296) 19 51 71 78 82 88 89 90 93 134 141
+CPARENTESIS (297) 19 51 71 78 82 88 89 90 93 134 141
+MAS (298) 62 64 124
+MENOS (299) 63 65 125 136
+POR (300) 128
+ENTRE (301) 129
+CONCA (302) 86
+CTF (303) 35 67
+CTESTRING (304) 34
+ID (305) 2 10 19 51 54 68 102 140 143
+CAR (306) 36 145
+CTE (307) 33 66 144
+
+
+Nonterminals, with rules where they appear
+
+$accept (53)
+    on left: 0
+programa (54)
+    on left: 2, on right: 0
+$@1 (55)
+    on left: 1, on right: 2
+programap (56)
+    on left: 3, on right: 2
+programapp (57)
+    on left: 4 5, on right: 3 4
+programappp (58)
+    on left: 6 7, on right: 3 6
+vars (59)
+    on left: 8, on right: 4 48
+vars_id (60)
+    on left: 10, on right: 8 11 16
+$@2 (61)
+    on left: 9, on right: 10
+varsip (62)
+    on left: 11 12 13, on right: 10
+var_init (63)
+    on left: 14 15, on right: 12
+var_initp (64)
+    on left: 16 17, on right: 12
+funcion (65)
+    on left: 19, on right: 6
+$@3 (66)
+    on left: 18, on right: 19
+funcionp (67)
+    on left: 20 21, on right: 19 20
+funcionpp (68)
+    on left: 22 23, on right: 19
+main (69)
+    on left: 25, on right: 2
+$@4 (70)
+    on left: 24, on right: 25
+bloque (71)
+    on left: 26 27, on right: 25 26 71 77 79 89
+tipo (72)
+    on left: 28 29 30 31 32, on right: 8 100
+varcte (73)
+    on left: 33 34 35 36 37 38 39 40, on right: 84 135
+estatutofuncion (74)
+    on left: 41 42, on right: 20
+estatuto (75)
+    on left: 43 44 45 46 47 48 49, on right: 26 41
+ejecuta_funcion (76)
+    on left: 51, on right: 49
+$@5 (77)
+    on left: 50, on right: 51
+regresa (78)
+    on left: 52, on right: 42
+asignacion (79)
+    on left: 54, on right: 43
+$@6 (80)
+    on left: 53, on right: 54
+asignacionp (81)
+    on left: 55 56, on right: 54
+asigp (82)
+    on left: 57, on right: 55
+lea (83)
+    on left: 58 59, on right: 57
+asigpp (84)
+    on left: 60 61, on right: 56
+ap (85)
+    on left: 62 63, on right: 60
+app (86)
+    on left: 64 65, on right: 61
+atipo (87)
+    on left: 66 67 68, on right: 64 65
+condicion (88)
+    on left: 69 70, on right: 44 76
+c (89)
+    on left: 71, on right: 69
+condicion_exp (90)
+    on left: 72 73, on right: 71
+sip (91)
+    on left: 74 75, on right: 71
+sipp (92)
+    on left: 76 77, on right: 74
+cp (93)
+    on left: 78, on right: 70
+cuandop (94)
+    on left: 79, on right: 78 80
+cuandopp (95)
+    on left: 80 81, on right: 79
+escritura (96)
+    on left: 82, on right: 45
+escriturap (97)
+    on left: 83, on right: 82
+escriturapp (98)
+    on left: 84 85, on right: 83 86
+e (99)
+    on left: 86 87, on right: 84 85
+lectura (100)
+    on left: 88, on right: 14 58
+ciclo (101)
+    on left: 89, on right: 46
+accion (102)
+    on left: 90, on right: 47
+accionp (103)
+    on left: 91 92, on right: 90 93
+accionsi (104)
+    on left: 93, on right: 73
+acciones (105)
+    on left: 94 95 96 97 98 99, on right: 90 93
+params (106)
+    on left: 100, on right: 22 104
+paramsp (107)
+    on left: 102, on right: 100 103
+$@7 (108)
+    on left: 101, on right: 102
+paramspp (109)
+    on left: 103 104 105, on right: 102
+params2 (110)
+    on left: 106, on right: 51 91 107 141
+params2p (111)
+    on left: 107 108, on right: 106
+mmexp (112)
+    on left: 109, on right: 15 52 59 72 89 110 134
+mmexpp (113)
+    on left: 110 111, on right: 109
+mexp (114)
+    on left: 112, on right: 109 113
+mexpp (115)
+    on left: 113 114, on right: 112
+expresion (116)
+    on left: 115, on right: 112 116
+expresionp (117)
+    on left: 116 117, on right: 115
+ep (118)
+    on left: 118 119 120, on right: 116
+epp (119)
+    on left: 121 122, on right: 118 119
+exp (120)
+    on left: 123, on right: 78 85 106 115 124 125
+expp (121)
+    on left: 124 125 126, on right: 123
+termino (122)
+    on left: 127, on right: 123 128 129
+terminop (123)
+    on left: 128 129 130, on right: 127
+factor (124)
+    on left: 131 132 133, on right: 127
+factorp (125)
+    on left: 134, on right: 131
+factorpp (126)
+    on left: 135, on right: 132
+f (127)
+    on left: 136 137 138, on right: 135
+factorppp (128)
+    on left: 140, on right: 133
+$@8 (129)
+    on left: 139, on right: 140
+fun_var (130)
+    on left: 141 142, on right: 140
+varselecciona (131)
+    on left: 143 144 145, on right: 79
+
+
+state 0
+
+    0 $accept: . programa $end
+
+    PROGRAMA  shift, and go to state 1
+
+    programa  go to state 2
+
+
+state 1
+
+    2 programa: PROGRAMA . ID $@1 IGUALP programap main
+
+    ID  shift, and go to state 3
+
+
+state 2
+
+    0 $accept: programa . $end
+
+    $end  shift, and go to state 4
+
+
+state 3
+
+    2 programa: PROGRAMA ID . $@1 IGUALP programap main
+
+    $default  reduce using rule 1 ($@1)
+
+    $@1  go to state 5
+
+
+state 4
+
+    0 $accept: programa $end .
+
+    $default  accept
+
+
+state 5
+
+    2 programa: PROGRAMA ID $@1 . IGUALP programap main
+
+    IGUALP  shift, and go to state 6
+
+
+state 6
+
+    2 programa: PROGRAMA ID $@1 IGUALP . programap main
+
+    ENTERO    shift, and go to state 7
+    FLOTANTE  shift, and go to state 8
+    LOGICO    shift, and go to state 9
+    PALABRA   shift, and go to state 10
+    CARACTER  shift, and go to state 11
+
+    $default  reduce using rule 5 (programapp)
+
+    programap   go to state 12
+    programapp  go to state 13
+    vars        go to state 14
+    tipo        go to state 15
+
+
+state 7
+
+   28 tipo: ENTERO .
+
+    $default  reduce using rule 28 (tipo)
+
+
+state 8
+
+   29 tipo: FLOTANTE .
+
+    $default  reduce using rule 29 (tipo)
+
+
+state 9
+
+   32 tipo: LOGICO .
+
+    $default  reduce using rule 32 (tipo)
+
+
+state 10
+
+   31 tipo: PALABRA .
+
+    $default  reduce using rule 31 (tipo)
+
+
+state 11
+
+   30 tipo: CARACTER .
+
+    $default  reduce using rule 30 (tipo)
+
+
+state 12
+
+    2 programa: PROGRAMA ID $@1 IGUALP programap . main
+
+    PRINCIPAL  shift, and go to state 16
+
+    main  go to state 17
+
+
+state 13
+
+    3 programap: programapp . programappp
+
+    FUNCION  shift, and go to state 18
+
+    $default  reduce using rule 7 (programappp)
+
+    programappp  go to state 19
+    funcion      go to state 20
+
+
+state 14
+
+    4 programapp: vars . programapp
+
+    ENTERO    shift, and go to state 7
+    FLOTANTE  shift, and go to state 8
+    LOGICO    shift, and go to state 9
+    PALABRA   shift, and go to state 10
+    CARACTER  shift, and go to state 11
+
+    $default  reduce using rule 5 (programapp)
+
+    programapp  go to state 21
+    vars        go to state 14
+    tipo        go to state 15
+
+
+state 15
+
+    8 vars: tipo . vars_id PUNTOCOMA
+
+    ID  shift, and go to state 22
+
+    vars_id  go to state 23
+
+
+state 16
+
+   25 main: PRINCIPAL . $@4 ALLAVE bloque CLLAVE
+
+    $default  reduce using rule 24 ($@4)
+
+    $@4  go to state 24
+
+
+state 17
+
+    2 programa: PROGRAMA ID $@1 IGUALP programap main .
+
+    $default  reduce using rule 2 (programa)
+
+
+state 18
+
+   19 funcion: FUNCION . ID $@3 APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE
+
+    ID  shift, and go to state 25
+
+
+state 19
+
+    3 programap: programapp programappp .
+
+    $default  reduce using rule 3 (programap)
+
+
+state 20
+
+    6 programappp: funcion . programappp
+
+    FUNCION  shift, and go to state 18
+
+    $default  reduce using rule 7 (programappp)
+
+    programappp  go to state 26
+    funcion      go to state 20
+
+
+state 21
+
+    4 programapp: vars programapp .
+
+    $default  reduce using rule 4 (programapp)
+
+
+state 22
+
+   10 vars_id: ID . $@2 varsip
+
+    $default  reduce using rule 9 ($@2)
+
+    $@2  go to state 27
+
+
+state 23
+
+    8 vars: tipo vars_id . PUNTOCOMA
+
+    PUNTOCOMA  shift, and go to state 28
+
+
+state 24
+
+   25 main: PRINCIPAL $@4 . ALLAVE bloque CLLAVE
+
+    ALLAVE  shift, and go to state 29
+
+
+state 25
+
+   19 funcion: FUNCION ID . $@3 APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE
+
+    $default  reduce using rule 18 ($@3)
+
+    $@3  go to state 30
+
+
+state 26
+
+    6 programappp: funcion programappp .
+
+    $default  reduce using rule 6 (programappp)
+
+
+state 27
+
+   10 vars_id: ID $@2 . varsip
+
+    COMA    shift, and go to state 31
+    IGUALR  shift, and go to state 32
+
+    $default  reduce using rule 13 (varsip)
+
+    varsip  go to state 33
+
+
+state 28
+
+    8 vars: tipo vars_id PUNTOCOMA .
+
+    $default  reduce using rule 8 (vars)
+
+
+state 29
+
+   25 main: PRINCIPAL $@4 ALLAVE . bloque CLLAVE
+
+    ADELANTE       shift, and go to state 34
+    ATRAS          shift, and go to state 35
+    ROTADERECHA    shift, and go to state 36
+    ROTAIZQUIERDA  shift, and go to state 37
+    TOMARTESORO    shift, and go to state 38
+    TOPA           shift, and go to state 39
+    SI             shift, and go to state 40
+    MIENTRAS       shift, and go to state 41
+    ENTERO         shift, and go to state 7
+    FLOTANTE       shift, and go to state 8
+    SELECCIONA     shift, and go to state 42
+    LOGICO         shift, and go to state 9
+    PALABRA        shift, and go to state 10
+    ESCRIBE        shift, and go to state 43
+    CARACTER       shift, and go to state 11
+    ID             shift, and go to state 44
+
+    $default  reduce using rule 27 (bloque)
+
+    vars             go to state 45
+    bloque           go to state 46
+    tipo             go to state 15
+    estatuto         go to state 47
+    ejecuta_funcion  go to state 48
+    asignacion       go to state 49
+    condicion        go to state 50
+    c                go to state 51
+    cp               go to state 52
+    escritura        go to state 53
+    ciclo            go to state 54
+    accion           go to state 55
+    acciones         go to state 56
+
+
+state 30
+
+   19 funcion: FUNCION ID $@3 . APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE
+
+    APARENTESIS  shift, and go to state 57
+
+
+state 31
+
+   11 varsip: COMA . vars_id
+
+    ID  shift, and go to state 22
+
+    vars_id  go to state 58
+
+
+state 32
+
+   12 varsip: IGUALR . var_init var_initp
+
+    LEE          shift, and go to state 59
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    var_init   go to state 64
+    lectura    go to state 65
+    mmexp      go to state 66
+    mexp       go to state 67
+    expresion  go to state 68
+    exp        go to state 69
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 33
+
+   10 vars_id: ID $@2 varsip .
+
+    $default  reduce using rule 10 (vars_id)
+
+
+state 34
+
+   94 acciones: ADELANTE .
+
+    $default  reduce using rule 94 (acciones)
+
+
+state 35
+
+   95 acciones: ATRAS .
+
+    $default  reduce using rule 95 (acciones)
+
+
+state 36
+
+   96 acciones: ROTADERECHA .
+
+    $default  reduce using rule 96 (acciones)
+
+
+state 37
+
+   97 acciones: ROTAIZQUIERDA .
+
+    $default  reduce using rule 97 (acciones)
+
+
+state 38
+
+   98 acciones: TOMARTESORO .
+
+    $default  reduce using rule 98 (acciones)
+
+
+state 39
+
+   99 acciones: TOPA .
+
+    $default  reduce using rule 99 (acciones)
+
+
+state 40
+
+   71 c: SI . APARENTESIS condicion_exp CPARENTESIS ALLAVE bloque CLLAVE sip
+
+    APARENTESIS  shift, and go to state 76
+
+
+state 41
+
+   89 ciclo: MIENTRAS . APARENTESIS mmexp CPARENTESIS ALLAVE bloque CLLAVE
+
+    APARENTESIS  shift, and go to state 77
+
+
+state 42
+
+   78 cp: SELECCIONA . APARENTESIS exp CPARENTESIS ALLAVE cuandop CLLAVE
+
+    APARENTESIS  shift, and go to state 78
+
+
+state 43
+
+   82 escritura: ESCRIBE . APARENTESIS escriturap CPARENTESIS PUNTOCOMA
+
+    APARENTESIS  shift, and go to state 79
+
+
+state 44
+
+   51 ejecuta_funcion: ID . $@5 APARENTESIS params2 CPARENTESIS
+   54 asignacion: ID . $@6 asignacionp PUNTOCOMA
+
+    APARENTESIS  reduce using rule 50 ($@5)
+    $default     reduce using rule 53 ($@6)
+
+    $@5  go to state 80
+    $@6  go to state 81
+
+
+state 45
+
+   48 estatuto: vars .
+
+    $default  reduce using rule 48 (estatuto)
+
+
+state 46
+
+   25 main: PRINCIPAL $@4 ALLAVE bloque . CLLAVE
+
+    CLLAVE  shift, and go to state 82
+
+
+state 47
+
+   26 bloque: estatuto . bloque
+
+    ADELANTE       shift, and go to state 34
+    ATRAS          shift, and go to state 35
+    ROTADERECHA    shift, and go to state 36
+    ROTAIZQUIERDA  shift, and go to state 37
+    TOMARTESORO    shift, and go to state 38
+    TOPA           shift, and go to state 39
+    SI             shift, and go to state 40
+    MIENTRAS       shift, and go to state 41
+    ENTERO         shift, and go to state 7
+    FLOTANTE       shift, and go to state 8
+    SELECCIONA     shift, and go to state 42
+    LOGICO         shift, and go to state 9
+    PALABRA        shift, and go to state 10
+    ESCRIBE        shift, and go to state 43
+    CARACTER       shift, and go to state 11
+    ID             shift, and go to state 44
+
+    $default  reduce using rule 27 (bloque)
+
+    vars             go to state 45
+    bloque           go to state 83
+    tipo             go to state 15
+    estatuto         go to state 47
+    ejecuta_funcion  go to state 48
+    asignacion       go to state 49
+    condicion        go to state 50
+    c                go to state 51
+    cp               go to state 52
+    escritura        go to state 53
+    ciclo            go to state 54
+    accion           go to state 55
+    acciones         go to state 56
+
+
+state 48
+
+   49 estatuto: ejecuta_funcion .
+
+    $default  reduce using rule 49 (estatuto)
+
+
+state 49
+
+   43 estatuto: asignacion .
+
+    $default  reduce using rule 43 (estatuto)
+
+
+state 50
+
+   44 estatuto: condicion .
+
+    $default  reduce using rule 44 (estatuto)
+
+
+state 51
+
+   69 condicion: c .
+
+    $default  reduce using rule 69 (condicion)
+
+
+state 52
+
+   70 condicion: cp .
+
+    $default  reduce using rule 70 (condicion)
+
+
+state 53
+
+   45 estatuto: escritura .
+
+    $default  reduce using rule 45 (estatuto)
+
+
+state 54
+
+   46 estatuto: ciclo .
+
+    $default  reduce using rule 46 (estatuto)
+
+
+state 55
+
+   47 estatuto: accion .
+
+    $default  reduce using rule 47 (estatuto)
+
+
+state 56
+
+   90 accion: acciones . APARENTESIS accionp CPARENTESIS PUNTOCOMA
+
+    APARENTESIS  shift, and go to state 84
+
+
+state 57
+
+   19 funcion: FUNCION ID $@3 APARENTESIS . funcionpp CPARENTESIS ALLAVE funcionp CLLAVE
+
+    ENTERO    shift, and go to state 7
+    FLOTANTE  shift, and go to state 8
+    LOGICO    shift, and go to state 9
+    PALABRA   shift, and go to state 10
+    CARACTER  shift, and go to state 11
+
+    $default  reduce using rule 23 (funcionpp)
+
+    funcionpp  go to state 85
+    tipo       go to state 86
+    params     go to state 87
+
+
+state 58
+
+   11 varsip: COMA vars_id .
+
+    $default  reduce using rule 11 (varsip)
+
+
+state 59
+
+   88 lectura: LEE . APARENTESIS CPARENTESIS
+
+    APARENTESIS  shift, and go to state 88
+
+
+state 60
+
+  137 f: NO .
+
+    $default  reduce using rule 137 (f)
+
+
+state 61
+
+  134 factorp: APARENTESIS . mmexp CPARENTESIS
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    mmexp      go to state 89
+    mexp       go to state 67
+    expresion  go to state 68
+    exp        go to state 69
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 62
+
+  136 f: MENOS .
+
+    $default  reduce using rule 136 (f)
+
+
+state 63
+
+  140 factorppp: ID . $@8 fun_var
+
+    $default  reduce using rule 139 ($@8)
+
+    $@8  go to state 90
+
+
+state 64
+
+   12 varsip: IGUALR var_init . var_initp
+
+    COMA  shift, and go to state 91
+
+    $default  reduce using rule 17 (var_initp)
+
+    var_initp  go to state 92
+
+
+state 65
+
+   14 var_init: lectura .
+
+    $default  reduce using rule 14 (var_init)
+
+
+state 66
+
+   15 var_init: mmexp .
+
+    $default  reduce using rule 15 (var_init)
+
+
+state 67
+
+  109 mmexp: mexp . mmexpp
+
+    O  shift, and go to state 93
+
+    $default  reduce using rule 111 (mmexpp)
+
+    mmexpp  go to state 94
+
+
+state 68
+
+  112 mexp: expresion . mexpp
+
+    Y  shift, and go to state 95
+
+    $default  reduce using rule 114 (mexpp)
+
+    mexpp  go to state 96
+
+
+state 69
+
+  115 expresion: exp . expresionp
+
+    MAYORQUE   shift, and go to state 97
+    MENORQUE   shift, and go to state 98
+    DIFERENTE  shift, and go to state 99
+
+    $default  reduce using rule 117 (expresionp)
+
+    expresionp  go to state 100
+    ep          go to state 101
+
+
+state 70
+
+  123 exp: termino . expp
+
+    MAS    shift, and go to state 102
+    MENOS  shift, and go to state 103
+
+    $default  reduce using rule 126 (expp)
+
+    expp  go to state 104
+
+
+state 71
+
+  127 termino: factor . terminop
+
+    POR    shift, and go to state 105
+    ENTRE  shift, and go to state 106
+
+    $default  reduce using rule 130 (terminop)
+
+    terminop  go to state 107
+
+
+state 72
+
+  131 factor: factorp .
+
+    $default  reduce using rule 131 (factor)
+
+
+state 73
+
+  132 factor: factorpp .
+
+    $default  reduce using rule 132 (factor)
+
+
+state 74
+
+  135 factorpp: f . varcte
+
+    VERPISTA   shift, and go to state 108
+    VACIO      shift, and go to state 109
+    VERDADERO  shift, and go to state 110
+    FALSO      shift, and go to state 111
+    CTF        shift, and go to state 112
+    CTESTRING  shift, and go to state 113
+    CAR        shift, and go to state 114
+    CTE        shift, and go to state 115
+
+    varcte  go to state 116
+
+
+state 75
+
+  133 factor: factorppp .
+
+    $default  reduce using rule 133 (factor)
+
+
+state 76
+
+   71 c: SI APARENTESIS . condicion_exp CPARENTESIS ALLAVE bloque CLLAVE sip
+
+    ADELANTE       shift, and go to state 34
+    ATRAS          shift, and go to state 35
+    ROTADERECHA    shift, and go to state 36
+    ROTAIZQUIERDA  shift, and go to state 37
+    TOMARTESORO    shift, and go to state 38
+    TOPA           shift, and go to state 39
+    NO             shift, and go to state 60
+    APARENTESIS    shift, and go to state 61
+    MENOS          shift, and go to state 62
+    ID             shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    condicion_exp  go to state 117
+    accionsi       go to state 118
+    acciones       go to state 119
+    mmexp          go to state 120
+    mexp           go to state 67
+    expresion      go to state 68
+    exp            go to state 69
+    termino        go to state 70
+    factor         go to state 71
+    factorp        go to state 72
+    factorpp       go to state 73
+    f              go to state 74
+    factorppp      go to state 75
+
+
+state 77
+
+   89 ciclo: MIENTRAS APARENTESIS . mmexp CPARENTESIS ALLAVE bloque CLLAVE
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    mmexp      go to state 121
+    mexp       go to state 67
+    expresion  go to state 68
+    exp        go to state 69
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 78
+
+   78 cp: SELECCIONA APARENTESIS . exp CPARENTESIS ALLAVE cuandop CLLAVE
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    exp        go to state 122
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 79
+
+   82 escritura: ESCRIBE APARENTESIS . escriturap CPARENTESIS PUNTOCOMA
+
+    VERPISTA     shift, and go to state 108
+    VACIO        shift, and go to state 109
+    VERDADERO    shift, and go to state 110
+    FALSO        shift, and go to state 111
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    CTF          shift, and go to state 112
+    CTESTRING    shift, and go to state 113
+    ID           shift, and go to state 63
+    CAR          shift, and go to state 114
+    CTE          shift, and go to state 115
+
+    VERPISTA   [reduce using rule 138 (f)]
+    VACIO      [reduce using rule 138 (f)]
+    VERDADERO  [reduce using rule 138 (f)]
+    FALSO      [reduce using rule 138 (f)]
+    CTF        [reduce using rule 138 (f)]
+    CTESTRING  [reduce using rule 138 (f)]
+    CAR        [reduce using rule 138 (f)]
+    CTE        [reduce using rule 138 (f)]
+
+    varcte       go to state 123
+    escriturap   go to state 124
+    escriturapp  go to state 125
+    exp          go to state 126
+    termino      go to state 70
+    factor       go to state 71
+    factorp      go to state 72
+    factorpp     go to state 73
+    f            go to state 74
+    factorppp    go to state 75
+
+
+state 80
+
+   51 ejecuta_funcion: ID $@5 . APARENTESIS params2 CPARENTESIS
+
+    APARENTESIS  shift, and go to state 127
+
+
+state 81
+
+   54 asignacion: ID $@6 . asignacionp PUNTOCOMA
+
+    IGUALR  shift, and go to state 128
+    MAS     shift, and go to state 129
+    MENOS   shift, and go to state 130
+
+    asignacionp  go to state 131
+    asigp        go to state 132
+    asigpp       go to state 133
+    ap           go to state 134
+    app          go to state 135
+
+
+state 82
+
+   25 main: PRINCIPAL $@4 ALLAVE bloque CLLAVE .
+
+    $default  reduce using rule 25 (main)
+
+
+state 83
+
+   26 bloque: estatuto bloque .
+
+    $default  reduce using rule 26 (bloque)
+
+
+state 84
+
+   90 accion: acciones APARENTESIS . accionp CPARENTESIS PUNTOCOMA
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    CPARENTESIS  reduce using rule 92 (accionp)
+    $default     reduce using rule 138 (f)
+
+    accionp    go to state 136
+    params2    go to state 137
+    exp        go to state 138
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 85
+
+   19 funcion: FUNCION ID $@3 APARENTESIS funcionpp . CPARENTESIS ALLAVE funcionp CLLAVE
+
+    CPARENTESIS  shift, and go to state 139
+
+
+state 86
+
+  100 params: tipo . paramsp
+
+    ID  shift, and go to state 140
+
+    paramsp  go to state 141
+
+
+state 87
+
+   22 funcionpp: params .
+
+    $default  reduce using rule 22 (funcionpp)
+
+
+state 88
+
+   88 lectura: LEE APARENTESIS . CPARENTESIS
+
+    CPARENTESIS  shift, and go to state 142
+
+
+state 89
+
+  134 factorp: APARENTESIS mmexp . CPARENTESIS
+
+    CPARENTESIS  shift, and go to state 143
+
+
+state 90
+
+  140 factorppp: ID $@8 . fun_var
+
+    APARENTESIS  shift, and go to state 144
+
+    $default  reduce using rule 142 (fun_var)
+
+    fun_var  go to state 145
+
+
+state 91
+
+   16 var_initp: COMA . vars_id
+
+    ID  shift, and go to state 22
+
+    vars_id  go to state 146
+
+
+state 92
+
+   12 varsip: IGUALR var_init var_initp .
+
+    $default  reduce using rule 12 (varsip)
+
+
+state 93
+
+  110 mmexpp: O . mmexp
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    mmexp      go to state 147
+    mexp       go to state 67
+    expresion  go to state 68
+    exp        go to state 69
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 94
+
+  109 mmexp: mexp mmexpp .
+
+    $default  reduce using rule 109 (mmexp)
+
+
+state 95
+
+  113 mexpp: Y . mexp
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    mexp       go to state 148
+    expresion  go to state 68
+    exp        go to state 69
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 96
+
+  112 mexp: expresion mexpp .
+
+    $default  reduce using rule 112 (mexp)
+
+
+state 97
+
+  118 ep: MAYORQUE . epp
+
+    IGUALR  shift, and go to state 149
+
+    $default  reduce using rule 122 (epp)
+
+    epp  go to state 150
+
+
+state 98
+
+  119 ep: MENORQUE . epp
+
+    IGUALR  shift, and go to state 149
+
+    $default  reduce using rule 122 (epp)
+
+    epp  go to state 151
+
+
+state 99
+
+  120 ep: DIFERENTE .
+
+    $default  reduce using rule 120 (ep)
+
+
+state 100
+
+  115 expresion: exp expresionp .
+
+    $default  reduce using rule 115 (expresion)
+
+
+state 101
+
+  116 expresionp: ep . expresion
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    expresion  go to state 152
+    exp        go to state 69
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 102
+
+  124 expp: MAS . exp
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    exp        go to state 153
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 103
+
+  125 expp: MENOS . exp
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    exp        go to state 154
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 104
+
+  123 exp: termino expp .
+
+    $default  reduce using rule 123 (exp)
+
+
+state 105
+
+  128 terminop: POR . termino
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    termino    go to state 155
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 106
+
+  129 terminop: ENTRE . termino
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    termino    go to state 156
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 107
+
+  127 termino: factor terminop .
+
+    $default  reduce using rule 127 (termino)
+
+
+state 108
+
+   38 varcte: VERPISTA .
+
+    $default  reduce using rule 38 (varcte)
+
+
+state 109
+
+   37 varcte: VACIO .
+
+    $default  reduce using rule 37 (varcte)
+
+
+state 110
+
+   39 varcte: VERDADERO .
+
+    $default  reduce using rule 39 (varcte)
+
+
+state 111
+
+   40 varcte: FALSO .
+
+    $default  reduce using rule 40 (varcte)
+
+
+state 112
+
+   35 varcte: CTF .
+
+    $default  reduce using rule 35 (varcte)
+
+
+state 113
+
+   34 varcte: CTESTRING .
+
+    $default  reduce using rule 34 (varcte)
+
+
+state 114
+
+   36 varcte: CAR .
+
+    $default  reduce using rule 36 (varcte)
+
+
+state 115
+
+   33 varcte: CTE .
+
+    $default  reduce using rule 33 (varcte)
+
+
+state 116
+
+  135 factorpp: f varcte .
+
+    $default  reduce using rule 135 (factorpp)
+
+
+state 117
+
+   71 c: SI APARENTESIS condicion_exp . CPARENTESIS ALLAVE bloque CLLAVE sip
+
+    CPARENTESIS  shift, and go to state 157
+
+
+state 118
+
+   73 condicion_exp: accionsi .
+
+    $default  reduce using rule 73 (condicion_exp)
+
+
+state 119
+
+   93 accionsi: acciones . APARENTESIS accionp CPARENTESIS
+
+    APARENTESIS  shift, and go to state 158
+
+
+state 120
+
+   72 condicion_exp: mmexp .
+
+    $default  reduce using rule 72 (condicion_exp)
+
+
+state 121
+
+   89 ciclo: MIENTRAS APARENTESIS mmexp . CPARENTESIS ALLAVE bloque CLLAVE
+
+    CPARENTESIS  shift, and go to state 159
+
+
+state 122
+
+   78 cp: SELECCIONA APARENTESIS exp . CPARENTESIS ALLAVE cuandop CLLAVE
+
+    CPARENTESIS  shift, and go to state 160
+
+
+state 123
+
+   84 escriturapp: varcte . e
+
+    CONCA  shift, and go to state 161
+
+    $default  reduce using rule 87 (e)
+
+    e  go to state 162
+
+
+state 124
+
+   82 escritura: ESCRIBE APARENTESIS escriturap . CPARENTESIS PUNTOCOMA
+
+    CPARENTESIS  shift, and go to state 163
+
+
+state 125
+
+   83 escriturap: escriturapp .
+
+    $default  reduce using rule 83 (escriturap)
+
+
+state 126
+
+   85 escriturapp: exp . e
+
+    CONCA  shift, and go to state 161
+
+    $default  reduce using rule 87 (e)
+
+    e  go to state 164
+
+
+state 127
+
+   51 ejecuta_funcion: ID $@5 APARENTESIS . params2 CPARENTESIS
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    params2    go to state 165
+    exp        go to state 138
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 128
+
+   57 asigp: IGUALR . lea
+
+    LEE          shift, and go to state 59
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    lea        go to state 166
+    lectura    go to state 167
+    mmexp      go to state 168
+    mexp       go to state 67
+    expresion  go to state 68
+    exp        go to state 69
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 129
+
+   62 ap: MAS . MAS
+   64 app: MAS . IGUALR atipo
+
+    IGUALR  shift, and go to state 169
+    MAS     shift, and go to state 170
+
+
+state 130
+
+   63 ap: MENOS . MENOS
+   65 app: MENOS . IGUALR atipo
+
+    IGUALR  shift, and go to state 171
+    MENOS   shift, and go to state 172
+
+
+state 131
+
+   54 asignacion: ID $@6 asignacionp . PUNTOCOMA
+
+    PUNTOCOMA  shift, and go to state 173
+
+
+state 132
+
+   55 asignacionp: asigp .
+
+    $default  reduce using rule 55 (asignacionp)
+
+
+state 133
+
+   56 asignacionp: asigpp .
+
+    $default  reduce using rule 56 (asignacionp)
+
+
+state 134
+
+   60 asigpp: ap .
+
+    $default  reduce using rule 60 (asigpp)
+
+
+state 135
+
+   61 asigpp: app .
+
+    $default  reduce using rule 61 (asigpp)
+
+
+state 136
+
+   90 accion: acciones APARENTESIS accionp . CPARENTESIS PUNTOCOMA
+
+    CPARENTESIS  shift, and go to state 174
+
+
+state 137
+
+   91 accionp: params2 .
+
+    $default  reduce using rule 91 (accionp)
+
+
+state 138
+
+  106 params2: exp . params2p
+
+    COMA  shift, and go to state 175
+
+    $default  reduce using rule 108 (params2p)
+
+    params2p  go to state 176
+
+
+state 139
+
+   19 funcion: FUNCION ID $@3 APARENTESIS funcionpp CPARENTESIS . ALLAVE funcionp CLLAVE
+
+    ALLAVE  shift, and go to state 177
+
+
+state 140
+
+  102 paramsp: ID . $@7 paramspp
+
+    $default  reduce using rule 101 ($@7)
+
+    $@7  go to state 178
+
+
+state 141
+
+  100 params: tipo paramsp .
+
+    $default  reduce using rule 100 (params)
+
+
+state 142
+
+   88 lectura: LEE APARENTESIS CPARENTESIS .
+
+    $default  reduce using rule 88 (lectura)
+
+
+state 143
+
+  134 factorp: APARENTESIS mmexp CPARENTESIS .
+
+    $default  reduce using rule 134 (factorp)
+
+
+state 144
+
+  141 fun_var: APARENTESIS . params2 CPARENTESIS
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    params2    go to state 179
+    exp        go to state 138
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 145
+
+  140 factorppp: ID $@8 fun_var .
+
+    $default  reduce using rule 140 (factorppp)
+
+
+state 146
+
+   16 var_initp: COMA vars_id .
+
+    $default  reduce using rule 16 (var_initp)
+
+
+state 147
+
+  110 mmexpp: O mmexp .
+
+    $default  reduce using rule 110 (mmexpp)
+
+
+state 148
+
+  113 mexpp: Y mexp .
+
+    $default  reduce using rule 113 (mexpp)
+
+
+state 149
+
+  121 epp: IGUALR .
+
+    $default  reduce using rule 121 (epp)
+
+
+state 150
+
+  118 ep: MAYORQUE epp .
+
+    $default  reduce using rule 118 (ep)
+
+
+state 151
+
+  119 ep: MENORQUE epp .
+
+    $default  reduce using rule 119 (ep)
+
+
+state 152
+
+  116 expresionp: ep expresion .
+
+    $default  reduce using rule 116 (expresionp)
+
+
+state 153
+
+  124 expp: MAS exp .
+
+    $default  reduce using rule 124 (expp)
+
+
+state 154
+
+  125 expp: MENOS exp .
+
+    $default  reduce using rule 125 (expp)
+
+
+state 155
+
+  128 terminop: POR termino .
+
+    $default  reduce using rule 128 (terminop)
+
+
+state 156
+
+  129 terminop: ENTRE termino .
+
+    $default  reduce using rule 129 (terminop)
+
+
+state 157
+
+   71 c: SI APARENTESIS condicion_exp CPARENTESIS . ALLAVE bloque CLLAVE sip
+
+    ALLAVE  shift, and go to state 180
+
+
+state 158
+
+   93 accionsi: acciones APARENTESIS . accionp CPARENTESIS
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    CPARENTESIS  reduce using rule 92 (accionp)
+    $default     reduce using rule 138 (f)
+
+    accionp    go to state 181
+    params2    go to state 137
+    exp        go to state 138
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 159
+
+   89 ciclo: MIENTRAS APARENTESIS mmexp CPARENTESIS . ALLAVE bloque CLLAVE
+
+    ALLAVE  shift, and go to state 182
+
+
+state 160
+
+   78 cp: SELECCIONA APARENTESIS exp CPARENTESIS . ALLAVE cuandop CLLAVE
+
+    ALLAVE  shift, and go to state 183
+
+
+state 161
+
+   86 e: CONCA . escriturapp
+
+    VERPISTA     shift, and go to state 108
+    VACIO        shift, and go to state 109
+    VERDADERO    shift, and go to state 110
+    FALSO        shift, and go to state 111
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    CTF          shift, and go to state 112
+    CTESTRING    shift, and go to state 113
+    ID           shift, and go to state 63
+    CAR          shift, and go to state 114
+    CTE          shift, and go to state 115
+
+    VERPISTA   [reduce using rule 138 (f)]
+    VACIO      [reduce using rule 138 (f)]
+    VERDADERO  [reduce using rule 138 (f)]
+    FALSO      [reduce using rule 138 (f)]
+    CTF        [reduce using rule 138 (f)]
+    CTESTRING  [reduce using rule 138 (f)]
+    CAR        [reduce using rule 138 (f)]
+    CTE        [reduce using rule 138 (f)]
+
+    varcte       go to state 123
+    escriturapp  go to state 184
+    exp          go to state 126
+    termino      go to state 70
+    factor       go to state 71
+    factorp      go to state 72
+    factorpp     go to state 73
+    f            go to state 74
+    factorppp    go to state 75
+
+
+state 162
+
+   84 escriturapp: varcte e .
+
+    $default  reduce using rule 84 (escriturapp)
+
+
+state 163
+
+   82 escritura: ESCRIBE APARENTESIS escriturap CPARENTESIS . PUNTOCOMA
+
+    PUNTOCOMA  shift, and go to state 185
+
+
+state 164
+
+   85 escriturapp: exp e .
+
+    $default  reduce using rule 85 (escriturapp)
+
+
+state 165
+
+   51 ejecuta_funcion: ID $@5 APARENTESIS params2 . CPARENTESIS
+
+    CPARENTESIS  shift, and go to state 186
+
+
+state 166
+
+   57 asigp: IGUALR lea .
+
+    $default  reduce using rule 57 (asigp)
+
+
+state 167
+
+   58 lea: lectura .
+
+    $default  reduce using rule 58 (lea)
+
+
+state 168
+
+   59 lea: mmexp .
+
+    $default  reduce using rule 59 (lea)
+
+
+state 169
+
+   64 app: MAS IGUALR . atipo
+
+    CTF  shift, and go to state 187
+    ID   shift, and go to state 188
+    CTE  shift, and go to state 189
+
+    atipo  go to state 190
+
+
+state 170
+
+   62 ap: MAS MAS .
+
+    $default  reduce using rule 62 (ap)
+
+
+state 171
+
+   65 app: MENOS IGUALR . atipo
+
+    CTF  shift, and go to state 187
+    ID   shift, and go to state 188
+    CTE  shift, and go to state 189
+
+    atipo  go to state 191
+
+
+state 172
+
+   63 ap: MENOS MENOS .
+
+    $default  reduce using rule 63 (ap)
+
+
+state 173
+
+   54 asignacion: ID $@6 asignacionp PUNTOCOMA .
+
+    $default  reduce using rule 54 (asignacion)
+
+
+state 174
+
+   90 accion: acciones APARENTESIS accionp CPARENTESIS . PUNTOCOMA
+
+    PUNTOCOMA  shift, and go to state 192
+
+
+state 175
+
+  107 params2p: COMA . params2
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    params2    go to state 193
+    exp        go to state 138
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 176
+
+  106 params2: exp params2p .
+
+    $default  reduce using rule 106 (params2)
+
+
+state 177
+
+   19 funcion: FUNCION ID $@3 APARENTESIS funcionpp CPARENTESIS ALLAVE . funcionp CLLAVE
+
+    ADELANTE       shift, and go to state 34
+    ATRAS          shift, and go to state 35
+    ROTADERECHA    shift, and go to state 36
+    ROTAIZQUIERDA  shift, and go to state 37
+    TOMARTESORO    shift, and go to state 38
+    TOPA           shift, and go to state 39
+    SI             shift, and go to state 40
+    MIENTRAS       shift, and go to state 41
+    ENTERO         shift, and go to state 7
+    FLOTANTE       shift, and go to state 8
+    SELECCIONA     shift, and go to state 42
+    REGRESA        shift, and go to state 194
+    LOGICO         shift, and go to state 9
+    PALABRA        shift, and go to state 10
+    ESCRIBE        shift, and go to state 43
+    CARACTER       shift, and go to state 11
+    ID             shift, and go to state 44
+
+    $default  reduce using rule 21 (funcionp)
+
+    vars             go to state 45
+    funcionp         go to state 195
+    tipo             go to state 15
+    estatutofuncion  go to state 196
+    estatuto         go to state 197
+    ejecuta_funcion  go to state 48
+    regresa          go to state 198
+    asignacion       go to state 49
+    condicion        go to state 50
+    c                go to state 51
+    cp               go to state 52
+    escritura        go to state 53
+    ciclo            go to state 54
+    accion           go to state 55
+    acciones         go to state 56
+
+
+state 178
+
+  102 paramsp: ID $@7 . paramspp
+
+    ENTERO    shift, and go to state 7
+    FLOTANTE  shift, and go to state 8
+    LOGICO    shift, and go to state 9
+    PALABRA   shift, and go to state 10
+    CARACTER  shift, and go to state 11
+    COMA      shift, and go to state 199
+
+    $default  reduce using rule 105 (paramspp)
+
+    tipo      go to state 86
+    params    go to state 200
+    paramspp  go to state 201
+
+
+state 179
+
+  141 fun_var: APARENTESIS params2 . CPARENTESIS
+
+    CPARENTESIS  shift, and go to state 202
+
+
+state 180
+
+   71 c: SI APARENTESIS condicion_exp CPARENTESIS ALLAVE . bloque CLLAVE sip
+
+    ADELANTE       shift, and go to state 34
+    ATRAS          shift, and go to state 35
+    ROTADERECHA    shift, and go to state 36
+    ROTAIZQUIERDA  shift, and go to state 37
+    TOMARTESORO    shift, and go to state 38
+    TOPA           shift, and go to state 39
+    SI             shift, and go to state 40
+    MIENTRAS       shift, and go to state 41
+    ENTERO         shift, and go to state 7
+    FLOTANTE       shift, and go to state 8
+    SELECCIONA     shift, and go to state 42
+    LOGICO         shift, and go to state 9
+    PALABRA        shift, and go to state 10
+    ESCRIBE        shift, and go to state 43
+    CARACTER       shift, and go to state 11
+    ID             shift, and go to state 44
+
+    $default  reduce using rule 27 (bloque)
+
+    vars             go to state 45
+    bloque           go to state 203
+    tipo             go to state 15
+    estatuto         go to state 47
+    ejecuta_funcion  go to state 48
+    asignacion       go to state 49
+    condicion        go to state 50
+    c                go to state 51
+    cp               go to state 52
+    escritura        go to state 53
+    ciclo            go to state 54
+    accion           go to state 55
+    acciones         go to state 56
+
+
+state 181
+
+   93 accionsi: acciones APARENTESIS accionp . CPARENTESIS
+
+    CPARENTESIS  shift, and go to state 204
+
+
+state 182
+
+   89 ciclo: MIENTRAS APARENTESIS mmexp CPARENTESIS ALLAVE . bloque CLLAVE
+
+    ADELANTE       shift, and go to state 34
+    ATRAS          shift, and go to state 35
+    ROTADERECHA    shift, and go to state 36
+    ROTAIZQUIERDA  shift, and go to state 37
+    TOMARTESORO    shift, and go to state 38
+    TOPA           shift, and go to state 39
+    SI             shift, and go to state 40
+    MIENTRAS       shift, and go to state 41
+    ENTERO         shift, and go to state 7
+    FLOTANTE       shift, and go to state 8
+    SELECCIONA     shift, and go to state 42
+    LOGICO         shift, and go to state 9
+    PALABRA        shift, and go to state 10
+    ESCRIBE        shift, and go to state 43
+    CARACTER       shift, and go to state 11
+    ID             shift, and go to state 44
+
+    $default  reduce using rule 27 (bloque)
+
+    vars             go to state 45
+    bloque           go to state 205
+    tipo             go to state 15
+    estatuto         go to state 47
+    ejecuta_funcion  go to state 48
+    asignacion       go to state 49
+    condicion        go to state 50
+    c                go to state 51
+    cp               go to state 52
+    escritura        go to state 53
+    ciclo            go to state 54
+    accion           go to state 55
+    acciones         go to state 56
+
+
+state 183
+
+   78 cp: SELECCIONA APARENTESIS exp CPARENTESIS ALLAVE . cuandop CLLAVE
+
+    CUANDO  shift, and go to state 206
+
+    cuandop  go to state 207
+
+
+state 184
+
+   86 e: CONCA escriturapp .
+
+    $default  reduce using rule 86 (e)
+
+
+state 185
+
+   82 escritura: ESCRIBE APARENTESIS escriturap CPARENTESIS PUNTOCOMA .
+
+    $default  reduce using rule 82 (escritura)
+
+
+state 186
+
+   51 ejecuta_funcion: ID $@5 APARENTESIS params2 CPARENTESIS .
+
+    $default  reduce using rule 51 (ejecuta_funcion)
+
+
+state 187
+
+   67 atipo: CTF .
+
+    $default  reduce using rule 67 (atipo)
+
+
+state 188
+
+   68 atipo: ID .
+
+    $default  reduce using rule 68 (atipo)
+
+
+state 189
+
+   66 atipo: CTE .
+
+    $default  reduce using rule 66 (atipo)
+
+
+state 190
+
+   64 app: MAS IGUALR atipo .
+
+    $default  reduce using rule 64 (app)
+
+
+state 191
+
+   65 app: MENOS IGUALR atipo .
+
+    $default  reduce using rule 65 (app)
+
+
+state 192
+
+   90 accion: acciones APARENTESIS accionp CPARENTESIS PUNTOCOMA .
+
+    $default  reduce using rule 90 (accion)
+
+
+state 193
+
+  107 params2p: COMA params2 .
+
+    $default  reduce using rule 107 (params2p)
+
+
+state 194
+
+   52 regresa: REGRESA . mmexp PUNTOCOMA
+
+    NO           shift, and go to state 60
+    APARENTESIS  shift, and go to state 61
+    MENOS        shift, and go to state 62
+    ID           shift, and go to state 63
+
+    $default  reduce using rule 138 (f)
+
+    mmexp      go to state 208
+    mexp       go to state 67
+    expresion  go to state 68
+    exp        go to state 69
+    termino    go to state 70
+    factor     go to state 71
+    factorp    go to state 72
+    factorpp   go to state 73
+    f          go to state 74
+    factorppp  go to state 75
+
+
+state 195
+
+   19 funcion: FUNCION ID $@3 APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp . CLLAVE
+
+    CLLAVE  shift, and go to state 209
+
+
+state 196
+
+   20 funcionp: estatutofuncion . funcionp
+
+    ADELANTE       shift, and go to state 34
+    ATRAS          shift, and go to state 35
+    ROTADERECHA    shift, and go to state 36
+    ROTAIZQUIERDA  shift, and go to state 37
+    TOMARTESORO    shift, and go to state 38
+    TOPA           shift, and go to state 39
+    SI             shift, and go to state 40
+    MIENTRAS       shift, and go to state 41
+    ENTERO         shift, and go to state 7
+    FLOTANTE       shift, and go to state 8
+    SELECCIONA     shift, and go to state 42
+    REGRESA        shift, and go to state 194
+    LOGICO         shift, and go to state 9
+    PALABRA        shift, and go to state 10
+    ESCRIBE        shift, and go to state 43
+    CARACTER       shift, and go to state 11
+    ID             shift, and go to state 44
+
+    $default  reduce using rule 21 (funcionp)
+
+    vars             go to state 45
+    funcionp         go to state 210
+    tipo             go to state 15
+    estatutofuncion  go to state 196
+    estatuto         go to state 197
+    ejecuta_funcion  go to state 48
+    regresa          go to state 198
+    asignacion       go to state 49
+    condicion        go to state 50
+    c                go to state 51
+    cp               go to state 52
+    escritura        go to state 53
+    ciclo            go to state 54
+    accion           go to state 55
+    acciones         go to state 56
+
+
+state 197
+
+   41 estatutofuncion: estatuto .
+
+    $default  reduce using rule 41 (estatutofuncion)
+
+
+state 198
+
+   42 estatutofuncion: regresa .
+
+    $default  reduce using rule 42 (estatutofuncion)
+
+
+state 199
+
+  103 paramspp: COMA . paramsp
+
+    ID  shift, and go to state 140
+
+    paramsp  go to state 211
+
+
+state 200
+
+  104 paramspp: params .
+
+    $default  reduce using rule 104 (paramspp)
+
+
+state 201
+
+  102 paramsp: ID $@7 paramspp .
+
+    $default  reduce using rule 102 (paramsp)
+
+
+state 202
+
+  141 fun_var: APARENTESIS params2 CPARENTESIS .
+
+    $default  reduce using rule 141 (fun_var)
+
+
+state 203
+
+   71 c: SI APARENTESIS condicion_exp CPARENTESIS ALLAVE bloque . CLLAVE sip
+
+    CLLAVE  shift, and go to state 212
+
+
+state 204
+
+   93 accionsi: acciones APARENTESIS accionp CPARENTESIS .
+
+    $default  reduce using rule 93 (accionsi)
+
+
+state 205
+
+   89 ciclo: MIENTRAS APARENTESIS mmexp CPARENTESIS ALLAVE bloque . CLLAVE
+
+    CLLAVE  shift, and go to state 213
+
+
+state 206
+
+   79 cuandop: CUANDO . varselecciona IGUALR MAYORQUE ALLAVE bloque CLLAVE cuandopp
+
+    ID   shift, and go to state 214
+    CAR  shift, and go to state 215
+    CTE  shift, and go to state 216
+
+    varselecciona  go to state 217
+
+
+state 207
+
+   78 cp: SELECCIONA APARENTESIS exp CPARENTESIS ALLAVE cuandop . CLLAVE
+
+    CLLAVE  shift, and go to state 218
+
+
+state 208
+
+   52 regresa: REGRESA mmexp . PUNTOCOMA
+
+    PUNTOCOMA  shift, and go to state 219
+
+
+state 209
+
+   19 funcion: FUNCION ID $@3 APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE .
+
+    $default  reduce using rule 19 (funcion)
+
+
+state 210
+
+   20 funcionp: estatutofuncion funcionp .
+
+    $default  reduce using rule 20 (funcionp)
+
+
+state 211
+
+  103 paramspp: COMA paramsp .
+
+    $default  reduce using rule 103 (paramspp)
+
+
+state 212
+
+   71 c: SI APARENTESIS condicion_exp CPARENTESIS ALLAVE bloque CLLAVE . sip
+
+    SINO  shift, and go to state 220
+
+    $default  reduce using rule 75 (sip)
+
+    sip  go to state 221
+
+
+state 213
+
+   89 ciclo: MIENTRAS APARENTESIS mmexp CPARENTESIS ALLAVE bloque CLLAVE .
+
+    $default  reduce using rule 89 (ciclo)
+
+
+state 214
+
+  143 varselecciona: ID .
+
+    $default  reduce using rule 143 (varselecciona)
+
+
+state 215
+
+  145 varselecciona: CAR .
+
+    $default  reduce using rule 145 (varselecciona)
+
+
+state 216
+
+  144 varselecciona: CTE .
+
+    $default  reduce using rule 144 (varselecciona)
+
+
+state 217
+
+   79 cuandop: CUANDO varselecciona . IGUALR MAYORQUE ALLAVE bloque CLLAVE cuandopp
+
+    IGUALR  shift, and go to state 222
+
+
+state 218
+
+   78 cp: SELECCIONA APARENTESIS exp CPARENTESIS ALLAVE cuandop CLLAVE .
+
+    $default  reduce using rule 78 (cp)
+
+
+state 219
+
+   52 regresa: REGRESA mmexp PUNTOCOMA .
+
+    $default  reduce using rule 52 (regresa)
+
+
+state 220
+
+   74 sip: SINO . sipp
+
+    SI          shift, and go to state 40
+    SELECCIONA  shift, and go to state 42
+    ALLAVE      shift, and go to state 223
+
+    condicion  go to state 224
+    c          go to state 51
+    sipp       go to state 225
+    cp         go to state 52
+
+
+state 221
+
+   71 c: SI APARENTESIS condicion_exp CPARENTESIS ALLAVE bloque CLLAVE sip .
+
+    $default  reduce using rule 71 (c)
+
+
+state 222
+
+   79 cuandop: CUANDO varselecciona IGUALR . MAYORQUE ALLAVE bloque CLLAVE cuandopp
+
+    MAYORQUE  shift, and go to state 226
+
+
+state 223
+
+   77 sipp: ALLAVE . bloque CLLAVE
+
+    ADELANTE       shift, and go to state 34
+    ATRAS          shift, and go to state 35
+    ROTADERECHA    shift, and go to state 36
+    ROTAIZQUIERDA  shift, and go to state 37
+    TOMARTESORO    shift, and go to state 38
+    TOPA           shift, and go to state 39
+    SI             shift, and go to state 40
+    MIENTRAS       shift, and go to state 41
+    ENTERO         shift, and go to state 7
+    FLOTANTE       shift, and go to state 8
+    SELECCIONA     shift, and go to state 42
+    LOGICO         shift, and go to state 9
+    PALABRA        shift, and go to state 10
+    ESCRIBE        shift, and go to state 43
+    CARACTER       shift, and go to state 11
+    ID             shift, and go to state 44
+
+    $default  reduce using rule 27 (bloque)
+
+    vars             go to state 45
+    bloque           go to state 227
+    tipo             go to state 15
+    estatuto         go to state 47
+    ejecuta_funcion  go to state 48
+    asignacion       go to state 49
+    condicion        go to state 50
+    c                go to state 51
+    cp               go to state 52
+    escritura        go to state 53
+    ciclo            go to state 54
+    accion           go to state 55
+    acciones         go to state 56
+
+
+state 224
+
+   76 sipp: condicion .
+
+    $default  reduce using rule 76 (sipp)
+
+
+state 225
+
+   74 sip: SINO sipp .
+
+    $default  reduce using rule 74 (sip)
+
+
+state 226
+
+   79 cuandop: CUANDO varselecciona IGUALR MAYORQUE . ALLAVE bloque CLLAVE cuandopp
+
+    ALLAVE  shift, and go to state 228
+
+
+state 227
+
+   77 sipp: ALLAVE bloque . CLLAVE
+
+    CLLAVE  shift, and go to state 229
+
+
+state 228
+
+   79 cuandop: CUANDO varselecciona IGUALR MAYORQUE ALLAVE . bloque CLLAVE cuandopp
+
+    ADELANTE       shift, and go to state 34
+    ATRAS          shift, and go to state 35
+    ROTADERECHA    shift, and go to state 36
+    ROTAIZQUIERDA  shift, and go to state 37
+    TOMARTESORO    shift, and go to state 38
+    TOPA           shift, and go to state 39
+    SI             shift, and go to state 40
+    MIENTRAS       shift, and go to state 41
+    ENTERO         shift, and go to state 7
+    FLOTANTE       shift, and go to state 8
+    SELECCIONA     shift, and go to state 42
+    LOGICO         shift, and go to state 9
+    PALABRA        shift, and go to state 10
+    ESCRIBE        shift, and go to state 43
+    CARACTER       shift, and go to state 11
+    ID             shift, and go to state 44
+
+    $default  reduce using rule 27 (bloque)
+
+    vars             go to state 45
+    bloque           go to state 230
+    tipo             go to state 15
+    estatuto         go to state 47
+    ejecuta_funcion  go to state 48
+    asignacion       go to state 49
+    condicion        go to state 50
+    c                go to state 51
+    cp               go to state 52
+    escritura        go to state 53
+    ciclo            go to state 54
+    accion           go to state 55
+    acciones         go to state 56
+
+
+state 229
+
+   77 sipp: ALLAVE bloque CLLAVE .
+
+    $default  reduce using rule 77 (sipp)
+
+
+state 230
+
+   79 cuandop: CUANDO varselecciona IGUALR MAYORQUE ALLAVE bloque . CLLAVE cuandopp
+
+    CLLAVE  shift, and go to state 231
+
+
+state 231
+
+   79 cuandop: CUANDO varselecciona IGUALR MAYORQUE ALLAVE bloque CLLAVE . cuandopp
+
+    CUANDO  shift, and go to state 206
+
+    $default  reduce using rule 81 (cuandopp)
+
+    cuandop   go to state 232
+    cuandopp  go to state 233
+
+
+state 232
+
+   80 cuandopp: cuandop .
+
+    $default  reduce using rule 80 (cuandopp)
+
+
+state 233
+
+   79 cuandop: CUANDO varselecciona IGUALR MAYORQUE ALLAVE bloque CLLAVE cuandopp .
+
+    $default  reduce using rule 79 (cuandop)
