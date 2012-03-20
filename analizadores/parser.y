@@ -14,6 +14,26 @@ static GQueue *POperadores;
 static GQueue *PTipos;
 static GQueue *PSaltos;
 
+//Declaracion de rangos de memoria
+//Globales
+	int enterosglobales = 1000;
+	int flotantesglobales = 10000;
+	int stringsglobales = 20000;
+	int caracteresglobales = 30000;
+	int logicosglobales = 40000;
+//Locales
+	int enteroslocales = 50000;
+	int flotanteslocales = 60000;
+	int stringslocales = 70000;
+	int caractereslocales = 80000;
+	int logicoslocales = 90000;
+
+//Temporales
+	int enterostemporales = 100000;
+	int flotantestemporales = 110000;
+	int stringstemporales = 120000;
+	int caracterestemporales = 130000;
+	int logicostemporales = 140000;
 //Declaracion del archivo objeto
 FILE *objeto;
 
@@ -238,6 +258,50 @@ void insert_var_to_table(char *name){
 		variable *temp = g_slice_new(variable);
 		temp->tipo = tipo_actual;
 		temp->nombre = name;
+		int virtual;
+		switch(tnuevo){
+			case 'I': if(strcmp(proc_actual,"programa")== 0){
+					virtual = enterosglobales;
+					enterosglobales++;			
+				} else{
+					virtual = enteroslocales;
+					enteroslocales++;
+				}
+				break;
+			case 'F': if(strcmp(proc_actual,"programa")== 0){
+					virtual = flotantesglobales;
+					flotantesglobales++;			
+				} else{
+					virtual = flotanteslocales;
+					flotanteslocales++;
+				}
+				break;
+			case 'S': if(strcmp(proc_actual,"programa")== 0){
+					virtual = stringsglobales;
+					stringsglobales++;			
+				} else{
+					virtual = stringslocales;
+					stringslocales++;
+				}
+				break;
+			case 'C': if(strcmp(proc_actual,"programa")== 0){
+					virtual = caracteresglobales;
+					caracteresglobales++;			
+				} else{
+					virtual = caractereslocales;
+					caractereslocales++;
+				}
+				break;
+			case 'L': if(strcmp(proc_actual,"programa")== 0){
+					virtual = logicosglobales;
+					logicosglobales++;			
+				} else{
+					virtual = logicoslocales;
+					logicoslocales++;
+				}
+				break;
+		}
+		temp->dir_virtual = virtual;
 		g_hash_table_insert(tabla->var_table,(gpointer)name,(gpointer)temp);
 		g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
 	}
@@ -288,7 +352,7 @@ Salida: entero
 */
 int traduce_tipo(char tipo){
 	switch(tipo){
-		case 'E': return 0;
+		case 'I': return 0;
 		case 'F': return 1;
 		case 'S': return 2;
 		case 'C': return 3;
@@ -345,7 +409,86 @@ int valida_existencia_logico(int operador){
 	}
 
 }
+/*
+Descripcion: Se encarga de obtener los opendos, tipos d eoperandos
+y el operador para generar el cuadruplo
 
+Parametros: 
+Salida: void
+*/
+void generar_cuadruplo_expresion(){
+	int operando2 = g_queue_pop_head(POperandos);
+	int operando1 = g_queue_pop_head(POperandos);
+	int operador = g_queue_pop_head(POperadores);
+	char tipo2 = g_queue_pop_head(PTipos);
+	char tipo1 = g_queue_pop_head(PTipos);
+
+	char tnuevo = cubo[traduce_tipo(tipo1)][traduce_tipo(tipo2)][operador];
+	if(tnuevo == 'E'){
+		printf("Error no se puede hacer esa operación");
+	}else{
+		int tmp;
+		switch(tnuevo){
+			case 'I': tmp = enterostemporales;
+				enterostemporales++;
+				break;
+			case 'F': tmp = flotantestemporales;
+				flotantestemporales++;
+				break;
+			case 'S': tmp = stringstemporales;
+				stringstemporales++;
+				break;
+			case 'C': tmp = caracterestemporales;
+				caracterestemporales++;
+				break;
+			case 'L': tmp = logicostemporales;
+				logicostemporales++;
+				break;
+		}
+		generar_cuadruplo(operador,operando1,operando2,tmp);
+		g_queue_push_head(POperandos,tmp);
+	}
+
+}
+/*
+Descripcion: Se encarga de obtener el operand, tipos de operando
+y el operador para generar el cuadruplo para expresiones de tipo unarias
+
+Parametros: 
+Salida: void
+*/
+void generar_cuadruplo_expresion_unaria(){
+	int operando1 = g_queue_pop_head(POperandos);
+	int operador = g_queue_pop_head(POperadores);
+	char tipo1 = g_queue_pop_head(PTipos);
+
+	char tnuevo = cubo[traduce_tipo(tipo1)][5][operador];
+	if(tnuevo == 'E'){
+		printf("Error no se puede hacer esa operación");
+	}else{
+		int tmp;
+		switch(tnuevo){
+			case 'I': tmp = enterostemporales;
+				enterostemporales++;
+				break;
+			case 'F': tmp = flotantestemporales;
+				flotantestemporales++;
+				break;
+			case 'S': tmp = stringstemporales;
+				stringstemporales++;
+				break;
+			case 'C': tmp = caracterestemporales;
+				caracterestemporales++;
+				break;
+			case 'L': tmp = logicostemporales;
+				logicostemporales++;
+				break;
+		}
+		generar_cuadruplo(operador,operando1,-1,tmp);
+		g_queue_push_head(POperandos,tmp);
+	}
+
+}
 /*
 Descripcion: Imprime el resultado de lo que se guardo en una tabla
 
@@ -508,15 +651,21 @@ params2: exp params2p;
 params2p: COMA params2
 	| ;
 
-mmexp: mexp mmexpp;
-mmexpp: O mmexp 
+mmexp: mexp {if(g_queue_peek_head(POperadores) == 16){
+			generar_cuadruplo_expresion();		
+	}} mmexpp;
+mmexpp: O {g_queue_push_head(POperadores,16);/*operador or*/} mmexp 
 	| ;
 	
-mexp: expresion mexpp;
-mexpp: Y mexp
+mexp: expresion{if(g_queue_peek_head(POperadores) == 15){
+			generar_cuadruplo_expresion();		
+	}} mexpp;
+mexpp: Y{g_queue_push_head(POperadores,15);/*operador and*/} mexp
 	| ;
 	
-expresion: exp expresionp;
+expresion: exp{if(valida_existencia_logico(g_queue_peek_head(POperadores))){
+			generar_cuadruplo_expresion();		
+	}} expresionp;
 expresionp: ep expresion 
 		| ;
 ep: 	MAYORQUE epp
@@ -525,14 +674,18 @@ ep: 	MAYORQUE epp
 epp: IGUALR 
 	| ;
 	
-exp: termino expp;
-expp: MAS exp
-	| MENOS exp 
+exp: termino{if(g_queue_peek_head(POperadores) == 0 || g_queue_peek_head(POperadores) == 3){
+			generar_cuadruplo_expresion();		
+	}} expp;
+expp: MAS{g_queue_push_head(POperadores,0);/*operador suma*/}  exp
+	| MENOS{g_queue_push_head(POperadores,3);/*operador resta*/}  exp 
 	| ;
 
-termino: factor terminop;
-terminop: POR termino
-	| ENTRE termino
+termino: factor{if(g_queue_peek_head(POperadores) == 6 || g_queue_peek_head(POperadores) == 7){
+			generar_cuadruplo_expresion();		
+	}} terminop;
+terminop: POR{g_queue_push_head(POperadores,6);/*operador multiplica*/} termino
+	| ENTRE{g_queue_push_head(POperadores,7);/*operador division*/} termino
 	| ;
 
 factor: factorp 
