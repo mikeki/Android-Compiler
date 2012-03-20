@@ -76,8 +76,18 @@
 
 static GHashTable *dir_procs;
 static char *proc_actual;
-static char *tipo_actual;
+static char tipo_actual;
 static char *id_a_verificar;
+
+//Declaracion de las pilas.
+static GQueue *POperandos;
+static GQueue *POperadores;
+static GQueue *PTipos;
+static GQueue *PSaltos;
+
+//Declaracion del archivo objeto
+FILE *objeto;
+
 /*
 Estructuras para las tabalase de procedimientos y tabla de variables
 */
@@ -86,8 +96,9 @@ GHashTable *var_table;
 }funcion;
 
 typedef struct{
-char *tipo;
+char tipo;
 char *nombre;
+int dir_virtual;
 }variable;
 
 /*
@@ -103,7 +114,39 @@ char cubo[6][6][19] =
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
+		{//MASMAS(++)
+			{'E','E','E','E','E','I'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MASIGUAL(+=)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
 		{//RESTA(-)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MENOSMENOS(--)
+			{'E','E','E','E','E','I'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MENOSIGUAL(-=)
 			{'I','F','E','E','E','E'},
 			{'F','F','E','E','E','E'},
 			{'E','E','E','E','E','E'},
@@ -135,14 +178,6 @@ char cubo[6][6][19] =
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
-		{//MAYORQUE(>)
-			{'L','L','E','E','E','E'},
-			{'L','L','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'}
-		},
 		{//MENORQUE(<)
 			{'L','L','E','E','E','E'},
 			{'L','L','E','E','E','E'},
@@ -159,17 +194,17 @@ char cubo[6][6][19] =
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
-		{//MASMAS(++)
-			{'E','E','E','E','E','I'},
-			{'E','E','E','E','E','E'},
+		{//MENORIGUAL(<=)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
-		{//MENOSMENOS(--)
-			{'E','E','E','E','E','I'},
-			{'E','E','E','E','E','E'},
+		{//MAYORQUE(>)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'},
@@ -183,28 +218,12 @@ char cubo[6][6][19] =
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
-		{//MENORIGUAL(<=)
+		{//IGUALIGUAL(==)
 			{'L','L','E','E','E','E'},
 			{'L','L','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'}
-		},
-		{//MASIGUAL(+=)
-			{'I','F','E','E','E','E'},
-			{'F','F','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'}
-		},
-		{//MENOSIGUAL(-=)
-			{'I','F','E','E','E','E'},
-			{'F','F','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
+			{'E','E','L','L','E','E'},
+			{'E','E','L','L','E','E'},
+			{'E','E','E','E','L','E'},
 			{'E','E','E','E','E','E'}
 		},
 		{//Y(Y)
@@ -238,14 +257,6 @@ char cubo[6][6][19] =
 			{'E','E','S','C','E','E'},
 			{'E','E','E','E','L','E'},
 			{'E','E','E','E','E','E'}
-		},
-		{//IGUALIGUAL(==)
-			{'L','L','E','E','E','E'},
-			{'L','L','E','E','E','E'},
-			{'E','E','L','L','E','E'},
-			{'E','E','L','L','E','E'},
-			{'E','E','E','E','L','E'},
-			{'E','E','E','E','E','E'}
 		}
 	};
 
@@ -255,8 +266,12 @@ Descripcion: Inicializa la tabla de dir_procs (directorio de procedimientos)
 Parametros: void
 Salida:void
 */
-void create_dir_table(){
+void crear_pilas_tablas(){
 	dir_procs = g_hash_table_new(g_str_hash, g_str_equal);
+	POperandos = g_queue_new();
+	POperadores = g_queue_new();
+	PTipos = g_queue_new();
+	PSaltos = g_queue_new();
 }
 
 /*
@@ -295,7 +310,7 @@ void insert_var_to_table(char *name){
 		temp->tipo = tipo_actual;
 		temp->nombre = name;
 		g_hash_table_insert(tabla->var_table,(gpointer)name,(gpointer)temp);
-		//g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
+		g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
 	}
 	
 }
@@ -334,6 +349,74 @@ void verifica_existe_procs(char *name){
 	}
 	
 }
+
+/*
+Descripcion: Función que se encrag de regresar el id numérico correspondiente
+del tipo que se le etsa mandando como paramtero
+
+Parametros: char tipo
+Salida: entero
+*/
+int traduce_tipo(char tipo){
+	switch(tipo){
+		case 'E': return 0;
+		case 'F': return 1;
+		case 'S': return 2;
+		case 'C': return 3;
+		case 'L': return 4;
+	}
+
+}
+
+/*
+Descripcion: Función que se encaraga de escribir en un arhcivo de codigo
+objeto los cuadruplos que reciba.
+
+Parametros: int operador, int operando1, int operando2, int resultadotmp
+Salida: void
+*/
+void generar_cuadruplo(int operador, int operando1, int operando2, int resultadotmp){
+	
+	fprintf(objeto,"%d,%d,%d,%d",operador,operando1,operando2,resultadotmp);
+}
+
+/*
+Descripcion: Función que se encraga de  regresar el operador al cual corresponde
+dependiendo de los 2 ultimos operadores. Aplica exclusiavmente para los 
+operadores con 2 caracteres.
+
+Parametros: int operador1, int operador2
+Salida: int
+*/
+int dame_operador_logico(int operador1, int operador2){
+	if(operador1 == 9 && operador2 == 12){
+		return 10;
+	}else if(operador1 == 9 && operador2 == 18){
+		return 11;
+	}else if(operador1 == 12 && operador2 == 18){
+		return 13;
+	}else if(operador1 == 18 && operador2 == 18){
+		return 14;
+	}
+
+}
+
+/*
+Descripcion: Función que se encarga de regresar si el operador es
+de tipo logico
+
+Parametros: int operador
+Salida: int
+*/
+int valida_existencia_logico(int operador){
+	if(operador >= 9 && operador <= 14){
+		return 1;
+	}else{
+		return 0;
+	}
+
+}
+
 /*
 Descripcion: Imprime el resultado de lo que se guardo en una tabla
 
@@ -353,7 +436,7 @@ void imprime(GHashTable *a){
 
 
 /* Line 189 of yacc.c  */
-#line 357 "parser.tab.c"
+#line 440 "parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -440,7 +523,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 283 "parser.y"
+#line 366 "parser.y"
  
 int integer; 
 float float_n;
@@ -449,7 +532,7 @@ char *str;
 
 
 /* Line 214 of yacc.c  */
-#line 453 "parser.tab.c"
+#line 536 "parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -461,7 +544,7 @@ char *str;
 
 
 /* Line 264 of yacc.c  */
-#line 465 "parser.tab.c"
+#line 548 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -801,22 +884,22 @@ static const yytype_int16 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   303,   303,   303,   304,   305,   306,   307,   308,   310,
-     311,   311,   312,   313,   314,   315,   316,   317,   318,   320,
-     320,   321,   322,   323,   324,   326,   326,   328,   329,   331,
-     332,   333,   334,   335,   337,   338,   339,   340,   341,   342,
-     343,   344,   346,   347,   349,   350,   351,   352,   353,   354,
-     356,   356,   357,   358,   360,   360,   362,   363,   365,   367,
-     367,   368,   369,   370,   371,   372,   373,   374,   375,   376,
-     377,   378,   379,   380,   381,   383,   384,   385,   386,   387,
-     388,   389,   390,   391,   392,   393,   394,   395,   397,   398,
-     399,   400,   401,   402,   404,   406,   408,   409,   410,   411,
-     412,   413,   414,   415,   416,   417,   419,   420,   420,   421,
-     422,   423,   424,   425,   426,   428,   430,   431,   433,   434,
-     435,   437,   438,   439,   440,   441,   442,   443,   444,   446,
-     447,   448,   449,   451,   452,   453,   454,   456,   457,   458,
-     459,   460,   461,   462,   463,   464,   464,   465,   466,   468,
-     469,   470
+       0,   386,   386,   386,   387,   388,   389,   390,   391,   393,
+     394,   394,   395,   396,   397,   398,   399,   400,   401,   403,
+     403,   404,   405,   406,   407,   409,   409,   411,   412,   414,
+     415,   416,   417,   418,   420,   421,   422,   423,   424,   425,
+     426,   427,   429,   430,   432,   433,   434,   435,   436,   437,
+     439,   439,   440,   441,   443,   443,   445,   446,   448,   450,
+     450,   451,   452,   453,   454,   455,   456,   457,   458,   459,
+     460,   461,   462,   463,   464,   466,   467,   468,   469,   470,
+     471,   472,   473,   474,   475,   476,   477,   478,   480,   481,
+     482,   483,   484,   485,   487,   489,   491,   492,   493,   494,
+     495,   496,   497,   498,   499,   500,   502,   503,   503,   504,
+     505,   506,   507,   508,   509,   511,   512,   513,   515,   516,
+     517,   519,   520,   521,   522,   523,   524,   525,   526,   528,
+     529,   530,   531,   533,   534,   535,   536,   538,   539,   540,
+     541,   542,   543,   544,   545,   546,   546,   547,   548,   550,
+     551,   552
 };
 #endif
 
@@ -1895,133 +1978,133 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 303 "parser.y"
+#line 386 "parser.y"
     {insert_proc_to_table("programa");;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 311 "parser.y"
+#line 394 "parser.y"
     {insert_var_to_table(yylval.str);;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 320 "parser.y"
+#line 403 "parser.y"
     {insert_proc_to_table(yylval.str);;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 326 "parser.y"
+#line 409 "parser.y"
     {insert_proc_to_table(yylval.str);;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 331 "parser.y"
-    {tipo_actual= "entero";;}
+#line 414 "parser.y"
+    {tipo_actual= 'E';;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 332 "parser.y"
-    {tipo_actual= "flotante";;}
+#line 415 "parser.y"
+    {tipo_actual= 'F';;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 333 "parser.y"
-    {tipo_actual= "caracter";;}
+#line 416 "parser.y"
+    {tipo_actual= 'C';;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 334 "parser.y"
-    {tipo_actual= "string";;}
+#line 417 "parser.y"
+    {tipo_actual= 'S';;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 335 "parser.y"
-    {tipo_actual= "logico";;}
+#line 418 "parser.y"
+    {tipo_actual= 'L';;}
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 356 "parser.y"
+#line 439 "parser.y"
     {id_a_verificar=yylval.str;;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 360 "parser.y"
+#line 443 "parser.y"
     {verifica_existe_procs(id_a_verificar);;}
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 367 "parser.y"
+#line 450 "parser.y"
     {verifica_existe_var(id_a_verificar);;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 381 "parser.y"
+#line 464 "parser.y"
     {verifica_existe_var(yylval.str);;}
     break;
 
   case 107:
 
 /* Line 1455 of yacc.c  */
-#line 420 "parser.y"
+#line 503 "parser.y"
     {insert_var_to_table(yylval.str);;}
     break;
 
   case 145:
 
 /* Line 1455 of yacc.c  */
-#line 464 "parser.y"
+#line 546 "parser.y"
     {id_a_verificar=yylval.str;;}
     break;
 
   case 147:
 
 /* Line 1455 of yacc.c  */
-#line 465 "parser.y"
+#line 547 "parser.y"
     {verifica_existe_procs(id_a_verificar);;}
     break;
 
   case 148:
 
 /* Line 1455 of yacc.c  */
-#line 466 "parser.y"
+#line 548 "parser.y"
     {verifica_existe_var(id_a_verificar);;}
     break;
 
   case 149:
 
 /* Line 1455 of yacc.c  */
-#line 468 "parser.y"
+#line 550 "parser.y"
     {verifica_existe_var(yylval.str);;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2025 "parser.tab.c"
+#line 2108 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2233,13 +2316,15 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 473 "parser.y"
+#line 555 "parser.y"
  
 main() { 
-create_dir_table();
+objeto = fopen("codigo.obj", "w");
+crear_pilas_tablas();
   yyparse(); 
 imprime(dir_procs); 
-
+fclose(objeto);
+/*
 printf("Proc3");
 g_hash_table_get_values(dir_procs);
 printf("Proc2");
@@ -2257,7 +2342,7 @@ while(tabla != NULL){
 
 g_list_free(tablas);
 free(tabla);
-
+*/
 
 free(dir_procs);
 }

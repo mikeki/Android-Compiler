@@ -5,8 +5,18 @@
 
 static GHashTable *dir_procs;
 static char *proc_actual;
-static char *tipo_actual;
+static char tipo_actual;
 static char *id_a_verificar;
+
+//Declaracion de las pilas.
+static GQueue *POperandos;
+static GQueue *POperadores;
+static GQueue *PTipos;
+static GQueue *PSaltos;
+
+//Declaracion del archivo objeto
+FILE *objeto;
+
 /*
 Estructuras para las tabalase de procedimientos y tabla de variables
 */
@@ -15,8 +25,9 @@ GHashTable *var_table;
 }funcion;
 
 typedef struct{
-char *tipo;
+char tipo;
 char *nombre;
+int dir_virtual;
 }variable;
 
 /*
@@ -32,7 +43,39 @@ char cubo[6][6][19] =
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
+		{//MASMAS(++)
+			{'E','E','E','E','E','I'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MASIGUAL(+=)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
 		{//RESTA(-)
+			{'I','F','E','E','E','E'},
+			{'F','F','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MENOSMENOS(--)
+			{'E','E','E','E','E','I'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		},
+		{//MENOSIGUAL(-=)
 			{'I','F','E','E','E','E'},
 			{'F','F','E','E','E','E'},
 			{'E','E','E','E','E','E'},
@@ -64,14 +107,6 @@ char cubo[6][6][19] =
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
-		{//MAYORQUE(>)
-			{'L','L','E','E','E','E'},
-			{'L','L','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'}
-		},
 		{//MENORQUE(<)
 			{'L','L','E','E','E','E'},
 			{'L','L','E','E','E','E'},
@@ -88,17 +123,17 @@ char cubo[6][6][19] =
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
-		{//MASMAS(++)
-			{'E','E','E','E','E','I'},
-			{'E','E','E','E','E','E'},
+		{//MENORIGUAL(<=)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
-		{//MENOSMENOS(--)
-			{'E','E','E','E','E','I'},
-			{'E','E','E','E','E','E'},
+		{//MAYORQUE(>)
+			{'L','L','E','E','E','E'},
+			{'L','L','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'},
@@ -112,28 +147,12 @@ char cubo[6][6][19] =
 			{'E','E','E','E','E','E'},
 			{'E','E','E','E','E','E'}
 		},
-		{//MENORIGUAL(<=)
+		{//IGUALIGUAL(==)
 			{'L','L','E','E','E','E'},
 			{'L','L','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'}
-		},
-		{//MASIGUAL(+=)
-			{'I','F','E','E','E','E'},
-			{'F','F','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'}
-		},
-		{//MENOSIGUAL(-=)
-			{'I','F','E','E','E','E'},
-			{'F','F','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
-			{'E','E','E','E','E','E'},
+			{'E','E','L','L','E','E'},
+			{'E','E','L','L','E','E'},
+			{'E','E','E','E','L','E'},
 			{'E','E','E','E','E','E'}
 		},
 		{//Y(Y)
@@ -167,14 +186,6 @@ char cubo[6][6][19] =
 			{'E','E','S','C','E','E'},
 			{'E','E','E','E','L','E'},
 			{'E','E','E','E','E','E'}
-		},
-		{//IGUALIGUAL(==)
-			{'L','L','E','E','E','E'},
-			{'L','L','E','E','E','E'},
-			{'E','E','L','L','E','E'},
-			{'E','E','L','L','E','E'},
-			{'E','E','E','E','L','E'},
-			{'E','E','E','E','E','E'}
 		}
 	};
 
@@ -184,8 +195,12 @@ Descripcion: Inicializa la tabla de dir_procs (directorio de procedimientos)
 Parametros: void
 Salida:void
 */
-void create_dir_table(){
+void crear_pilas_tablas(){
 	dir_procs = g_hash_table_new(g_str_hash, g_str_equal);
+	POperandos = g_queue_new();
+	POperadores = g_queue_new();
+	PTipos = g_queue_new();
+	PSaltos = g_queue_new();
 }
 
 /*
@@ -263,6 +278,74 @@ void verifica_existe_procs(char *name){
 	}
 	
 }
+
+/*
+Descripcion: Función que se encrag de regresar el id numérico correspondiente
+del tipo que se le etsa mandando como paramtero
+
+Parametros: char tipo
+Salida: entero
+*/
+int traduce_tipo(char tipo){
+	switch(tipo){
+		case 'E': return 0;
+		case 'F': return 1;
+		case 'S': return 2;
+		case 'C': return 3;
+		case 'L': return 4;
+	}
+
+}
+
+/*
+Descripcion: Función que se encaraga de escribir en un arhcivo de codigo
+objeto los cuadruplos que reciba.
+
+Parametros: int operador, int operando1, int operando2, int resultadotmp
+Salida: void
+*/
+void generar_cuadruplo(int operador, int operando1, int operando2, int resultadotmp){
+	
+	fprintf(objeto,"%d,%d,%d,%d",operador,operando1,operando2,resultadotmp);
+}
+
+/*
+Descripcion: Función que se encraga de  regresar el operador al cual corresponde
+dependiendo de los 2 ultimos operadores. Aplica exclusiavmente para los 
+operadores con 2 caracteres.
+
+Parametros: int operador1, int operador2
+Salida: int
+*/
+int dame_operador_logico(int operador1, int operador2){
+	if(operador1 == 9 && operador2 == 12){
+		return 10;
+	}else if(operador1 == 9 && operador2 == 18){
+		return 11;
+	}else if(operador1 == 12 && operador2 == 18){
+		return 13;
+	}else if(operador1 == 18 && operador2 == 18){
+		return 14;
+	}
+
+}
+
+/*
+Descripcion: Función que se encarga de regresar si el operador es
+de tipo logico
+
+Parametros: int operador
+Salida: int
+*/
+int valida_existencia_logico(int operador){
+	if(operador >= 9 && operador <= 14){
+		return 1;
+	}else{
+		return 0;
+	}
+
+}
+
 /*
 Descripcion: Imprime el resultado de lo que se guardo en una tabla
 
@@ -328,11 +411,11 @@ main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE bloque CLLAVE;
 bloque: estatuto bloque
 	| ;
 
-tipo:	 ENTERO {tipo_actual= "entero";}
-	|FLOTANTE {tipo_actual= "flotante";}
-	| CARACTER {tipo_actual= "caracter";}
-	| PALABRA {tipo_actual= "string";}
-	| LOGICO {tipo_actual= "logico";};
+tipo:	 ENTERO {tipo_actual= 'E';}
+	|FLOTANTE {tipo_actual= 'F';}
+	| CARACTER {tipo_actual= 'C';}
+	| PALABRA {tipo_actual= 'S';}
+	| LOGICO {tipo_actual= 'L';};
 
 varcte: CTE
 	| CTESTRING
@@ -471,10 +554,11 @@ varselecciona: ID{verifica_existe_var(yylval.str);}
 
 %% 
 main() { 
-create_dir_table();
+objeto = fopen("codigo.obj", "w");
+crear_pilas_tablas();
   yyparse(); 
 imprime(dir_procs); 
-
+fclose(objeto);
 /*
 printf("Proc3");
 g_hash_table_get_values(dir_procs);
