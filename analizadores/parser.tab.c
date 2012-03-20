@@ -295,7 +295,7 @@ void insert_var_to_table(char *name){
 		temp->tipo = tipo_actual;
 		temp->nombre = name;
 		g_hash_table_insert(tabla->var_table,(gpointer)name,(gpointer)temp);
-		g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
+		//g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
 	}
 	
 }
@@ -2239,6 +2239,26 @@ main() {
 create_dir_table();
   yyparse(); 
 imprime(dir_procs); 
+
+printf("Proc3");
+g_hash_table_get_values(dir_procs);
+printf("Proc2");
+GQueue *tablas = g_hash_table_get_values(dir_procs);
+printf("Proc1");
+funcion *tabla = g_queue_pop_head(tablas);
+
+//g_queue_foreach(tablas,(GFunc)printf,NULL);
+
+while(tabla != NULL){
+	printf("Proc");
+	imprime(tabla->var_table);
+	tabla = g_queue_pop_head(tablas);
+}
+
+g_list_free(tablas);
+free(tabla);
+
+
 free(dir_procs);
 }
 
