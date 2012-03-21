@@ -4,9 +4,11 @@
 #include <glib.h>
 
 static GHashTable *dir_procs;
+static GHashTable *tabla_constantes;
 static char *proc_actual;
 static char tipo_actual;
 static char *id_a_verificar;
+static int exp_operador_actual;
 
 //Declaracion de las pilas.
 static GQueue *POperandos;
@@ -16,24 +18,31 @@ static GQueue *PSaltos;
 
 //Declaracion de rangos de memoria
 //Globales
-	int enterosglobales = 1000;
-	int flotantesglobales = 10000;
-	int stringsglobales = 20000;
-	int caracteresglobales = 30000;
-	int logicosglobales = 40000;
+	int enterosglobales = 110000;
+	int flotantesglobales = 120000;
+	int stringsglobales = 130000;
+	int caracteresglobales = 140000;
+	int logicosglobales = 150000;
 //Locales
-	int enteroslocales = 50000;
-	int flotanteslocales = 60000;
-	int stringslocales = 70000;
-	int caractereslocales = 80000;
-	int logicoslocales = 90000;
+	int enteroslocales = 210000;
+	int flotanteslocales = 220000;
+	int stringslocales = 230000;
+	int caractereslocales = 240000;
+	int logicoslocales = 250000;
 
 //Temporales
-	int enterostemporales = 100000;
-	int flotantestemporales = 110000;
-	int stringstemporales = 120000;
-	int caracterestemporales = 130000;
-	int logicostemporales = 140000;
+	int enterostemporales = 310000;
+	int flotantestemporales = 320000;
+	int stringstemporales = 330000;
+	int caracterestemporales = 340000;
+	int logicostemporales = 350000;
+
+//Constantes
+	int enterosconstantes = 410000;
+	int flotantesconstantes = 420000;
+	int stringsconstantes = 430000;
+	int caracteresconstantes = 440000;
+	int logicosconstantes = 450000;
 //Declaracion del archivo objeto
 FILE *objeto;
 
@@ -50,10 +59,14 @@ char *nombre;
 int dir_virtual;
 }variable;
 
+typedef struct{
+int dir_virtual;
+}constante;
+
 /*
 CUBO SEMANTICO
 */
-char cubo[6][6][19] =
+char cubo[6][6][20] =
 	{
 		{//SUMA(+)
 			{'I','F','E','E','E','E'},
@@ -207,6 +220,15 @@ char cubo[6][6][19] =
 			{'E','E','E','E','L','E'},
 			{'E','E','E','E','E','E'}
 		}
+		,
+		{//NEGATIVO(-)
+			{'E','E','E','E','E','I'},
+			{'E','E','E','E','E','F'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'},
+			{'E','E','E','E','E','E'}
+		}
 	};
 
 /*
@@ -259,7 +281,7 @@ void insert_var_to_table(char *name){
 		temp->tipo = tipo_actual;
 		temp->nombre = name;
 		int virtual;
-		switch(tnuevo){
+		switch(tipo_actual){
 			case 'I': if(strcmp(proc_actual,"programa")== 0){
 					virtual = enterosglobales;
 					enterosglobales++;			
@@ -370,7 +392,7 @@ Salida: void
 */
 void generar_cuadruplo(int operador, int operando1, int operando2, int resultadotmp){
 	
-	fprintf(objeto,"%d,%d,%d,%d",operador,operando1,operando2,resultadotmp);
+	fprintf(objeto,"%d,%d,%d,%d\n",operador,operando1,operando2,resultadotmp);
 }
 
 /*
@@ -382,9 +404,7 @@ Parametros: int operador1, int operador2
 Salida: int
 */
 int dame_operador_logico(int operador1, int operador2){
-	if(operador1 == 9 && operador2 == 12){
-		return 10;
-	}else if(operador1 == 9 && operador2 == 18){
+	if(operador1 == 9 && operador2 == 18){
 		return 11;
 	}else if(operador1 == 12 && operador2 == 18){
 		return 13;
@@ -417,9 +437,9 @@ Parametros:
 Salida: void
 */
 void generar_cuadruplo_expresion(){
-	int operando2 = g_queue_pop_head(POperandos);
-	int operando1 = g_queue_pop_head(POperandos);
-	int operador = g_queue_pop_head(POperadores);
+	int operando2 = (int)g_queue_pop_head(POperandos);
+	int operando1 = (int)g_queue_pop_head(POperandos);
+	int operador = (int)g_queue_pop_head(POperadores);
 	char tipo2 = g_queue_pop_head(PTipos);
 	char tipo1 = g_queue_pop_head(PTipos);
 
@@ -490,6 +510,48 @@ void generar_cuadruplo_expresion_unaria(){
 
 }
 /*
+Descripcion:Funcion que se encarga de insertar las constantes a la 
+tabla de constantes
+
+Parametros:int virtual, int tipo
+Salida: void
+*/
+void insert_constante_to_table(char *valor, int tipo){
+	constante *cte = g_slice_new(constante);
+	cte = g_hash_table_lookup(tabla_constantes,(gpointer)valor);
+	
+	if(cte == NULL){
+		
+		int dir;
+		switch(tipo){
+			case 1: dir = enterosconstantes;
+				enterosconstantes++;
+				break;
+			case 2: dir = flotantesconstantes;
+				flotantesconstantes++;
+				break;
+			case 3: dir = stringsconstantes;
+				stringsconstantes++;
+				break;
+			case 4: dir = caracteresconstantes;
+				caracteresconstantes++;
+				break;
+			case 5: dir = logicosconstantes;
+				logicosconstantes++;
+				break;
+		}
+		cte= g_slice_new(constante);
+		cte->dir_virtual = dir;
+		g_hash_table_insert(tabla_constantes,(gpointer)valor,(gpointer)cte);
+		//printf("lkjcf\n");
+		g_queue_push_head(PTipos,tipo);
+		g_queue_push_head(POperandos,dir);
+	}else{
+		g_queue_push_head(PTipos,tipo);
+		g_queue_push_head(POperandos,cte->dir_virtual);
+	}
+}
+/*
 Descripcion: Imprime el resultado de lo que se guardo en una tabla
 
 Parametros: GHashTable *a
@@ -507,8 +569,8 @@ void imprime(GHashTable *a){
 
 %}
 %union{ 
-int integer; 
-float float_n;
+char *integer; 
+char *float_n;
 char *str; 
 } 
 %token ADELANTE ATRAS ROTADERECHA ROTAIZQUIERDA TOMARTESORO TOPA
@@ -560,14 +622,14 @@ tipo:	 ENTERO {tipo_actual= 'E';}
 	| PALABRA {tipo_actual= 'S';}
 	| LOGICO {tipo_actual= 'L';};
 
-varcte: CTE
-	| CTESTRING
-	| CTF
-	| CAR
+varcte: CTE {insert_constante_to_table(yylval.integer,1);}
+	| CTESTRING {insert_constante_to_table(yylval.str,2);}
+	| CTF {insert_constante_to_table(yylval.str,3);}
+	| CAR {insert_constante_to_table(yylval.str,4);}
 	| VACIO
 	| VERPISTA
-	| VERDADERO
-	| FALSO;
+	| VERDADERO{insert_constante_to_table(yylval.str,5);}
+	| FALSO{insert_constante_to_table(yylval.str,5);};
 
 estatutofuncion: estatuto
 		|regresa;
@@ -602,8 +664,8 @@ ap:		MAS MAS
 		|MENOS MENOS;
 app:		MAS IGUALR atipo
 		| MENOS IGUALR atipo;
-atipo:		CTE
-		| CTF
+atipo:		CTE {insert_constante_to_table(yylval.integer,1);}
+		| CTF {insert_constante_to_table(yylval.integer,2);}
 		| ID{verifica_existe_var(yylval.str);};
 
 condicion: c
@@ -668,10 +730,14 @@ expresion: exp{if(valida_existencia_logico(g_queue_peek_head(POperadores))){
 	}} expresionp;
 expresionp: ep expresion 
 		| ;
-ep: 	MAYORQUE epp
-	|MENORQUE epp
-	| DIFERENTE;
-epp: IGUALR 
+ep: 	MAYORQUE{g_queue_push_head(POperadores,12);/*operador mayorque*/ exp_operador_actual = 12;}  epp
+	|MENORQUE{g_queue_push_head(POperadores,9);/*operador menorque*/ exp_operador_actual = 9;} epp
+	| DIFERENTE{g_queue_push_head(POperadores,10);/*operador diferente*/}
+	| IGUALR IGUALR  {g_queue_push_head(POperadores,14);/*operador igual igual*/} ;
+epp: IGUALR {int operadoranterior = g_queue_pop_head(POperadores);
+		int operadorreal = dame_operador_logico(operadoranterior,exp_operador_actual);
+		g_queue_push_head(POperadores,operadorreal);
+		}
 	| ;
 	
 exp: termino{if(g_queue_peek_head(POperadores) == 0 || g_queue_peek_head(POperadores) == 3){
@@ -691,18 +757,38 @@ terminop: POR{g_queue_push_head(POperadores,6);/*operador multiplica*/} termino
 factor: factorp 
 	| factorpp
 	| factorppp;
-factorp: APARENTESIS mmexp CPARENTESIS;
-factorpp: f varcte;
-f: 	MENOS 
-	| NO
+factorp: nf APARENTESIS{g_queue_push_head(POperadores,'(');} mmexp CPARENTESIS {if(g_queue_peek_head(POperadores) == '('){
+		g_queue_pop_head(POperadores);
+		}else{
+			printf("Mala construccion de expresion");
+		};
+		if(g_queue_peek_head(POperadores) == 17){
+			generar_cuadruplo_expresion_unaria();
+		}
+		}
+nf:	NO{g_queue_push_head(POperadores,17);/*operador NOT*/}
+	|;
+factorpp: f varcte {if(g_queue_peek_head(POperadores) == 17 || g_queue_peek_head(POperadores) == 19){
+			generar_cuadruplo_expresion_unaria();
+			}};
+f: 	MENOS {g_queue_push_head(POperadores,19);/*operador multiplica*/}
+	| NO {g_queue_push_head(POperadores,17);/*operador NOT*/}
 	| ;
 factorppp: ID{id_a_verificar=yylval.str;} fun_var;
 fun_var: APARENTESIS paramsf CPARENTESIS{verifica_existe_procs(id_a_verificar);}
-         | {verifica_existe_var(id_a_verificar);};
+         | {verifica_existe_var(id_a_verificar);
+         	//Obteniendo el tipo de variable en la tabla d evariables
+		funcion *tabla = g_slice_new(funcion);
+		tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+		variable *var = g_slice_new(variable);
+		var = g_hash_table_lookup(tabla->var_table,(gpointer)id_a_verificar);
+		g_queue_push_head(POperandos,var->dir_virtual);
+		g_queue_push_head(PTipos,var->tipo);
+         	};
 	
 varselecciona: ID{verifica_existe_var(yylval.str);}
-		|CTE
-		|CAR;
+		|CTE {insert_constante_to_table(yylval.integer,1);}
+		|CAR {insert_constante_to_table(yylval.str,4);};
  
 
 %% 

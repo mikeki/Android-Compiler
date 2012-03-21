@@ -986,12 +986,12 @@ YY_RULE_SETUP
 case 25:
 YY_RULE_SETUP
 #line 39 "scanner.l"
-{return VERDADERO;}
+{yylval.str = strdup(yytext); return VERDADERO;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 40 "scanner.l"
-{return FALSO;}
+{yylval.str = strdup(yytext); return FALSO;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
@@ -1021,13 +1021,13 @@ YY_RULE_SETUP
 case 32:
 YY_RULE_SETUP
 #line 47 "scanner.l"
-{yylval.integer = atoi(yytext);
+{yylval.integer = strdup(yytext);
         return CTE;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 49 "scanner.l"
-{yylval.float_n = atof(yytext);
+{yylval.float_n = strdup(yytext);
         return CTF;}
 	YY_BREAK
 case 34:

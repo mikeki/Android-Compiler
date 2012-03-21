@@ -36,17 +36,17 @@ ctef		[0-9]+"."[0-9]+
 "lee" {return LEE;}
 "principal" {yylval.str = "principal";return PRINCIPAL;}
 "vacio" {return VACIO;}
-"verdadero" {return VERDADERO;}
-"falso" {return FALSO;}
+"verdadero" {yylval.str = strdup(yytext); return VERDADERO;}
+"falso" {yylval.str = strdup(yytext); return FALSO;}
 "y" {return Y;}
 "o" {return O;}
 "no" {return NO;}
 "programa" {return PROGRAMA;}
 "caracter" {return CARACTER;}
 
-{ctei} {yylval.integer = atoi(yytext);
+{ctei} {yylval.integer = strdup(yytext);
         return CTE;}
-{ctef} {yylval.float_n = atof(yytext);
+{ctef} {yylval.float_n = strdup(yytext);
         return CTF;}
 \"[^\"]*\" {yylval.str = strdup(yytext);
                     return CTESTRING;}
