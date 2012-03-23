@@ -53,11 +53,12 @@ principal{
 	
 	
 	
-	entero j = 0;
-	mientras(j < 10){
+	entero j = 0, l =9;
+	mientras(j < 10 y l < 3*4/5){
 		selecciona(j){
 			cuando 1 => { 
   		  flotante ku = uno();
+  		  entero ka, ko;
 				flotante u = uno();
 			}
 			cuando 2 => { 

@@ -63,6 +63,8 @@ typedef struct{
 int dir_virtual;
 }constante;
 
+int traduce_tipo(char tipo);
+
 /*
 CUBO SEMANTICO
 */
@@ -239,6 +241,7 @@ Salida:void
 */
 void crear_pilas_tablas(){
 	dir_procs = g_hash_table_new(g_str_hash, g_str_equal);
+	tabla_constantes = g_hash_table_new(g_str_hash, g_str_equal);
 	POperandos = g_queue_new();
 	POperadores = g_queue_new();
 	PTipos = g_queue_new();
@@ -326,6 +329,7 @@ void insert_var_to_table(char *name){
 		temp->dir_virtual = virtual;
 		g_hash_table_insert(tabla->var_table,(gpointer)name,(gpointer)temp);
 		g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
+		printf("ALta Variable: %s %d\n",name, virtual);
 	}
 	
 }
@@ -339,12 +343,24 @@ Salida: void
 */
 void verifica_existe_var(char *name){
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
-	if(g_hash_table_lookup(tabla->var_table,(gpointer)name) == NULL){
+	variable *local = g_slice_new(variable);
+	variable *global = g_slice_new(variable);
+	local = g_hash_table_lookup(tabla->var_table,(gpointer)name);
+	if(local == NULL){
 		funcion *tabla = g_hash_table_lookup(dir_procs,"programa");
-		if(g_hash_table_lookup(tabla->var_table,(gpointer)name) == NULL){
+		global = g_hash_table_lookup(tabla->var_table,(gpointer)name);
+		if(global == NULL){
 			printf("Error de Semantica variable %s no declarada\n",name);
 			exit(1);
+		}else{
+		  g_queue_push_head(PTipos,traduce_tipo(global->tipo)+1);
+		  printf("Direccion Variable Global: %s %d\n",name, global->dir_virtual);
+		  g_queue_push_head(POperandos,global->dir_virtual);
 		}
+	}else{
+	  g_queue_push_head(PTipos,traduce_tipo(local->tipo)+1);
+	  printf("Direccion Variable Local: %s %d\n",name, local->dir_virtual);
+	  g_queue_push_head(POperandos,local->dir_virtual);
 	}
 	
 	
@@ -438,12 +454,18 @@ Salida: void
 */
 void generar_cuadruplo_expresion(){
 	int operando2 = (int)g_queue_pop_head(POperandos);
+	printf("op2: %d ", operando2);
 	int operando1 = (int)g_queue_pop_head(POperandos);
+	printf("op1: %d ", operando1);
 	int operador = (int)g_queue_pop_head(POperadores);
-	char tipo2 = g_queue_pop_head(PTipos);
-	char tipo1 = g_queue_pop_head(PTipos);
+	printf("oper: %d ", operador);
+	int tipo2 = g_queue_pop_head(PTipos);
+	printf("tipo2: %d ", tipo2);
+	int tipo1 = g_queue_pop_head(PTipos);
+	printf("tipo1: %d\n", tipo1);
+//	printf("op2: %d op1: %d oper: %d tipo1: %d tipo2: %d\n", operando2, operando1, operador, tipo1, tipo2);
 
-	char tnuevo = cubo[traduce_tipo(tipo1)][traduce_tipo(tipo2)][operador];
+	char tnuevo = cubo[tipo1-1][tipo2-1][operador];
 	if(tnuevo == 'E'){
 		printf("Error no se puede hacer esa operación");
 	}else{
@@ -467,6 +489,7 @@ void generar_cuadruplo_expresion(){
 		}
 		generar_cuadruplo(operador,operando1,operando2,tmp);
 		g_queue_push_head(POperandos,tmp);
+		g_queue_push_head(PTipos,traduce_tipo(tnuevo)+1);
 	}
 
 }
@@ -519,7 +542,6 @@ Salida: void
 void insert_constante_to_table(char *valor, int tipo){
 	constante *cte = g_slice_new(constante);
 	cte = g_hash_table_lookup(tabla_constantes,(gpointer)valor);
-	
 	if(cte == NULL){
 		
 		int dir;
@@ -543,11 +565,12 @@ void insert_constante_to_table(char *valor, int tipo){
 		cte= g_slice_new(constante);
 		cte->dir_virtual = dir;
 		g_hash_table_insert(tabla_constantes,(gpointer)valor,(gpointer)cte);
-		//printf("lkjcf\n");
 		g_queue_push_head(PTipos,tipo);
+		printf("Direccion Constante: %d %s\n", dir, valor);
 		g_queue_push_head(POperandos,dir);
 	}else{
 		g_queue_push_head(PTipos,tipo);
+		printf("Direccion Constante: %d %s\n", cte->dir_virtual, valor);
 		g_queue_push_head(POperandos,cte->dir_virtual);
 	}
 }
@@ -616,7 +639,7 @@ main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE bloque CLLAVE;
 bloque: estatuto bloque
 	| ;
 
-tipo:	 ENTERO {tipo_actual= 'E';}
+tipo:	 ENTERO {tipo_actual= 'I';}
 	|FLOTANTE {tipo_actual= 'F';}
 	| CARACTER {tipo_actual= 'C';}
 	| PALABRA {tipo_actual= 'S';}
@@ -713,45 +736,53 @@ params2: exp params2p;
 params2p: COMA params2
 	| ;
 
-mmexp: mexp {if(g_queue_peek_head(POperadores) == 16){
+mmexp: mexp {
+  if(g_queue_peek_head(POperadores) == 17){
 			generar_cuadruplo_expresion();		
 	}} mmexpp;
-mmexpp: O {g_queue_push_head(POperadores,16);/*operador or*/} mmexp 
+mmexpp: O {g_queue_push_head(POperadores,17);/*operador or*/} mmexp 
 	| ;
 	
-mexp: expresion{if(g_queue_peek_head(POperadores) == 15){
+mexp: expresion{
+  if(g_queue_peek_head(POperadores) == 16){
 			generar_cuadruplo_expresion();		
 	}} mexpp;
-mexpp: Y{g_queue_push_head(POperadores,15);/*operador and*/} mexp
+mexpp: Y{g_queue_push_head(POperadores,16);/*operador and*/} mexp
 	| ;
 	
-expresion: exp{if(valida_existencia_logico(g_queue_peek_head(POperadores))){
+expresion: exp{
+  if(valida_existencia_logico(g_queue_peek_head(POperadores))){
 			generar_cuadruplo_expresion();		
 	}} expresionp;
 expresionp: ep expresion 
 		| ;
-ep: 	MAYORQUE{g_queue_push_head(POperadores,12);/*operador mayorque*/ exp_operador_actual = 12;}  epp
-	|MENORQUE{g_queue_push_head(POperadores,9);/*operador menorque*/ exp_operador_actual = 9;} epp
-	| DIFERENTE{g_queue_push_head(POperadores,10);/*operador diferente*/}
-	| IGUALR IGUALR  {g_queue_push_head(POperadores,14);/*operador igual igual*/} ;
+ep: 	MAYORQUE{g_queue_push_head(POperadores,13);/*operador mayorque*/ exp_operador_actual = 13;}  epp
+	|MENORQUE{g_queue_push_head(POperadores,10);/*operador menorque*/ exp_operador_actual = 10;} epp
+	| DIFERENTE{g_queue_push_head(POperadores,11);/*operador diferente*/}
+	| IGUALR IGUALR  {g_queue_push_head(POperadores,15);/*operador igual igual*/} ;
 epp: IGUALR {int operadoranterior = g_queue_pop_head(POperadores);
 		int operadorreal = dame_operador_logico(operadoranterior,exp_operador_actual);
 		g_queue_push_head(POperadores,operadorreal);
 		}
 	| ;
 	
-exp: termino{if(g_queue_peek_head(POperadores) == 0 || g_queue_peek_head(POperadores) == 3){
-			generar_cuadruplo_expresion();		
+exp: termino
+  {if(g_queue_peek_head(POperadores) == 1 || g_queue_peek_head(POperadores) == 4){
+		printf("Genera cuadruplo + o -\n");
+		generar_cuadruplo_expresion();		
 	}} expp;
-expp: MAS{g_queue_push_head(POperadores,0);/*operador suma*/}  exp
-	| MENOS{g_queue_push_head(POperadores,3);/*operador resta*/}  exp 
+expp: MAS{g_queue_push_head(POperadores,1);printf("Push +\n");/*operador suma*/}  exp
+	| MENOS{g_queue_push_head(POperadores,4);printf("Push -\n");/*operador resta*/}  exp 
 	| ;
 
-termino: factor{if(g_queue_peek_head(POperadores) == 6 || g_queue_peek_head(POperadores) == 7){
-			generar_cuadruplo_expresion();		
-	}} terminop;
-terminop: POR{g_queue_push_head(POperadores,6);/*operador multiplica*/} termino
-	| ENTRE{g_queue_push_head(POperadores,7);/*operador division*/} termino
+termino: factor
+  {if(g_queue_peek_head(POperadores) == 7 || g_queue_peek_head(POperadores) == 8){
+    printf("Genera cuadruplo * o /\n");
+		generar_cuadruplo_expresion();		
+	}} 
+	terminop;
+terminop: POR{g_queue_push_head(POperadores,7);/*operador multiplica*/} termino
+	| ENTRE{g_queue_push_head(POperadores,8);/*operador division*/} termino
 	| ;
 
 factor: factorp 
@@ -762,17 +793,19 @@ factorp: nf APARENTESIS{g_queue_push_head(POperadores,'(');} mmexp CPARENTESIS {
 		}else{
 			printf("Mala construccion de expresion");
 		};
-		if(g_queue_peek_head(POperadores) == 17){
+		if(g_queue_peek_head(POperadores) == 18){
 			generar_cuadruplo_expresion_unaria();
 		}
 		}
-nf:	NO{g_queue_push_head(POperadores,17);/*operador NOT*/}
+nf:	NO{g_queue_push_head(POperadores,18);/*operador NOT*/}
 	|;
-factorpp: f varcte {if(g_queue_peek_head(POperadores) == 17 || g_queue_peek_head(POperadores) == 19){
-			generar_cuadruplo_expresion_unaria();
-			}};
-f: 	MENOS {g_queue_push_head(POperadores,19);/*operador multiplica*/}
-	| NO {g_queue_push_head(POperadores,17);/*operador NOT*/}
+factorpp: f varcte {
+  if(g_queue_peek_head(POperadores) == 18 || g_queue_peek_head(POperadores) == 20){
+		generar_cuadruplo_expresion_unaria();
+	}
+	};
+f: 	MENOS {g_queue_push_head(POperadores,20);/*operador multiplica*/}
+	| NO {g_queue_push_head(POperadores,18);/*operador NOT*/}
 	| ;
 factorppp: ID{id_a_verificar=yylval.str;} fun_var;
 fun_var: APARENTESIS paramsf CPARENTESIS{verifica_existe_procs(id_a_verificar);}
@@ -783,7 +816,7 @@ fun_var: APARENTESIS paramsf CPARENTESIS{verifica_existe_procs(id_a_verificar);}
 		variable *var = g_slice_new(variable);
 		var = g_hash_table_lookup(tabla->var_table,(gpointer)id_a_verificar);
 		g_queue_push_head(POperandos,var->dir_virtual);
-		g_queue_push_head(PTipos,var->tipo);
+		g_queue_push_head(PTipos,traduce_tipo(var->tipo)+1);
          	};
 	
 varselecciona: ID{verifica_existe_var(yylval.str);}
