@@ -20,17 +20,17 @@ logico b = verdadero;
 
 
 funcion uno(){
-	entero a = 1 + 1;
+	entero a = 1 + 1 +1 ;
 	flotante yu = 1.123;
 
 	//flotante
 	
-	logico tu = verdadero o (verdadero y falso);
+	logico tu = verdadero o (verdadero y verdadero);
 	
-	entero d = 1 + 1;
+	entero d = 1 / a;
 	flotante e = 1.123;
 
-	flotante f = a * b;
+	flotante f = a + p;
 	
 	c  += h;
 	regresa c;
