@@ -4,27 +4,56 @@ programa holamundo:
 
 
 
-entero h = 123;
 
+
+entero x = 1;
+
+**
 funcion uno(){
 
 }
-
+**
 principal{
+
+	selecciona("P"){
+		cuando 1 => {
+				x = 1;
+			}
+		cuando 2 => {
+				x = 2;
+			}
+	}
+	x = 2 * 2/1;
 	
+	**
 	entero a = 1 + 1;
 	
 	entero h;
-	**
+	
 	h = 2.1 + 2.1;
 	//logico b = falso;
 	logico b = no(verdadero y falso);
 	logico c = no verdadero;
 	logico d = verdadero;
 	a = 2 + (-2);
-	**
-	a++;
-	entero u = 1 + uno();
 	
+	a++;
+	entero u = 1;
+	
+	entero a = 1;
+	si(verdadero){
+		a = 2;
+	}sino si(falso){
+		a = 3;
+	}
+	
+
+	mientras(verdadero){
+
+	}
+	
+	entero a;
+	escribe("holamundo4".a);
+	**
 	
 }

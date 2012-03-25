@@ -4,12 +4,14 @@
 #include "parser.tab.h"
 
 %}
+%option noyywrap nodefault yylineno case-insensitive
 
 id		[a-zA-Z]([a-zA-Z0-9]|[_])*
 ctei		[0-9]+
 ctef		[0-9]+"."[0-9]+
 
 %%
+
 
 "**"[^*]*"**" {;}
 "//".*	{;}
@@ -73,7 +75,7 @@ ctef		[0-9]+"."[0-9]+
 "/" {return ENTRE;}
 "." {return CONCA;}
 
-
+\n
 . ;
 
 %%

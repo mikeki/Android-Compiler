@@ -3,13 +3,15 @@
 #include <string.h>
 #include <glib.h>
 
-static GHashTable *dir_procs;
-static GHashTable *tabla_constantes;
-static char *proc_actual;
-static char tipo_actual;
-static char *id_a_verificar;
-static int exp_operador_actual;
-
+static GHashTable *dir_procs; //Directerio de Procedimientos
+static GHashTable *tabla_constantes; //Tabla de constantes 
+static GQueue *cuadruplos; //Tabla de cuadruplos se maneja como lista empezanod con el inidce 0
+static char *proc_actual; //Procedimeitno actual mientras recorre sintaxis
+static char tipo_actual; //Tipo actual de variables o procedimientos
+static char *id_a_verificar; //Varibale utilizada para verificar la existencia del id
+static int exp_operador_actual; //Variable utilizada en operaicones logicas con 2 simbolos
+static int contador_cuadruplos = 1; //Contador de cuadruplos realizados
+extern int yylineno;
 //Declaracion de las pilas.
 static GQueue *POperandos;
 static GQueue *POperadores;
@@ -51,6 +53,8 @@ Estructuras para las tabalase de procedimientos y tabla de variables
 */
 typedef struct{
 GHashTable *var_table;
+char tipo;
+GQueue *parametros;
 }funcion;
 
 typedef struct{
@@ -62,6 +66,13 @@ int dir_virtual;
 typedef struct{
 int dir_virtual;
 }constante;
+
+typedef struct{
+int operador;
+int operando1;
+int operando2;
+int destino;
+}cuadruplo;
 
 int traduce_tipo(char tipo);
 
@@ -246,6 +257,7 @@ void crear_pilas_tablas(){
 	POperadores = g_queue_new();
 	PTipos = g_queue_new();
 	PSaltos = g_queue_new();
+	cuadruplos = g_queue_new();
 }
 
 /*
@@ -257,11 +269,12 @@ Salida:void
 */
 void insert_proc_to_table(char *name){
 	if(g_hash_table_lookup(dir_procs,(gpointer)name) != NULL){
-		printf("Error de Semantica funcion %s redeclarada\n",name);
+		printf("Error: Función %s redeclarada en la línea %d\n",name,yylineno);
 		exit(1);
 	}else{
 	funcion *temp = g_slice_new(funcion);
 	temp->var_table = g_hash_table_new(g_str_hash, g_str_equal);
+	temp->tipo = tipo_actual;
 	g_hash_table_insert(dir_procs,(gpointer)name,(gpointer)temp);
 	proc_actual = name;
 	}
@@ -277,7 +290,7 @@ void insert_var_to_table(char *name){
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	//printf("%s", tabla->var_table);
 	if(g_hash_table_lookup(tabla->var_table,(gpointer)name) != NULL){
-		printf("Error de Semantica variable %s redeclarada\n",name);
+		printf("Error: Variable %s redeclarada en la línea %d\n",name,yylineno);
 		exit(1);
 	}else{
 		variable *temp = g_slice_new(variable);
@@ -350,7 +363,7 @@ void verifica_existe_var(char *name){
 		tabla = g_hash_table_lookup(dir_procs,"programa");
 		global = g_hash_table_lookup(tabla->var_table,(gpointer)name);
 		if(global == NULL){
-			printf("Error de Semantica variable %s no declarada\n",name);
+			printf("Error: Variable %s no declarada en la línea\n",name,yylineno);
 			exit(1);
 		}else{
 		  
@@ -382,7 +395,7 @@ Salida: void
 */
 void verifica_existe_procs(char *name){
 	if(g_hash_table_lookup(dir_procs,(gpointer)name) == NULL){
-		printf("Error de Semantica funcion %s no declarada\n",name);
+		printf("Error: Función %s no declarada en la línea %d\n",name,yylineno);
 		exit(1);
 	}
 	
@@ -407,6 +420,23 @@ int traduce_tipo(char tipo){
 }
 
 /*
+Descripcion: Función que se encarga de regresar el string correspondiente
+del tipo que se le etsa mandando como paramtero
+
+Parametros: int tipo
+Salida: char *
+*/
+char* traduce_tipo2(int tipo){
+	switch(tipo){
+		case 1: return "entero";
+		case 2: return "flotante";
+		case 3: return "palabra";
+		case 4: return "caracter";
+		case 5: return "lógico";
+	}
+
+}
+/*
 Descripcion: Función que se encaraga de escribir en un arhcivo de codigo
 objeto los cuadruplos que reciba.
 
@@ -414,8 +444,17 @@ Parametros: int operador, int operando1, int operando2, int resultadotmp
 Salida: void
 */
 void generar_cuadruplo(int operador, int operando1, int operando2, int resultadotmp){
+
+	cuadruplo *c = g_slice_new(cuadruplo);
+	c->operador = operador;
+	c->operando1 = operando1;
+	c->operando2 = operando2;
+	c->destino = resultadotmp;
+
+	g_queue_push_tail(cuadruplos,(gpointer)c);
 	
-	fprintf(objeto,"%d,%d,%d,%d\n",operador,operando1,operando2,resultadotmp);
+	//fprintf(objeto,"%d,%d,%d,%d\n",operador,operando1,operando2,resultadotmp);
+	contador_cuadruplos++;
 }
 
 /*
@@ -475,7 +514,7 @@ void generar_cuadruplo_expresion(){
 
 	char tnuevo = cubo[operador-1][tipo1-1][tipo2-1];
 	if(tnuevo == 'E'){
-		printf("Error no se puede hacer esa operación\n");
+		printf("Error: No se puede hacer la operación entre %s y %s en la línea %d \n",traduce_tipo2(tipo1),traduce_tipo2(tipo2),yylineno);
 		exit(1);
 	}else{
 		int tmp;
@@ -538,7 +577,8 @@ void generar_cuadruplo_asignacion(){
 
 	char tnuevo = cubo[operador-1][tipo1-1][tipo2-1];
 	if(tnuevo == 'E'){
-		printf("Error no se puede hacer esa operación\n");
+		
+		printf("Error: No se puede hacer la asignación de %s a %s en la línea %d \n",traduce_tipo2(tipo2),traduce_tipo2(tipo1),yylineno);
 		exit(1);
 	}else{
 		
@@ -568,7 +608,7 @@ void generar_cuadruplo_expresion_unaria(){
 
 	char tnuevo = cubo[operador-1][tipo1-1][5];
 	if(tnuevo == 'E'){
-		printf("Error no se puede hacer esa operación unaria\n");
+		printf("Error: No se puede hacer la operación con %s en la línea %d \n",traduce_tipo2(tipo1),yylineno);
 		exit(1);
 	}else{
 		int tmp;
@@ -704,7 +744,9 @@ var_init: lectura
 var_initp: COMA vars_id
            | ;
 
-funcion: FUNCION ID{insert_proc_to_table(yylval.str);} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE;
+funcion: FUNCION tipof ID{insert_proc_to_table(yylval.str);} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE;
+tipof: tipo
+	|  {tipo_actual= 'V';};
 funcionp: estatutofuncion funcionp
 	| ;
 funcionpp: params 
@@ -773,28 +815,127 @@ atipo:		CTE {insert_constante_to_table(yylval.integer,1);}
 
 condicion: c
 	|  cp;
-c:	SI APARENTESIS condicion_exp CPARENTESIS ALLAVE bloque CLLAVE sip;
+c:	SI APARENTESIS condicion_exp {
+		int aux = g_queue_pop_head(PTipos);
+		
+		if(aux != 5){
+			printf("Error: Se espera un valor lógico en la línea %d\n",yylineno);
+			exit(1);
+		}
+		int resultado = g_queue_pop_head(POperandos);
+		printf("Genera cuadruplo gotof\n");
+		generar_cuadruplo(22,resultado,-1,-1);
+		
+		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+		
+		
+	} CPARENTESIS ALLAVE bloque CLLAVE sip {
+		int final = g_queue_pop_head(PSaltos);
+		//printf("salto %d\n",final);
+		//Rellenar goto con el contador de cuadruplos para el final
+		cuadruplo *tmp = g_slice_new(cuadruplo);
+		tmp = g_queue_pop_nth(cuadruplos,(guint)final-1);
+		tmp->destino = contador_cuadruplos;
+		g_queue_push_nth(cuadruplos,(gpointer)tmp,final-1);
+	};
 condicion_exp: mmexp
                | accionsi;
-sip:	SINO sipp
+sip:	SINO{
+		printf("Genera cuadruplo goto\n");
+		generar_cuadruplo(21,-1,-1,-1);
+		int falso = g_queue_pop_head(PSaltos);
+
+		//Rellenar falso con el contador de cuadruplos
+		cuadruplo *tmp = g_slice_new(cuadruplo);
+		tmp = g_queue_pop_nth(cuadruplos,falso-1);
+		tmp->destino = contador_cuadruplos;
+		g_queue_push_nth(cuadruplos,(gpointer)tmp,falso-1);
+		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+	} sipp
 	| ;
 sipp: 	condicion
 	| ALLAVE bloque CLLAVE;
-cp: 	SELECCIONA APARENTESIS exp CPARENTESIS ALLAVE cuandop CLLAVE;
-cuandop: CUANDO varselecciona IGUALR MAYORQUE ALLAVE bloque CLLAVE cuandopp;
+cp: 	SELECCIONA APARENTESIS exp CPARENTESIS ALLAVE cuandop CLLAVE{
+		//Regla 30
+		int p;
+		while(p = g_queue_pop_head(PSaltos)){
+			cuadruplo *tmp = g_slice_new(cuadruplo);
+			tmp = g_queue_pop_nth(cuadruplos,p-1);
+			tmp->destino = contador_cuadruplos;
+			g_queue_push_nth(cuadruplos,(gpointer)tmp,p-1);
+		}
+		//Sacar de Poperando y Ptipos la cte de comparacion
+		g_queue_pop_head(POperandos);
+		g_queue_pop_head(PTipos);
+	};
+cuandop: CUANDO varselecciona{
+		//Regla 28
+		g_queue_push_head(POperadores,15);
+		int cte = g_queue_peek_nth(POperandos,1);
+		int tipo = g_queue_peek_nth(PTipos,1);
+		generar_cuadruplo_expresion();
+		int tmp = g_queue_pop_head(POperandos);
+		g_queue_pop_head(PTipos);
+		printf("Genera cuadruplo gotof\n");
+		generar_cuadruplo(22,tmp,-1,-1);
+		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+		//Volver a meter tipo y cte de comparacion
+		g_queue_push_head(POperandos,cte);
+		g_queue_push_head(PTipos,tipo);
+		
+	} IGUALR MAYORQUE ALLAVE bloque CLLAVE{
+		//Regla29
+		int falso = g_queue_pop_head(PSaltos);
+		printf("Genera cuadruplo goto\n");
+		generar_cuadruplo(21,-1,-1,-1);
+		//Rellenar falso con contador_cuadruplos
+		cuadruplo *tmp = g_slice_new(cuadruplo);
+		tmp = g_queue_pop_nth(cuadruplos,falso-1);
+		tmp->destino = contador_cuadruplos;
+		g_queue_push_nth(cuadruplos,(gpointer)tmp,falso-1);
+		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+	} cuandopp;
 cuandopp: cuandop 
 	| ;
 
-escritura: ESCRIBE APARENTESIS escriturap CPARENTESIS PUNTOCOMA;
-escriturap: escriturapp;
-escriturapp: varcte e 
-	| exp e;
-e: 	CONCA escriturapp
+escritura: ESCRIBE APARENTESIS escriturap CPARENTESIS{
+		int operando1 = (int)g_queue_pop_head(POperandos);	
+		int tipo1 = g_queue_pop_head(PTipos);
+		generar_cuadruplo(25,operando1,-1,-1);
+		} PUNTOCOMA;
+escriturap: escriturapp { if(g_queue_peek_head(POperadores) == 9){
+		printf("Genera cuadruplo .\n");
+		generar_cuadruplo_expresion();		
+		}} 
+	e;
+escriturapp: varcte 
+	| exp;
+e: 	CONCA {g_queue_push_head(POperadores,9);/*operador concatenacion(.)*/} escriturap
 	| ;
 
 lectura: LEE APARENTESIS CPARENTESIS {insert_constante_to_table("Lectura de pantalla",3);};
 
-ciclo: MIENTRAS APARENTESIS mmexp CPARENTESIS ALLAVE bloque CLLAVE;
+ciclo: MIENTRAS{g_queue_push_head(PSaltos,contador_cuadruplos); } APARENTESIS mmexp CPARENTESIS ALLAVE
+	{ 	int aux = g_queue_pop_head(PTipos);
+		
+		if(aux != 5){
+			printf("Error: Se espera un valor logico en la línea %d\n",yylineno);
+			exit(1);
+		}
+		int resultado = g_queue_pop_head(POperandos);
+		printf("Genera cuadruplo gotof\n");
+		generar_cuadruplo(22,resultado,-1,-1);		
+		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+	} bloque CLLAVE {
+		int falso = g_queue_pop_head(PSaltos);
+		int retorno = g_queue_pop_head(PSaltos);
+		generar_cuadruplo(21,-1,-1,retorno);
+		//Rellenar falso con el contador de cuadruplos
+		cuadruplo *tmp = g_slice_new(cuadruplo);
+		tmp = g_queue_pop_nth(cuadruplos,falso-1);
+		tmp->destino = contador_cuadruplos;
+		g_queue_push_nth(cuadruplos,(gpointer)tmp,falso-1);
+	};
 
 accion: acciones APARENTESIS accionp CPARENTESIS PUNTOCOMA;
 accionp: params2 
@@ -918,30 +1059,19 @@ objeto = fopen("codigo.obj", "w");
 crear_pilas_tablas();
   yyparse(); 
 imprime(dir_procs); 
-fclose(objeto);
-/*
-printf("Proc3");
-g_hash_table_get_values(dir_procs);
-printf("Proc2");
-GQueue *tablas = g_hash_table_get_values(dir_procs);
-printf("Proc1");
-funcion *tabla = g_queue_pop_head(tablas);
 
-//g_queue_foreach(tablas,(GFunc)printf,NULL);
 
-while(tabla != NULL){
-	printf("Proc");
-	imprime(tabla->var_table);
-	tabla = g_queue_pop_head(tablas);
+
+//Escirbri en el arhcivo los cuadruplos
+cuadruplo *a = g_slice_new(cuadruplo);
+while(a = g_queue_pop_head(cuadruplos)){
+	fprintf(objeto,"%d,%d,%d,%d\n",a->operador,a->operando1,a->operando2,a->destino);
 }
 
-g_list_free(tablas);
-free(tabla);
-*/
-
+fclose(objeto);
 free(dir_procs);
 }
 
 yyerror(char *s){
-       printf("%s \n", s);
+       printf("Error de sintaxis en la línea %d\n", yylineno);
 }
