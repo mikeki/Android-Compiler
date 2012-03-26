@@ -411,7 +411,7 @@ int traduce_tipo(char tipo){
 }
 
 /*
-Descripcioó: Función que se encarga de regresar el string correspondiente
+Descripción: Función que se encarga de regresar el string correspondiente
 del tipo que se le está mandando como parámetros
 
 Parámetros: int tipo
@@ -440,7 +440,6 @@ void generar_cuadruplo(int operador, int operando1, int operando2, int resultado
 	c->operando1 = operando1;
 	c->operando2 = operando2;
 	c->destino = resultadotmp;
-
 	g_queue_push_tail(cuadruplos,(gpointer)c);
 	
 	//fprintf(objeto,"%d,%d,%d,%d\n",operador,operando1,operando2,resultadotmp);
@@ -456,12 +455,12 @@ Parámetros: int operador1, int operador2
 Salida: int
 */
 int dame_operador_logico(int operador1, int operador2){
-	if(operador1 == 9 && operador2 == 18){
-		return 11;
-	}else if(operador1 == 12 && operador2 == 18){
-		return 13;
+	if(operador1 == 9 && operador2 == 18){// 9 = .(concatenación), 18 = no(negación)
+		return 11; // 11 = <>(diferente de)
+	}else if(operador1 == 12 && operador2 == 18){// 12 = <= (menor o igual a)
+		return 13;//13 = > (mayor que)
 	}else if(operador1 == 18 && operador2 == 18){
-		return 14;
+		return 14; //14 = >= (mayor o igual)
 	}
 }
 
@@ -473,7 +472,7 @@ Parámetros: int operador
 Salida: int
 */
 int valida_existencia_logico(int operador){
-	if(operador >= 9 && operador <= 14){
+	if(operador >= 9 && operador <= 14){// 9 = .(concatenación), 14 = >= (mayor o igual)
 		return 1;
 	}else{
 		return 0;
@@ -563,7 +562,7 @@ void generar_cuadruplo_asignacion(){
 //	printf("op2: %d op1: %d oper: %d tipo1: %d tipo2: %d\n", operando2, operando1, operador, tipo1, tipo2);
 
 	char tnuevo = cubo[operador-1][tipo1-1][tipo2-1];
-	if(tnuevo == 'E'){
+	if(tnuevo == 'E'){//E es error
 		printf("Error: No se puede hacer la asignación de %s a %s en la línea %d \n",traduce_tipo2(tipo2),traduce_tipo2(tipo1),yylineno);
 		exit(1);
 	}else{
@@ -591,7 +590,7 @@ void generar_cuadruplo_expresion_unaria(){
 	}
 
 	char tnuevo = cubo[operador-1][tipo1-1][5];
-	if(tnuevo == 'E'){
+	if(tnuevo == 'E'){// E es error
 		printf("Error: No se puede hacer la operación con %s en la línea %d \n",traduce_tipo2(tipo1),yylineno);
 		exit(1);
 	}else{
