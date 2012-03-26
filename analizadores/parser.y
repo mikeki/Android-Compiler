@@ -18,7 +18,7 @@ static GQueue *POperadores;
 static GQueue *PTipos;
 static GQueue *PSaltos;
 
-//Declaracion de rangos de memoria
+//Declaración de rangos de memoria
 //Globales
 	int enterosglobales = 110000;
 	int flotantesglobales = 120000;
@@ -49,7 +49,7 @@ static GQueue *PSaltos;
 FILE *objeto;
 
 /*
-Estructuras para las tabalase de procedimientos y tabla de variables
+Estructuras para las tabalas de procedimientos y tabla de variables
 */
 typedef struct{
 GHashTable *var_table;
@@ -77,7 +77,7 @@ int destino;
 int traduce_tipo(char tipo);
 
 /*
-CUBO SEMANTICO
+CUBO SEMÁNTICO
 */
 char cubo[20][6][6] =
 	{
@@ -245,9 +245,9 @@ char cubo[20][6][6] =
 	};
 
 /*
-Descripcion: Inicializa la tabla de dir_procs (directorio de procedimientos)
+Descripción: Inicializa la tabla de dir_procs (directorio de procedimientos)
 
-Parametros: void
+Parámetros: void
 Salida:void
 */
 void crear_pilas_tablas(){
@@ -261,10 +261,10 @@ void crear_pilas_tablas(){
 }
 
 /*
-Descripcion: Funcion que se encarga de insetrar un procedimiento, programa global
+Descripción: Función que se encarga de insertar un procedimiento, programa global
 y la rutina principal
 
-Parametros: char * name
+Parámetros: char * name
 Salida:void
 */
 void insert_proc_to_table(char *name){
@@ -280,10 +280,10 @@ void insert_proc_to_table(char *name){
 	}
 }	
 /*
-Descripcion: Inserta una variable en el proceso actual en su tabla de 
+Descripción: Inserta una variable en el proceso actual en su tabla de 
 variables correspondiente.
 
-Parametros: char *name
+Parámetros: char *name
 Salida:void
 */	
 void insert_var_to_table(char *name){
@@ -343,15 +343,14 @@ void insert_var_to_table(char *name){
 		g_hash_table_insert(tabla->var_table,(gpointer)name,(gpointer)temp);
 		g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
 		printf("ALta Variable: %s %d\n",name, virtual);
-	}
-	
+	}	
 }
 /*
-Descripcion: Verificar en la tabla de variablas del procedimiento actual 
-si existe la variable declarada(en la tabla).Regresa error de semantica
+Descripción: Verificar en la tabla de variables del procedimiento actual 
+si existe la variable declarada(en la tabla). Regresa error de semántica
 si no cumple.
 
-Parametros: char *name
+Parámetros: char *name
 Salida: void
 */
 void verifica_existe_var(char *name){
@@ -366,31 +365,23 @@ void verifica_existe_var(char *name){
 			printf("Error: Variable %s no declarada en la línea\n",name,yylineno);
 			exit(1);
 		}else{
-		  
 		  int tipot = traduce_tipo(global->tipo)+1;
 		  g_queue_push_head(PTipos,tipot);
-		 
 		  printf("Direccion Variable Global: %s %d\n",name, global->dir_virtual);
-		  
 		  g_queue_push_head(POperandos,global->dir_virtual);
-		
-		 
 		}
 	}else{
-	
 	  g_queue_push_head(PTipos,traduce_tipo(local->tipo)+1);
 	  printf("Direccion Variable Local: %s %d\n",name, local->dir_virtual);
 	  g_queue_push_head(POperandos,local->dir_virtual);
 	}
-	
-	
 }
 
 /*
-Descripcion: Verificar en el directorio de procedimientos si existe el procedimiento
-mandado como parametro.Regresa error de semantica si no cumple.
+Descripción: Verificar en el directorio de procedimientos si existe el procedimiento
+mandado como parámetro. Regresa error de semántica si no cumple.
 
-Parametros: char *name
+Parámetros: char *name
 Salida: void
 */
 void verifica_existe_procs(char *name){
@@ -402,10 +393,10 @@ void verifica_existe_procs(char *name){
 }
 
 /*
-Descripcion: Función que se encrag de regresar el id numérico correspondiente
-del tipo que se le etsa mandando como paramtero
+Descripción: Función que se encarga de regresar el id numérico correspondiente
+del tipo que se le está mandando como parámetro
 
-Parametros: char tipo
+Parámetros: char tipo
 Salida: entero
 */
 int traduce_tipo(char tipo){
@@ -420,10 +411,10 @@ int traduce_tipo(char tipo){
 }
 
 /*
-Descripcion: Función que se encarga de regresar el string correspondiente
-del tipo que se le etsa mandando como paramtero
+Descripcioó: Función que se encarga de regresar el string correspondiente
+del tipo que se le está mandando como parámetros
 
-Parametros: int tipo
+Parámetros: int tipo
 Salida: char *
 */
 char* traduce_tipo2(int tipo){
@@ -437,14 +428,13 @@ char* traduce_tipo2(int tipo){
 
 }
 /*
-Descripcion: Función que se encaraga de escribir en un arhcivo de codigo
-objeto los cuadruplos que reciba.
+Descripción: Función que se encarga de escribir en un archivo de código
+objeto los cuádruplos que reciba.
 
-Parametros: int operador, int operando1, int operando2, int resultadotmp
+Parámetros: int operador, int operando1, int operando2, int resultadotmp
 Salida: void
 */
 void generar_cuadruplo(int operador, int operando1, int operando2, int resultadotmp){
-
 	cuadruplo *c = g_slice_new(cuadruplo);
 	c->operador = operador;
 	c->operando1 = operando1;
@@ -458,11 +448,11 @@ void generar_cuadruplo(int operador, int operando1, int operando2, int resultado
 }
 
 /*
-Descripcion: Función que se encraga de  regresar el operador al cual corresponde
-dependiendo de los 2 ultimos operadores. Aplica exclusiavmente para los 
+Descripción: Función que se encarga de  regresar el operador al cual corresponde
+dependiendo de los 2 últimos operadores. Aplica exclusiavmente para los 
 operadores con 2 caracteres.
 
-Parametros: int operador1, int operador2
+Parámetros: int operador1, int operador2
 Salida: int
 */
 int dame_operador_logico(int operador1, int operador2){
@@ -473,14 +463,13 @@ int dame_operador_logico(int operador1, int operador2){
 	}else if(operador1 == 18 && operador2 == 18){
 		return 14;
 	}
-
 }
 
 /*
-Descripcion: Función que se encarga de regresar si el operador es
-de tipo logico
+Descripción: Función que se encarga de regresar si el operador es
+de tipo lógico
 
-Parametros: int operador
+Parámetros: int operador
 Salida: int
 */
 int valida_existencia_logico(int operador){
@@ -492,14 +481,13 @@ int valida_existencia_logico(int operador){
 
 }
 /*
-Descripcion: Se encarga de obtener los opendos, tipos d eoperandos
-y el operador para generar el cuadruplo
+Descripción: Se encarga de obtener los operandos, tipos de operandos
+y el operador para generar el cuádruplo
 
-Parametros: 
+Parámetros: 
 Salida: void
 */
 void generar_cuadruplo_expresion(){
-	
 	int operando2 = (int)g_queue_pop_head(POperandos);
 	printf("op2: %d ", operando2);
 	int operando1 = (int)g_queue_pop_head(POperandos);
@@ -553,16 +541,15 @@ void generar_cuadruplo_expresion(){
 
 }
 /*
-Descripcion: Se encarga de obtener los opendos, tipos d eoperandos
-y el operador para generar el cuadruplo para asignacionde variables 
-asimsmo durante la declaracion de variables se distingue por no usar
+Descripción: Se encarga de obtener los operandos, tipos de operandos
+y el operador para generar el cuádruplo para asignacionde variables. 
+Asimismo durante la declaracion de variables se distingue por no usar
 temporales.
 
-Parametros: 
+Parámetros: 
 Salida: void
 */
 void generar_cuadruplo_asignacion(){
-	
 	int operando2 = (int)g_queue_pop_head(POperandos);
 	printf("op2: %d ", operando2);
 	int operando1 = (int)g_queue_pop_head(POperandos);
@@ -577,21 +564,18 @@ void generar_cuadruplo_asignacion(){
 
 	char tnuevo = cubo[operador-1][tipo1-1][tipo2-1];
 	if(tnuevo == 'E'){
-		
 		printf("Error: No se puede hacer la asignación de %s a %s en la línea %d \n",traduce_tipo2(tipo2),traduce_tipo2(tipo1),yylineno);
 		exit(1);
 	}else{
-		
 		generar_cuadruplo(operador,operando2,-1,operando1);
 		
 	}
-
 }
 /*
-Descripcion: Se encarga de obtener el operand, tipos de operando
-y el operador para generar el cuadruplo para expresiones de tipo unarias
+Descripción: Se encarga de obtener el operando, tipos de operando
+y el operador para generar el cuádruplo para expresiones de tipo unarias
 
-Parametros: 
+Parámetros: 
 Salida: void
 */
 void generar_cuadruplo_expresion_unaria(){
@@ -640,23 +624,20 @@ void generar_cuadruplo_expresion_unaria(){
 				g_queue_push_head(POperandos,tmp);
 				g_queue_push_head(PTipos,traduce_tipo(tnuevo)+1);
 			}
-		}
-		
+		}	
 	}
-
 }
 /*
-Descripcion:Funcion que se encarga de insertar las constantes a la 
+Descripción:Funcion que se encarga de insertar las constantes a la 
 tabla de constantes
 
-Parametros:int virtual, int tipo
+Parámetros:int virtual, int tipo
 Salida: void
 */
 void insert_constante_to_table(char *valor, int tipo){
 	constante *cte = g_slice_new(constante);
 	cte = g_hash_table_lookup(tabla_constantes,(gpointer)valor);
 	if(cte == NULL){
-		
 		int dir;
 		switch(tipo){
 			case 1: dir = enterosconstantes;
@@ -688,19 +669,15 @@ void insert_constante_to_table(char *valor, int tipo){
 	}
 }
 /*
-Descripcion: Imprime el resultado de lo que se guardo en una tabla
+Descripción: Imprime el resultado de lo que se guardó en una tabla
 
-Parametros: GHashTable *a
+Parámetros: GHashTable *a
 Salida:void
 */
 void imprime(GHashTable *a){
 	printf("Lista:");
 	g_hash_table_foreach(a,(GHFunc)printf,NULL);
-	
-	
 	printf("\n");
-	
-	
 }
 
 %}
@@ -758,7 +735,7 @@ bloque: estatuto bloque
 	| ;
 
 tipo:	 ENTERO {tipo_actual= 'I';}
-	|FLOTANTE {tipo_actual= 'F';}
+	| FLOTANTE {tipo_actual= 'F';}
 	| CARACTER {tipo_actual= 'C';}
 	| PALABRA {tipo_actual= 'S';}
 	| LOGICO {tipo_actual= 'L';};
@@ -825,14 +802,13 @@ c:	SI APARENTESIS condicion_exp {
 		int resultado = g_queue_pop_head(POperandos);
 		printf("Genera cuadruplo gotof\n");
 		generar_cuadruplo(22,resultado,-1,-1);
-		
 		g_queue_push_head(PSaltos,contador_cuadruplos-1);
 		
 		
 	} CPARENTESIS ALLAVE bloque CLLAVE sip {
 		int final = g_queue_pop_head(PSaltos);
 		//printf("salto %d\n",final);
-		//Rellenar goto con el contador de cuadruplos para el final
+		//Rellenar GoTo con el contador de cuádruplos para el final
 		cuadruplo *tmp = g_slice_new(cuadruplo);
 		tmp = g_queue_pop_nth(cuadruplos,(guint)final-1);
 		tmp->destino = contador_cuadruplos;
@@ -1061,8 +1037,7 @@ crear_pilas_tablas();
 imprime(dir_procs); 
 
 
-
-//Escirbri en el arhcivo los cuadruplos
+//Escribir en el arhcivo los cuádruplos
 cuadruplo *a = g_slice_new(cuadruplo);
 while(a = g_queue_pop_head(cuadruplos)){
 	fprintf(objeto,"%d,%d,%d,%d\n",a->operador,a->operando1,a->operando2,a->destino);
