@@ -501,7 +501,8 @@ void generar_cuadruplo_expresion(){
 
 	char tnuevo = cubo[operador-1][tipo1-1][tipo2-1];
 	if(tnuevo == 'E'){
-		printf("Error: No se puede hacer la operación entre %s y %s en la línea %d \n",traduce_tipo2(tipo1),traduce_tipo2(tipo2),yylineno);
+		printf("Error: No se puede hacer la operación entre %s y %s en la línea %d \n",traduce_tipo2(tipo1),
+			traduce_tipo2(tipo2),yylineno);
 		exit(1);
 	}else{
 		int tmp;
@@ -563,7 +564,8 @@ void generar_cuadruplo_asignacion(){
 
 	char tnuevo = cubo[operador-1][tipo1-1][tipo2-1];
 	if(tnuevo == 'E'){//E es error
-		printf("Error: No se puede hacer la asignación de %s a %s en la línea %d \n",traduce_tipo2(tipo2),traduce_tipo2(tipo1),yylineno);
+		printf("Error: No se puede hacer la asignación de %s a %s en la línea %d \n",traduce_tipo2(tipo2),
+			traduce_tipo2(tipo1),yylineno);
 		exit(1);
 	}else{
 		generar_cuadruplo(operador,operando2,-1,operando1);
