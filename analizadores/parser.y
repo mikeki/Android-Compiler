@@ -55,7 +55,11 @@ typedef struct{
 GHashTable *var_table;
 char tipo;
 GQueue *parametros;
+int dir_inicial;
+int tamano_locales[5];
+int tamano_temporales[5];
 }funcion;
+
 
 typedef struct{
 char tipo;
@@ -243,6 +247,39 @@ char cubo[20][6][6] =
 			{'E','E','E','E','E','E'}
 		}
 	};
+/*
+Descripción: Se encraga de escribir en el codigo objeto
+el directorio de procedimientos. La funcion sera utilizada en 
+g_hash_table_foreach.
+
+Entrada: char *key, char *value, gpointer user_data
+Salida: void
+*/
+void imprime_dir_procs(char *key, funcion *value, gpointer user_data){
+	funcion *f = value;
+
+	fprintf(objeto,"%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",key,f->tipo,f->dir_inicial,f->tamano_locales[0],f->tamano_locales[1]
+		,f->tamano_locales[2],f->tamano_locales[3],f->tamano_locales[4],f->tamano_temporales[0],f->tamano_temporales[1],
+		f->tamano_temporales[2],f->tamano_temporales[3],f->tamano_temporales[4]);
+
+	
+}
+
+/*
+Descripción: Se encraga de escribir en el codigo objeto
+la tabla de constantes. La funcion sera utilizada en 
+g_hash_table_foreach.
+
+Entrada: char *key, char *value, gpointer user_data
+Salida: void
+*/
+void imprime_tabla_constantes(char *key, constante *value, gpointer user_data){
+	constante *c = value;
+
+	fprintf(objeto,"%s,%d\n",key,c->dir_virtual);
+
+	
+}
 
 /*
 Descripción: Inicializa la tabla de dir_procs (directorio de procedimientos)
@@ -406,6 +443,7 @@ int traduce_tipo(char tipo){
 		case 'S': return 2;
 		case 'C': return 3;
 		case 'L': return 4;
+		case 'V': return 5;
 	}
 
 }
@@ -424,6 +462,7 @@ char* traduce_tipo2(int tipo){
 		case 3: return "palabra";
 		case 4: return "caracter";
 		case 5: return "lógico";
+		case 6: return "void";
 	}
 
 }
@@ -722,7 +761,9 @@ var_init: lectura
 var_initp: COMA vars_id
            | ;
 
-funcion: FUNCION tipof ID{insert_proc_to_table(yylval.str);} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionp CLLAVE;
+funcion: FUNCION tipof ID{insert_proc_to_table(yylval.str);} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionv funcionp CLLAVE;
+funcionv: 	vars funcionv
+		|;
 tipof: tipo
 	|  {tipo_actual= 'V';};
 funcionp: estatutofuncion funcionp
@@ -730,8 +771,9 @@ funcionp: estatutofuncion funcionp
 funcionpp: params 
 	| ;
 
-main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE bloque CLLAVE;
-
+main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE mainv bloque CLLAVE;
+mainv: 		vars mainv
+		|;
 bloque: estatuto bloque
 	| ;
 
@@ -757,8 +799,7 @@ estatuto: empieza_id
 		|condicion
 		|escritura
 		|ciclo
-		|accion
-		|vars;
+		|accion;
 		
 empieza_id: ID{id_a_verificar=yylval.str;} empieza_idp;
 empieza_idp: ejecuta_funcion
@@ -1038,6 +1079,13 @@ crear_pilas_tablas();
 imprime(dir_procs); 
 
 
+//Escirbir el directorio de procedimientos
+g_hash_table_foreach(dir_procs,(GHFunc)imprime_dir_procs,NULL);
+
+fprintf(objeto,"--\n");
+//Escribir en el archivo la tabla de constantes
+g_hash_table_foreach(tabla_constantes,(GHFunc)imprime_tabla_constantes,NULL);
+fprintf(objeto,"--\n");
 //Escribir en el arhcivo los cuádruplos
 cuadruplo *a = g_slice_new(cuadruplo);
 while(a = g_queue_pop_head(cuadruplos)){

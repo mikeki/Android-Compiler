@@ -15,14 +15,10 @@ funcion uno(){
 **
 principal{
 
-	selecciona("P"){
-		cuando 1 => {
-				x = 1;
-			}
-		cuando 2 => {
-				x = 2;
-			}
-	}
+	logico b = verdadero;
+	caracter c = 'A';
+	palabra p = "hola";
+	flotante f = 1.123;
 	x = 2 * 2/1;
 	
 	**
