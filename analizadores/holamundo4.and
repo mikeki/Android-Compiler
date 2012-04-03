@@ -1,55 +1,39 @@
-
-
 programa holamundo:
 
-
-
-
-
-entero x = 1;
-
-**
-funcion uno(){
-
+funcion entero uno(entero a){
+	a = 1;
 }
-**
+
+
 principal{
 
-	logico b = verdadero;
-	caracter c = 'A';
-	palabra p = "hola";
-	flotante f = 1.123;
-	x = 2 * 2/1;
-	
-	**
-	entero a = 1 + 1;
-	
-	entero h;
-	
-	h = 2.1 + 2.1;
-	//logico b = falso;
-	logico b = no(verdadero y falso);
-	logico c = no verdadero;
-	logico d = verdadero;
-	a = 2 + (-2);
-	
-	a++;
-	entero u = 1;
-	
-	entero a = 1;
-	si(verdadero){
-		a = 2;
-	}sino si(falso){
-		a = 3;
-	}
-	
+entero a = 1, b, c;
+a = 1;
+b = 2;
+c = 2;
+mientras(b < 5 y c < 5*2+1-2){
+b++;
+}
+a = 2;
+selecciona(2){
+	cuando 1 => {}
+	cuando 2 => {}
+}	
 
-	mientras(verdadero){
-
+si(verdadero){
+	selecciona(2){
+		cuando 1 => {selecciona(3){
+				cuando 1 => { 
+					selecciona(4){
+					cuando 1 => {}
+					cuando 2 => {}
+					}
+				}
+				cuando 2 => {}
+				}
 	}
-	
-	entero a;
-	escribe("holamundo4".a);
-	**
+		cuando 2 => {}
+	}
+}
 	
 }

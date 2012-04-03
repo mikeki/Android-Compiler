@@ -6,7 +6,7 @@ programa holamundo:
 
 entero h = 123;
 
-funcion uno(){
+funcion flotante uno(){
 	entero a = 1 + 1;
 	flotante b = 1.123;
 
@@ -16,11 +16,13 @@ funcion uno(){
 	regresa c;
 }
 
-funcion dos(entero rec){
-	uno();
+funcion entero dos(entero rec){
 	entero i = 0;
+
+	uno();
+	
 	mientras(i < rec){
-	  entero u = 9;
+	  
 		adelante();
 		i++;
 	}
@@ -41,7 +43,7 @@ funcion cuatro(entero rec){
 	
 	entero i = 0;
 	mientras(i < rec){
-	  flotante ku = 0;
+	  
 		atras();
 		i++;
 	}
@@ -51,15 +53,16 @@ funcion cuatro(entero rec){
 
 principal{
 	
-	
-	
+	flotante ku = uno();
+	entero ka, ko;
 	entero j = 0, l =9;
+	logico b = verdadero;
 	mientras(j < 10 y l < 3*4/5){
 		selecciona(j){
 			cuando 1 => { 
-  		  flotante ku = uno();
-  		  entero ka, ko;
-				flotante u = uno();
+  		  
+  		  
+				ku = uno();
 			}
 			cuando 2 => { 
 				dos(1);
@@ -68,18 +71,19 @@ principal{
 				tres();
 			}
 			cuando 4 => { 
-				cuatro(2);
+				cuatro();
 			}
 		}		
-		j+=1;
+		j = 1;
+		j = 2;
 	}
 	
 	
-	escribe("¿Quieres checar que ganste? verdadero o falso \n");
-	logico b = lee();
+	//escribe("¿Quieres checar que ganste? verdadero o falso \n");
+	**
 	si(b){
-		si(topa()){
-			si(tomartesoro()){
+		si(verdadero){
+			si(falso){
 				escribe("ganaste!!!");
 			}
 			sino{
@@ -89,7 +93,7 @@ principal{
 			escribe("Perdiste");
 		}	
 	}
-
+	**
 	
 	
 }

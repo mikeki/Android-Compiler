@@ -17,6 +17,7 @@ static GQueue *POperandos;
 static GQueue *POperadores;
 static GQueue *PTipos;
 static GQueue *PSaltos;
+static GQueue *PSwitch;
 
 //Declaración de rangos de memoria
 //Globales
@@ -295,6 +296,7 @@ void crear_pilas_tablas(){
 	PTipos = g_queue_new();
 	PSaltos = g_queue_new();
 	cuadruplos = g_queue_new();
+	PSwitch = g_queue_new();
 }
 
 /*
@@ -311,7 +313,7 @@ void insert_proc_to_table(char *name){
 	}else{
 	funcion *temp = g_slice_new(funcion);
 	temp->var_table = g_hash_table_new(g_str_hash, g_str_equal);
-	temp->tipo = tipo_actual;
+	temp->tipo = traduce_tipo(tipo_actual);
 	g_hash_table_insert(dir_procs,(gpointer)name,(gpointer)temp);
 	proc_actual = name;
 	}
@@ -342,6 +344,7 @@ void insert_var_to_table(char *name){
 					virtual = enteroslocales;
 					enteroslocales++;
 				}
+				tabla->tamano_locales[0]++;
 				break;
 			case 'F': if(strcmp(proc_actual,"programa")== 0){
 					virtual = flotantesglobales;
@@ -350,6 +353,7 @@ void insert_var_to_table(char *name){
 					virtual = flotanteslocales;
 					flotanteslocales++;
 				}
+				tabla->tamano_locales[1]++;
 				break;
 			case 'S': if(strcmp(proc_actual,"programa")== 0){
 					virtual = stringsglobales;
@@ -358,6 +362,7 @@ void insert_var_to_table(char *name){
 					virtual = stringslocales;
 					stringslocales++;
 				}
+				tabla->tamano_locales[2]++;
 				break;
 			case 'C': if(strcmp(proc_actual,"programa")== 0){
 					virtual = caracteresglobales;
@@ -366,6 +371,7 @@ void insert_var_to_table(char *name){
 					virtual = caractereslocales;
 					caractereslocales++;
 				}
+				tabla->tamano_locales[3]++;
 				break;
 			case 'L': if(strcmp(proc_actual,"programa")== 0){
 					virtual = logicosglobales;
@@ -374,6 +380,7 @@ void insert_var_to_table(char *name){
 					virtual = logicoslocales;
 					logicoslocales++;
 				}
+				tabla->tamano_locales[4]++;
 				break;
 		}
 		temp->dir_virtual = virtual;
@@ -708,6 +715,30 @@ void insert_constante_to_table(char *valor, int tipo){
 		g_queue_push_head(POperandos,cte->dir_virtual);
 	}
 }
+
+/*
+Descripción: Meter el tipo del parametro en el procedimiento actual del directorio
+de procedimeintos en la secuencia de paramteros en la lista de parametros.
+
+Entrada: 
+Salida: void
+*/
+void insert_param_tipo(){
+	funcion *proc = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+	g_queue_push_tail(proc->parametros,tipo_actual);
+
+}
+/*
+Descripción: Metodo que se encraga de intorudcir en el dir. de procedimientos
+el cuadruplo siguiente.
+
+Entrada: 
+Salida: void
+*/
+void insert_dir_inicial(){
+	funcion *proc = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+	proc->dir_inicial = contador_cuadruplos;
+}
 /*
 Descripción: Imprime el resultado de lo que se guardó en una tabla
 
@@ -741,7 +772,7 @@ char *str;
 %start programa
 
 %% 
-programa: PROGRAMA ID{insert_proc_to_table("programa");} IGUALP programap main;
+programa: PROGRAMA ID{tipo_actual = 'V'; insert_proc_to_table("programa");} IGUALP programap main;
 programap: programapp programappp;
 programapp: 	vars programapp
 		| ;
@@ -761,17 +792,31 @@ var_init: lectura
 var_initp: COMA vars_id
            | ;
 
-funcion: FUNCION tipof ID{insert_proc_to_table(yylval.str);} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionv funcionp CLLAVE;
+funcion: FUNCION tipof ID{insert_proc_to_table(yylval.str);} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionv funcionp CLLAVE{
+	//Locales
+	int enteroslocales = 210000;
+	int flotanteslocales = 220000;
+	int stringslocales = 230000;
+	int caractereslocales = 240000;
+	int logicoslocales = 250000;
+
+	//Temporales
+	int enterostemporales = 310000;
+	int flotantestemporales = 320000;
+	int stringstemporales = 330000;
+	int caracterestemporales = 340000;
+	int logicostemporales = 350000;
+	};
 funcionv: 	vars funcionv
 		|;
 tipof: tipo
 	|  {tipo_actual= 'V';};
-funcionp: estatutofuncion funcionp
+funcionp: {insert_dir_inicial();}estatutofuncion funcionp
 	| ;
 funcionpp: params 
 	| ;
 
-main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE mainv bloque CLLAVE;
+main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE mainv {insert_dir_inicial();}bloque CLLAVE;
 mainv: 		vars mainv
 		|;
 bloque: estatuto bloque
@@ -857,7 +902,7 @@ c:	SI APARENTESIS condicion_exp {
 		g_queue_push_nth(cuadruplos,(gpointer)tmp,final-1);
 	};
 condicion_exp: mmexp
-               | accionsi;
+		| accionsi;
 sip:	SINO{
 		printf("Genera cuadruplo goto\n");
 		generar_cuadruplo(21,-1,-1,-1);
@@ -873,14 +918,20 @@ sip:	SINO{
 	| ;
 sipp: 	condicion
 	| ALLAVE bloque CLLAVE;
-cp: 	SELECCIONA APARENTESIS exp CPARENTESIS ALLAVE cuandop CLLAVE{
+cp: 	SELECCIONA APARENTESIS exp CPARENTESIS ALLAVE{
+		g_queue_push_head(PSwitch,0);		
+		} cuandop CLLAVE{
 		//Regla 30
 		int p;
-		while(p = g_queue_pop_head(PSaltos)){
+		int acum = g_queue_pop_head(PSwitch);
+		int i = 0;
+		while(i < acum){
+			p = g_queue_pop_head(PSaltos);
 			cuadruplo *tmp = g_slice_new(cuadruplo);
 			tmp = g_queue_pop_nth(cuadruplos,p-1);
 			tmp->destino = contador_cuadruplos;
 			g_queue_push_nth(cuadruplos,(gpointer)tmp,p-1);
+			i++;
 		}
 		//Sacar de Poperando y Ptipos la cte de comparacion
 		g_queue_pop_head(POperandos);
@@ -912,6 +963,10 @@ cuandop: CUANDO varselecciona{
 		tmp->destino = contador_cuadruplos;
 		g_queue_push_nth(cuadruplos,(gpointer)tmp,falso-1);
 		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+		//Regla 42
+		int acum = g_queue_pop_head(PSwitch);
+		acum++;
+		g_queue_push_head(PSwitch,acum);
 	} cuandopp;
 cuandopp: cuandop 
 	| ;
@@ -967,7 +1022,7 @@ acciones: ADELANTE
 	| TOPA;
 
 params: tipo paramsp;
-paramsp: ID{insert_var_to_table(yylval.str);} paramspp;
+paramsp: ID{insert_param_tipo();insert_var_to_table(yylval.str);/*Regla 103*/} paramspp;
 paramspp: COMA paramsp
 	| params
 	| ;
