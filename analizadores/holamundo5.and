@@ -1,0 +1,15 @@
+programa holamundo:
+
+	
+
+funcion entero uno(entero a,flotante b, palabra c){
+	
+
+	
+}
+
+
+principal{
+	entero a = 1 + uno(1,1.2,"h");
+	//uno(a,2.2,"hola");
+}

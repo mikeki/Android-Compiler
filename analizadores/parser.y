@@ -11,6 +11,7 @@ static char tipo_actual; //Tipo actual de variables o procedimientos
 static char *id_a_verificar; //Varibale utilizada para verificar la existencia del id
 static int exp_operador_actual; //Variable utilizada en operaicones logicas con 2 simbolos
 static int contador_cuadruplos = 1; //Contador de cuadruplos realizados
+static int accion;
 extern int yylineno;
 //Declaracion de las pilas.
 static GQueue *POperandos;
@@ -18,6 +19,8 @@ static GQueue *POperadores;
 static GQueue *PTipos;
 static GQueue *PSaltos;
 static GQueue *PSwitch;
+static GQueue *PFunciones;
+static GQueue *PParametros;
 
 //Declaración de rangos de memoria
 //Globales
@@ -78,6 +81,13 @@ int operando1;
 int operando2;
 int destino;
 }cuadruplo;
+
+typedef struct{
+int operador;
+char *operando1;
+int operando2;
+int destino;
+}cuadruplofuncion;
 
 int traduce_tipo(char tipo);
 
@@ -297,6 +307,8 @@ void crear_pilas_tablas(){
 	PSaltos = g_queue_new();
 	cuadruplos = g_queue_new();
 	PSwitch = g_queue_new();
+	PFunciones = g_queue_new();
+	PParametros = g_queue_new();
 }
 
 /*
@@ -312,6 +324,7 @@ void insert_proc_to_table(char *name){
 		exit(1);
 	}else{
 	funcion *temp = g_slice_new(funcion);
+	temp->parametros = g_queue_new();
 	temp->var_table = g_hash_table_new(g_str_hash, g_str_equal);
 	temp->tipo = traduce_tipo(tipo_actual);
 	g_hash_table_insert(dir_procs,(gpointer)name,(gpointer)temp);
@@ -482,6 +495,25 @@ Salida: void
 */
 void generar_cuadruplo(int operador, int operando1, int operando2, int resultadotmp){
 	cuadruplo *c = g_slice_new(cuadruplo);
+	c->operador = operador;
+	c->operando1 = operando1;
+	c->operando2 = operando2;
+	c->destino = resultadotmp;
+	g_queue_push_tail(cuadruplos,(gpointer)c);
+	
+	//fprintf(objeto,"%d,%d,%d,%d\n",operador,operando1,operando2,resultadotmp);
+	contador_cuadruplos++;
+}
+
+/*
+Descripción: Función que se encarga de escribir en un archivo de código
+objeto los cuádruplos que reciba de tipo funcion.
+
+Parámetros: int operador, char *operando1, int operando2, int resultadotmp
+Salida: void
+*/
+void generar_cuadruplo_funcion(int operador, char *operando1, int operando2, int resultadotmp){
+	cuadruplofuncion *c = g_slice_new(cuadruplofuncion);
 	c->operador = operador;
 	c->operando1 = operando1;
 	c->operando2 = operando2;
@@ -736,8 +768,10 @@ Salida: void
 */
 void insert_param_tipo(){
 	funcion *proc = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
-	g_queue_push_tail(proc->parametros,tipo_actual);
-
+	
+	g_queue_push_tail(proc->parametros,traduce_tipo(tipo_actual)+1);
+	//printf("Se agrego a parametos: %d\n",g_queue_peek_nth(proc->parametros,0));
+	//g_queue_foreach(proc->parametros,(GHFunc)printf,NULL);
 }
 /*
 Descripción: Metodo que se encraga de intorudcir en el dir. de procedimientos
@@ -749,6 +783,7 @@ Salida: void
 void insert_dir_inicial(){
 	funcion *proc = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	proc->dir_inicial = contador_cuadruplos;
+	
 }
 /*
 Descripción: Imprime el resultado de lo que se guardó en una tabla
@@ -783,7 +818,7 @@ char *str;
 %start programa
 
 %% 
-programa: PROGRAMA ID{tipo_actual = 'V'; insert_proc_to_table("programa");} IGUALP programap main;
+programa: {generar_cuadruplo(21,-1,-1,-1);/*goto del main*/ }PROGRAMA ID{tipo_actual = 'V'; insert_proc_to_table("programa");} IGUALP programap main;
 programap: programapp programappp;
 programapp: 	vars programapp
 		| ;
@@ -805,18 +840,18 @@ var_initp: COMA vars_id
 
 funcion: FUNCION tipof ID{insert_proc_to_table(yylval.str);} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionv funcionp CLLAVE{
 	//Locales
-	int enteroslocales = 210000;
-	int flotanteslocales = 220000;
-	int stringslocales = 230000;
-	int caractereslocales = 240000;
-	int logicoslocales = 250000;
+	enteroslocales = 210000;
+	flotanteslocales = 220000;
+	stringslocales = 230000;
+	caractereslocales = 240000;
+	logicoslocales = 250000;
 
 	//Temporales
-	int enterostemporales = 310000;
-	int flotantestemporales = 320000;
-	int stringstemporales = 330000;
-	int caracterestemporales = 340000;
-	int logicostemporales = 350000;
+	enterostemporales = 310000;
+	flotantestemporales = 320000;
+	stringstemporales = 330000;
+	caracterestemporales = 340000;
+	logicostemporales = 350000;
 	};
 funcionv: 	vars funcionv
 		|;
@@ -827,7 +862,14 @@ funcionp: {insert_dir_inicial();}estatutofuncion funcionp
 funcionpp: params 
 	| ;
 
-main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE mainv {insert_dir_inicial();}bloque CLLAVE;
+main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE{
+		//Rellenar goto inicial del main con el contador de cuadruplos
+		cuadruplo *tmp = g_slice_new(cuadruplo);
+		tmp = g_queue_peek_nth(cuadruplos,0);
+		tmp->destino = contador_cuadruplos;
+		} mainv {
+		insert_dir_inicial();
+		}bloque CLLAVE;
 mainv: 		vars mainv
 		|;
 bloque: estatuto bloque
@@ -861,7 +903,29 @@ empieza_id: ID{id_a_verificar=yylval.str;} empieza_idp;
 empieza_idp: ejecuta_funcion
             | asignacion;
 
-ejecuta_funcion:  APARENTESIS paramsf CPARENTESIS{verifica_existe_procs(id_a_verificar);} PUNTOCOMA;
+ejecuta_funcion:  APARENTESIS{
+			verifica_existe_procs(id_a_verificar);
+						
+			//Regla 36
+			g_queue_push_head(PFunciones,id_a_verificar);
+			//ERA
+			generar_cuadruplo_funcion(25,id_a_verificar,-1,-1);
+			g_queue_push_head(PParametros,0);
+			
+			} paramsf CPARENTESIS{
+			//Regla 39
+			char *func = g_queue_peek_head(PFunciones);
+			funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)func);
+	
+			g_queue_pop_head(PFunciones);
+			int contador_parametros = g_queue_pop_head(PParametros);
+			if(g_queue_get_length(ft->parametros) != contador_parametros + 1){
+				printf("Error: Menos parámetros de los esperados en la linea %d\n",yylineno);
+				exit(1);
+			}
+			//Regla 40
+			generar_cuadruplo_funcion(24,func,ft->dir_inicial,-1);
+			} PUNTOCOMA;
 
 paramsf: params2
           | ;
@@ -1021,24 +1085,59 @@ ciclo: MIENTRAS{g_queue_push_head(PSaltos,contador_cuadruplos); } APARENTESIS mm
 		g_queue_push_nth(cuadruplos,(gpointer)tmp,falso-1);
 	};
 
-accion: acciones APARENTESIS accionp CPARENTESIS PUNTOCOMA;
-accionp: params2 
-	| ;
-accionsi: acciones APARENTESIS accionp CPARENTESIS;
-acciones: ADELANTE
-	| ATRAS
-	| ROTADERECHA
-	| ROTAIZQUIERDA
-	| TOMARTESORO
-	| TOPA;
+accion: acciones{
+	//Regla 41
+	printf("Genera cuadruplo de accion\n");
+	generar_cuadruplo(accion,-1,-1,-1);
+	} APARENTESIS CPARENTESIS PUNTOCOMA;
+	
+accionsi: acciones{
+	//Regla 41
+	printf("Genera cuadruplo de accion\n");
+	generar_cuadruplo(accion,-1,-1,-1);	
+	} APARENTESIS CPARENTESIS;
+acciones: ADELANTE{accion = 28;}
+	| ATRAS{accion = 29;}
+	| ROTADERECHA{accion = 30;}
+	| ROTAIZQUIERDA{accion = 31;}
+	| TOMARTESORO{accion = 32;}
+	| TOPA{accion = 33;};
 
 params: tipo paramsp;
 paramsp: ID{insert_param_tipo();insert_var_to_table(yylval.str);/*Regla 103*/} paramspp;
-paramspp: COMA paramsp
-	| params
+paramspp: COMA params
 	| ;
-params2: exp params2p;
-params2p: COMA params2
+params2: exp{ 
+	
+	//Regla 37
+	
+	int argumento = g_queue_pop_head(POperandos);
+	int tipoarg = g_queue_pop_head(PTipos);
+	
+	funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)g_queue_peek_head(PFunciones));
+	int contador_parametros = g_queue_peek_head(PParametros);
+	if(g_queue_get_length(ft->parametros) < contador_parametros + 1){
+				printf("Error: Mas parámetros de los esperados en la linea %d\n",yylineno);
+				exit(1);
+			}
+	
+	int tipoparam = g_queue_peek_nth(ft->parametros,contador_parametros);
+	printf("Argumento y tipoarg, tipoparam: %d,%d,%d\n",argumento,tipoarg,tipoparam);
+	
+	if(tipoarg != tipoparam){
+		printf("Error: Se espera un valor %s en la línea %d\n",traduce_tipo2(tipoparam),yylineno);
+			exit(1);
+	}
+	//Generar cuadruplo parametro
+	printf("Genera cuadruplo parametro \n");
+	generar_cuadruplo(26,argumento,contador_parametros+1,-1);
+	} params2p;
+params2p: COMA{
+		//Regla 38
+		int p = g_queue_pop_head(PParametros);
+		p++;
+		g_queue_push_head(PParametros,p);
+		} params2
 	| ;
 
 mmexp: mexp {
@@ -1118,18 +1217,32 @@ f: 	MENOS {g_queue_push_head(POperadores,20);/*operador multiplica*/}
 	| NO {g_queue_push_head(POperadores,18);/*operador NOT*/}
 	| ;
 factorppp: ID{id_a_verificar=yylval.str;} fun_var;
-fun_var: APARENTESIS paramsf CPARENTESIS{verifica_existe_procs(id_a_verificar);}
+fun_var: APARENTESIS{
+		verifica_existe_procs(id_a_verificar);
+					
+		//Regla 36
+		g_queue_push_head(PFunciones,id_a_verificar);
+		//ERA
+		generar_cuadruplo_funcion(25,id_a_verificar,-1,-1);
+		g_queue_push_head(PParametros,0);
+			
+	} paramsf CPARENTESIS{
+		verifica_existe_procs(id_a_verificar);
+		//Regla 39
+		char *func = g_queue_peek_head(PFunciones);
+		funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)func);
+	
+		g_queue_pop_head(PFunciones);
+		int contador_parametros = g_queue_pop_head(PParametros);
+		if(g_queue_get_length(ft->parametros) != contador_parametros + 1){
+			printf("Error: Menos parámetros de los esperados en la linea %d\n",yylineno);
+			exit(1);
+		}
+		//Regla 40
+		generar_cuadruplo_funcion(24,func,ft->dir_inicial,-1);
+	}
          | {verifica_existe_var(id_a_verificar);
-         	//Obteniendo el tipo de variable en la tabla d evariables
-		/*
-		funcion *tabla = g_slice_new(funcion);
-		tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
-		variable *var = g_slice_new(variable);
-		var = g_hash_table_lookup(tabla->var_table,(gpointer)id_a_verificar);
-		
-		g_queue_push_head(POperandos,var->dir_virtual);
-		g_queue_push_head(PTipos,traduce_tipo(var->tipo)+1);
-		*/
+         	
          	};
 	
 varselecciona: ID{verifica_existe_var(yylval.str);}
@@ -1154,8 +1267,21 @@ g_hash_table_foreach(tabla_constantes,(GHFunc)imprime_tabla_constantes,NULL);
 fprintf(objeto,"--\n");
 //Escribir en el arhcivo los cuádruplos
 cuadruplo *a = g_slice_new(cuadruplo);
-while(a = g_queue_pop_head(cuadruplos)){
-	fprintf(objeto,"%d,%d,%d,%d\n",a->operador,a->operando1,a->operando2,a->destino);
+cuadruplofuncion *b = g_slice_new(cuadruplofuncion);
+cuadruplo *fin = g_slice_new(cuadruplo);
+fin = g_queue_peek_head(cuadruplos);
+while(fin){
+	a = g_queue_peek_head(cuadruplos);
+	if(a->operador == 24 || a->operador == 25){
+		b = g_queue_pop_head(cuadruplos);
+		fprintf(objeto,"%d,%s,%d,%d\n",b->operador,b->operando1,b->operando2,b->destino);
+		
+	}else{
+		a = g_queue_pop_head(cuadruplos);
+		fprintf(objeto,"%d,%d,%d,%d\n",a->operador,a->operando1,a->operando2,a->destino);
+		
+	}
+	fin = g_queue_peek_head(cuadruplos);
 }
 
 fclose(objeto);
