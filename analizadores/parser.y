@@ -543,6 +543,7 @@ void generar_cuadruplo_expresion(){
 	printf("tipo2: %d ", tipo2);
 	int tipo1 = g_queue_pop_head(PTipos);
 	printf("tipo1: %d\n", tipo1);
+	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 //	printf("op2: %d op1: %d oper: %d tipo1: %d tipo2: %d\n", operando2, operando1, operador, tipo1, tipo2);
 
 	char tnuevo = cubo[operador-1][tipo1-1][tipo2-1];
@@ -555,18 +556,23 @@ void generar_cuadruplo_expresion(){
 		switch(tnuevo){
 			case 'I': tmp = enterostemporales;
 				enterostemporales++;
+				tabla->tamano_temporales[0]++;
 				break;
 			case 'F': tmp = flotantestemporales;
 				flotantestemporales++;
+				tabla->tamano_temporales[1]++;
 				break;
 			case 'S': tmp = stringstemporales;
 				stringstemporales++;
+				tabla->tamano_temporales[2]++;
 				break;
 			case 'C': tmp = caracterestemporales;
 				caracterestemporales++;
+				tabla->tamano_temporales[3]++;
 				break;
 			case 'L': tmp = logicostemporales;
 				logicostemporales++;
+				tabla->tamano_temporales[4]++;
 				break;
 		}
 		switch(operador){
@@ -632,7 +638,7 @@ void generar_cuadruplo_expresion_unaria(){
 	printf("oper: %d ", operador);
 	int tipo1 = g_queue_pop_head(PTipos);
 	printf("tipo1: %d\n", tipo1);
-
+	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	if(operador == 1 || operador == 4){
 		operador++;
 	}
@@ -646,18 +652,23 @@ void generar_cuadruplo_expresion_unaria(){
 		switch(tnuevo){
 			case 'I': tmp = enterostemporales;
 				enterostemporales++;
+				tabla->tamano_temporales[0]++;
 				break;
 			case 'F': tmp = flotantestemporales;
 				flotantestemporales++;
+				tabla->tamano_temporales[1]++;
 				break;
 			case 'S': tmp = stringstemporales;
 				stringstemporales++;
+				tabla->tamano_temporales[2]++;
 				break;
 			case 'C': tmp = caracterestemporales;
 				caracterestemporales++;
+				tabla->tamano_temporales[3]++;
 				break;
 			case 'L': tmp = logicostemporales;
 				logicostemporales++;
+				tabla->tamano_temporales[4]++;
 				break;
 		}
 		switch(operador){

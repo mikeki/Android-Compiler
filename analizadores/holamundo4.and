@@ -1,7 +1,7 @@
 programa holamundo:
 
 funcion entero uno(entero a){
-	a = 1;
+	a = 1 +1 ;
 }
 
 
