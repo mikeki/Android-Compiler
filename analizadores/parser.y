@@ -760,8 +760,8 @@ void insert_constante_to_table(char *valor, int tipo){
 }
 
 /*
-Descripción: Meter el tipo del parametro en el procedimiento actual del directorio
-de procedimeintos en la secuencia de paramteros en la lista de parametros.
+Descripción: Meter el tipo del parámetro en el procedimiento actual del directorio
+de procedimientos en la secuencia de parámetros en la lista de parámetros.
 
 Entrada: 
 Salida: void
@@ -774,8 +774,8 @@ void insert_param_tipo(){
 	//g_queue_foreach(proc->parametros,(GHFunc)printf,NULL);
 }
 /*
-Descripción: Metodo que se encraga de intorudcir en el dir. de procedimientos
-el cuadruplo siguiente.
+Descripción: Método que se encarga de introducir en el dir. de procedimientos
+el cuádruplo siguiente.
 
 Entrada: 
 Salida: void
