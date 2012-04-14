@@ -1,15 +1,20 @@
 programa holamundo:
 
+funcion holandyfgold(){
 	
 
-funcion entero uno(entero a,flotante b, palabra c){
-	
+}
 
-	
+funcion flotante hola2(){
+
+entero a = 1;
+flotante b = 1.1;
+
+
+regresa a + b +1.1;
 }
 
 
 principal{
-	entero a = 1 + uno(1,1.2,"h");
-	//uno(a,2.2,"hola");
+	
 }
