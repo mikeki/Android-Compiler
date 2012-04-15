@@ -1,20 +1,21 @@
 programa holamundo:
 
-funcion holandyfgold(){
+funcion hola(){
 	
 
 }
 
 funcion flotante hola2(){
 
-entero a = 1;
-flotante b = 1.1;
-
-
-regresa a + b +1.1;
+regresa 1.2 + 1.2;
 }
 
 
 principal{
-	
+
+
+entero a;
+flotante b;
+
+b = hola2() + 3.4;
 }

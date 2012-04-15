@@ -452,6 +452,26 @@ void verifica_existe_procs(char *name){
 }
 
 /*
+Descripción: Inserta el procedieminto en la pila d eoperandos asimismo inserta 
+el tipo correspondiente.
+
+Parámetros: char *name
+Salida: void
+*/
+void inserta_procs_factor(char *name){
+	funcion *f = g_hash_table_lookup(dir_procs,(gpointer)name);
+	if(f->tipo == 'V'){//Valida si un modulo llamdo en la expresion es de tipo void
+		printf("Error: Expresion invalida en la línea %d\n",yylineno);
+		exit(1);
+	}
+	funcion *proc_global = g_hash_table_lookup(dir_procs,"programa");
+	variable *modulo = g_hash_table_lookup(proc_global->var_table,(gpointer)name);
+	g_queue_push_head(POperandos,modulo->dir_virtual);
+	g_queue_push_head(PTipos,traduce_tipo(modulo->tipo)+1);
+	printf("Direccion Variable Global: %s %d\n",name, modulo->dir_virtual);
+	
+}
+/*
 Descripción: Función que se encarga de regresar el id numérico correspondiente
 del tipo que se le está mandando como parámetro
 
@@ -820,7 +840,7 @@ char *str;
 %start programa
 
 %% 
-programa: {generar_cuadruplo(21,-1,-1,-1);/*goto del main*/ }PROGRAMA ID{tipo_actual = 'V'; insert_proc_to_table("programa");} IGUALP programap main;
+programa: {/*Regla 43*/generar_cuadruplo(21,-1,-1,-1);/*goto del main*/ }PROGRAMA ID{/* Regla 48*/tipo_actual = 'V'; /*Regla 101*/insert_proc_to_table("programa");} IGUALP programap main;
 programap: programapp programappp;
 programapp: 	vars programapp
 		| ;
@@ -828,9 +848,10 @@ programappp: funcion programappp
 		| ;
 
 vars: tipo vars_id PUNTOCOMA;
-vars_id: ID{id_a_verificar = yylval.str; insert_var_to_table(yylval.str,proc_actual);} varsip;
+vars_id: ID{/*Regla 103 y 32*/id_a_verificar = yylval.str; insert_var_to_table(yylval.str,proc_actual);} varsip;
 varsip: COMA vars_id
-        | {verifica_existe_var(id_a_verificar);} IGUALR {g_queue_push_head(POperadores,19);/*operador asigancion(=)*/} var_init {
+        | {/*Regla 1*/verifica_existe_var(id_a_verificar);} IGUALR {/*Regla 2*/g_queue_push_head(POperadores,19);/*operador asigancion(=)*/} var_init {
+		//regla 3
 		printf("Genera cuadruplo =\n");
 		generar_cuadruplo_asignacion();	}
 	var_initp
@@ -841,14 +862,15 @@ var_initp: COMA vars_id
            | ;
 
 funcion: FUNCION tipof ID{
-	//Regla 35
+	//Regla 101
 	insert_proc_to_table(yylval.str);
+	//Regla 35
 	bandera_return = 0;
 	/*Regla 46*/ 
 	if(tipo_funcion_actual != 'V'){
 		insert_var_to_table(proc_actual,"programa");
 	}
-	} APARENTESIS funcionpp CPARENTESIS ALLAVE funcionv funcionp CLLAVE{
+	} APARENTESIS funcionpp CPARENTESIS ALLAVE {/*Regla 33*/insert_dir_inicial();} funcionv funcionp CLLAVE{
 	//Regla 34
 	//Locales
 	enteroslocales = 210000;
@@ -882,22 +904,24 @@ funcion: FUNCION tipof ID{
 	};
 funcionv: 	vars funcionv
 		|;
-tipof: tipo{
+tipof: tipo{//Regla 49
 		tipo_funcion_actual = tipo_actual;
-		
 		}
-	|  {tipo_funcion_actual= 'V';};
-funcionp: {insert_dir_inicial();}estatutofuncion funcionp
+	|  { 	//Regla 48
+		tipo_funcion_actual= 'V';};
+funcionp: estatutofuncion funcionp
 	| ;
 funcionpp: params 
 	| ;
 
-main: PRINCIPAL{insert_proc_to_table(yylval.str);} ALLAVE{
+main: PRINCIPAL{/*Regla 101*/insert_proc_to_table(yylval.str);} ALLAVE{
+		//Regla 50
 		//Rellenar goto inicial del main con el contador de cuadruplos
 		cuadruplo *tmp = g_slice_new(cuadruplo);
 		tmp = g_queue_peek_nth(cuadruplos,0);
 		tmp->destino = contador_cuadruplos;
 		} mainv {
+		//Regla 33
 		insert_dir_inicial();
 		}bloque CLLAVE;
 mainv: 		vars mainv
@@ -905,20 +929,20 @@ mainv: 		vars mainv
 bloque: estatuto bloque
 	| ;
 
-tipo:	 ENTERO {tipo_actual= 'I';}
-	| FLOTANTE {tipo_actual= 'F';}
-	| CARACTER {tipo_actual= 'C';}
-	| PALABRA {tipo_actual= 'S';}
-	| LOGICO {tipo_actual= 'L';};
+tipo:	 ENTERO {/*Regla 102*/tipo_actual= 'I';}
+	| FLOTANTE {/*Regla 102*/tipo_actual= 'F';}
+	| CARACTER {/*Regla 102*/tipo_actual= 'C';}
+	| PALABRA {/*Regla 102*/tipo_actual= 'S';}
+	| LOGICO {/*Regla 102*/tipo_actual= 'L';};
 
-varcte: CTE {insert_constante_to_table(yylval.integer,1);}
-	| CTESTRING {insert_constante_to_table(yylval.str,3);}
-	| CTF {insert_constante_to_table(yylval.str,2);}
-	| CAR {insert_constante_to_table(yylval.str,4);}
+varcte: CTE {/*Regla 16*/insert_constante_to_table(yylval.integer,1);}
+	| CTESTRING {/*Regla 16*/insert_constante_to_table(yylval.str,3);}
+	| CTF {/*Regla 16*/insert_constante_to_table(yylval.str,2);}
+	| CAR {/*Regla 16*/insert_constante_to_table(yylval.str,4);}
 	| VACIO
 	| VERPISTA
-	| VERDADERO{insert_constante_to_table(yylval.str,5);}
-	| FALSO{insert_constante_to_table(yylval.str,5);};
+	| VERDADERO{/*Regla 16*/insert_constante_to_table(yylval.str,5);}
+	| FALSO{/*Regla 16*/insert_constante_to_table(yylval.str,5);};
 
 estatutofuncion: estatuto
 		|regresa;
@@ -929,11 +953,12 @@ estatuto: empieza_id
 		|ciclo
 		|accion;
 		
-empieza_id: ID{id_a_verificar=yylval.str;} empieza_idp;
+empieza_id: ID{/*Regla 17*/id_a_verificar=yylval.str;} empieza_idp;
 empieza_idp: ejecuta_funcion
             | asignacion;
 
 ejecuta_funcion:  APARENTESIS{
+			/*Regla 105*/
 			verifica_existe_procs(id_a_verificar);
 						
 			//Regla 36
@@ -949,18 +974,19 @@ ejecuta_funcion:  APARENTESIS{
 	
 			g_queue_pop_head(PFunciones);
 			int contador_parametros = g_queue_pop_head(PParametros);
-			if(g_queue_get_length(ft->parametros) != contador_parametros + 1){
+			if(g_queue_get_length(ft->parametros) != contador_parametros){
 				printf("Error: Menos parámetros de los esperados en la linea %d\n",yylineno);
 				exit(1);
 			}
 			//Regla 40
+			//GOSUB
 			generar_cuadruplo_funcion(24,func,ft->dir_inicial,-1);
 			} PUNTOCOMA;
 
 paramsf: params2
           | ;
 
-regresa: REGRESA{bandera_return = 1;} mmexp {
+regresa: REGRESA{/*Regla 44*/bandera_return = 1;} mmexp {
 	//Regla 45
 	int expresion = g_queue_pop_head(POperandos);
 	int tipoexp = g_queue_pop_head(PTipos) - 1;
@@ -986,8 +1012,8 @@ regresa: REGRESA{bandera_return = 1;} mmexp {
 	g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
 	variable *global = g_slice_new(variable);
 	global = g_hash_table_lookup(tabla->var_table,(gpointer)proc_actual);
-	printf("Direccion Variable Global: %s %d\n",proc_actual, global->dir_virtual);
-	  printf("Hola\n");
+	//printf("Direccion Variable Global: %s %d\n",proc_actual, global->dir_virtual);
+	  //printf("Hola\n");
 	
 	
 	char tnuevo = cubo[19-1][traduce_tipo(tipo_funcion_actual)][tipoexp];
@@ -1005,29 +1031,31 @@ regresa: REGRESA{bandera_return = 1;} mmexp {
 	
 	}PUNTOCOMA;
 
-asignacion: {verifica_existe_var(id_a_verificar);} asignacionp  PUNTOCOMA;
+asignacion: {/*Regla 104*/verifica_existe_var(id_a_verificar);} asignacionp  PUNTOCOMA;
 asignacionp: 	asigp
 		| ap;
-asigp: 		IGUALR {g_queue_push_head(POperadores,19);/*operador asigancion(=)*/}lea {
+asigp: 		IGUALR {/*Regla 2*/g_queue_push_head(POperadores,19);/*operador asigancion(=)*/}lea {
+		//Regla 3
 		printf("Genera cuadruplo =\n");
 		generar_cuadruplo_asignacion();	};
 lea: 	lectura
 		  |mmexp;
 
-ap:		MAS{g_queue_push_head(POperadores,1);/*operador +*/} maiap
-		|MENOS{g_queue_push_head(POperadores,4);/*operador -*/} miap;
-maiap:		MAS{ generar_cuadruplo_expresion_unaria();}
-		| IGUALR atipo {generar_cuadruplo_expresion();};
-miap:		MENOS { generar_cuadruplo_expresion_unaria();}
-		|IGUALR atipo{generar_cuadruplo_expresion();};
+ap:		MAS{/*Regla 2*/g_queue_push_head(POperadores,1);/*operador +*/} maiap
+		|MENOS{/*Regla 2*/g_queue_push_head(POperadores,4);/*operador -*/} miap;
+maiap:		MAS{/*Regla 4*/generar_cuadruplo_expresion_unaria();}
+		| IGUALR atipo {/*Regla 5*/generar_cuadruplo_expresion();};
+miap:		MENOS {/*Regla 4*/ generar_cuadruplo_expresion_unaria();}
+		|IGUALR atipo{/*Regla 5*/generar_cuadruplo_expresion();};
 
-atipo:		CTE {insert_constante_to_table(yylval.integer,1);}
-		| CTF {insert_constante_to_table(yylval.integer,2);}
-		| ID{verifica_existe_var(yylval.str);};
+atipo:		CTE {/*Regla 16*/insert_constante_to_table(yylval.integer,1);}
+		| CTF {/*Regla 16*/insert_constante_to_table(yylval.integer,2);}
+		| ID{/*Regla 104*/verifica_existe_var(yylval.str);};
 
 condicion: c
 	|  cp;
 c:	SI APARENTESIS condicion_exp {
+		//Regla 20
 		int aux = g_queue_pop_head(PTipos);
 		
 		if(aux != 5){
@@ -1041,8 +1069,8 @@ c:	SI APARENTESIS condicion_exp {
 		
 		
 	} CPARENTESIS ALLAVE bloque CLLAVE sip {
+		//Regla 22
 		int final = g_queue_pop_head(PSaltos);
-		//printf("salto %d\n",final);
 		//Rellenar GoTo con el contador de cuádruplos para el final
 		cuadruplo *tmp = g_slice_new(cuadruplo);
 		tmp = g_queue_pop_nth(cuadruplos,(guint)final-1);
@@ -1052,6 +1080,7 @@ c:	SI APARENTESIS condicion_exp {
 condicion_exp: mmexp
 		| accionsi;
 sip:	SINO{
+		//Regla 21
 		printf("Genera cuadruplo goto\n");
 		generar_cuadruplo(21,-1,-1,-1);
 		int falso = g_queue_pop_head(PSaltos);
@@ -1067,6 +1096,7 @@ sip:	SINO{
 sipp: 	condicion
 	| ALLAVE bloque CLLAVE;
 cp: 	SELECCIONA APARENTESIS exp CPARENTESIS ALLAVE{
+		//Regla 42
 		g_queue_push_head(PSwitch,0);		
 		} cuandop CLLAVE{
 		//Regla 30
@@ -1111,7 +1141,7 @@ cuandop: CUANDO varselecciona{
 		tmp->destino = contador_cuadruplos;
 		g_queue_push_nth(cuadruplos,(gpointer)tmp,falso-1);
 		g_queue_push_head(PSaltos,contador_cuadruplos-1);
-		//Regla 42
+		//Regla 51
 		int acum = g_queue_pop_head(PSwitch);
 		acum++;
 		g_queue_push_head(PSwitch,acum);
@@ -1136,10 +1166,11 @@ escriturap: exp {
 e: 	CONCA {/*Regla 2*/g_queue_push_head(POperadores,9);/*operador concatenacion(.)*/} escriturap
 	| ;
 
-lectura: LEE APARENTESIS CPARENTESIS {insert_constante_to_table("Lectura de pantalla",3);};
+lectura: LEE APARENTESIS CPARENTESIS {/*Regla 16*/insert_constante_to_table("Lectura de pantalla",3);};
 
-ciclo: MIENTRAS{g_queue_push_head(PSaltos,contador_cuadruplos); } APARENTESIS mmexp CPARENTESIS ALLAVE
-	{ 	int aux = g_queue_pop_head(PTipos);
+ciclo: MIENTRAS{/* Regla 23*/g_queue_push_head(PSaltos,contador_cuadruplos); } APARENTESIS mmexp CPARENTESIS ALLAVE
+	{ 	//Regla 24
+		int aux = g_queue_pop_head(PTipos);
 		
 		if(aux != 5){
 			printf("Error: Se espera un valor logico en la línea %d\n",yylineno);
@@ -1150,6 +1181,7 @@ ciclo: MIENTRAS{g_queue_push_head(PSaltos,contador_cuadruplos); } APARENTESIS mm
 		generar_cuadruplo(22,resultado,-1,-1);		
 		g_queue_push_head(PSaltos,contador_cuadruplos-1);
 	} bloque CLLAVE {
+		//Regla 25
 		int falso = g_queue_pop_head(PSaltos);
 		int retorno = g_queue_pop_head(PSaltos);
 		generar_cuadruplo(21,-1,-1,retorno);
@@ -1171,15 +1203,15 @@ accionsi: acciones{
 	printf("Genera cuadruplo de accion\n");
 	generar_cuadruplo(accion,-1,-1,-1);	
 	} APARENTESIS CPARENTESIS;
-acciones: ADELANTE{accion = 28;}
-	| ATRAS{accion = 29;}
-	| ROTADERECHA{accion = 30;}
-	| ROTAIZQUIERDA{accion = 31;}
-	| TOMARTESORO{accion = 32;}
-	| TOPA{accion = 33;};
+acciones: ADELANTE{/*Regla 52*/accion = 28;}
+	| ATRAS{/*Regla 52*/accion = 29;}
+	| ROTADERECHA{/*Regla 52*/accion = 30;}
+	| ROTAIZQUIERDA{/*Regla 52*/accion = 31;}
+	| TOMARTESORO{/*Regla 52*/accion = 32;}
+	| TOPA{/*Regla 52*/accion = 33;};
 
 params: tipo paramsp;
-paramsp: ID{insert_param_tipo();insert_var_to_table(yylval.str,proc_actual);/*Regla 103*/} paramspp;
+paramsp: ID{/*Regla 19*/insert_param_tipo();/*Regla 103*/insert_var_to_table(yylval.str,proc_actual);} paramspp;
 paramspp: COMA params
 	| ;
 params2: exp{ 
@@ -1206,93 +1238,107 @@ params2: exp{
 	//Generar cuadruplo parametro
 	printf("Genera cuadruplo parametro \n");
 	generar_cuadruplo(26,argumento,contador_parametros+1,-1);
+
+	//Regla 38
+	int p = g_queue_pop_head(PParametros);
+	p++;
+	g_queue_push_head(PParametros,p);
+	
 	} params2p;
-params2p: COMA{
-		//Regla 38
-		int p = g_queue_pop_head(PParametros);
-		p++;
-		g_queue_push_head(PParametros,p);
-		} params2
+params2p: COMA params2
 	| ;
 
 mmexp: mexp {
-  if(g_queue_peek_head(POperadores) == 17){
+	//Regla 9
+	  if(g_queue_peek_head(POperadores) == 17){
   			printf("Genera cuadruplo or \n");
 			generar_cuadruplo_expresion();		
 	}} mmexpp;
-mmexpp: O {g_queue_push_head(POperadores,17);/*operador or*/} mmexp 
+mmexpp: O {/*Regla 2*/g_queue_push_head(POperadores,17);/*operador or*/} mmexp 
 	| ;
 	
 mexp: expresion{
+	//Regla 8
   if(g_queue_peek_head(POperadores) == 16){
   			printf("Genera cuadruplo and /\n");
 			generar_cuadruplo_expresion();		
 	}} mexpp;
-mexpp: Y{g_queue_push_head(POperadores,16);/*operador and*/} mexp
+mexpp: Y{/*Regla 2*/g_queue_push_head(POperadores,16);/*operador and*/} mexp
 	| ;
 	
 expresion: exp{
+	//Regla 7
   if(valida_existencia_logico(g_queue_peek_head(POperadores))){
   			printf("Genera cuadruplo < > <= >= <>\n");
 			generar_cuadruplo_expresion();		
 	}} expresionp;
 expresionp: ep expresion 
 		| ;
-ep: 	MAYORQUE{g_queue_push_head(POperadores,13);/*operador mayorque*/ exp_operador_actual = 13;}  epp
-	|MENORQUE{g_queue_push_head(POperadores,10);/*operador menorque*/ exp_operador_actual = 10;} epp
-	| DIFERENTE{g_queue_push_head(POperadores,11);/*operador diferente*/}
-	| IGUALR IGUALR  {g_queue_push_head(POperadores,15);/*operador igual igual*/} ;
-epp: IGUALR {int operadoranterior = g_queue_pop_head(POperadores);
+ep: 	MAYORQUE{/*Regla 2*/g_queue_push_head(POperadores,13);/*operador mayorque*/ exp_operador_actual = 13;}  epp
+	|MENORQUE{/*Regla 2*/g_queue_push_head(POperadores,10);/*operador menorque*/ exp_operador_actual = 10;} epp
+	| DIFERENTE{/*Regla 2*/g_queue_push_head(POperadores,11);/*operador diferente*/}
+	| IGUALR IGUALR  {/*Regla 2*/g_queue_push_head(POperadores,15);/*operador igual igual*/} ;
+epp: IGUALR {
+		//Regla 6
+		int operadoranterior = g_queue_pop_head(POperadores);
 		int operadorreal = dame_operador_logico(operadoranterior,exp_operador_actual);
 		g_queue_push_head(POperadores,operadorreal);
 		}
 	| ;
 	
 exp: termino
-  {if(g_queue_peek_head(POperadores) == 1 || g_queue_peek_head(POperadores) == 4){
+  {	//Regla 10
+  	if(g_queue_peek_head(POperadores) == 1 || g_queue_peek_head(POperadores) == 4){
 		printf("Genera cuadruplo + o -\n");
 		generar_cuadruplo_expresion();		
 	}} expp;
-expp: MAS{g_queue_push_head(POperadores,1);printf("Push +\n");/*operador suma*/}  exp
-	| MENOS{g_queue_push_head(POperadores,4);printf("Push -\n");/*operador resta*/}  exp 
+expp: MAS{ /*Regla 2*/g_queue_push_head(POperadores,1);printf("Push +\n");/*operador suma*/}  exp
+	| MENOS{ /*Regla 2*/g_queue_push_head(POperadores,4);printf("Push -\n");/*operador resta*/}  exp 
 	| ;
 
 termino: factor
-  {if(g_queue_peek_head(POperadores) == 7 || g_queue_peek_head(POperadores) == 8){
-    printf("Genera cuadruplo * o /\n");
+  {	//Regla 11
+  	if(g_queue_peek_head(POperadores) == 7 || g_queue_peek_head(POperadores) == 8){
+    	printf("Genera cuadruplo * o /\n");
 		generar_cuadruplo_expresion();		
 	}} 
 	terminop;
-terminop: POR{g_queue_push_head(POperadores,7);/*operador multiplica*/} termino
-	| ENTRE{g_queue_push_head(POperadores,8);/*operador division*/} termino
+terminop: POR{/*Regla 2*/g_queue_push_head(POperadores,7);/*operador multiplica*/} termino
+	| ENTRE{/*Regla 2*/g_queue_push_head(POperadores,8);/*operador division*/} termino
 	| ;
 
 factor: factorp 
 	| factorpp
 	| factorppp;
-factorp: nf APARENTESIS{g_queue_push_head(POperadores,'(');} mmexp CPARENTESIS {if(g_queue_peek_head(POperadores) == '('){
-		g_queue_pop_head(POperadores);
+factorp: nf APARENTESIS{/*Regla 12*/g_queue_push_head(POperadores,'(');} mmexp CPARENTESIS {
+		/*Regla 13*/
+		if(g_queue_peek_head(POperadores) == '('){
+			g_queue_pop_head(POperadores);
 		}else{
-			printf("Mala construccion de expresion");
-		};
+			printf("Error: Mala construccion de expresión en la línea %d\n",yylineno);
+			exit(1);
+		}
+		//Regla 14
 		if(g_queue_peek_head(POperadores) == 18){
 			printf("Genera cuadruplo not\n");
 			generar_cuadruplo_expresion_unaria();
 		}
 		}
-nf:	NO{g_queue_push_head(POperadores,18);/*operador NOT*/}
+nf:	NO{/*Regla 2*/g_queue_push_head(POperadores,18);/*operador NOT*/}
 	|;
 factorpp: f varcte {
-  if(g_queue_peek_head(POperadores) == 18 || g_queue_peek_head(POperadores) == 20){
+	//Regla 15
+  	if(g_queue_peek_head(POperadores) == 18 || g_queue_peek_head(POperadores) == 20){
 		printf("Genera cuadruplo not o - \n");
 		generar_cuadruplo_expresion_unaria();
 	}
 	};
-f: 	MENOS {g_queue_push_head(POperadores,20);/*operador multiplica*/}
-	| NO {g_queue_push_head(POperadores,18);/*operador NOT*/}
+f: 	MENOS {/*Regla 2*/g_queue_push_head(POperadores,20);/*operador multiplica*/}
+	| NO {/*Regla 2*/g_queue_push_head(POperadores,18);/*operador NOT*/}
 	| ;
-factorppp: ID{id_a_verificar=yylval.str;} fun_var;
+factorppp: ID{/*Regla 17*/id_a_verificar=yylval.str;} fun_var;
 fun_var: APARENTESIS{
+		//Regla 105
 		verifica_existe_procs(id_a_verificar);
 					
 		//Regla 36
@@ -1302,27 +1348,32 @@ fun_var: APARENTESIS{
 		g_queue_push_head(PParametros,0);
 			
 	} paramsf CPARENTESIS{
-		verifica_existe_procs(id_a_verificar);
+		//verifica_existe_procs(id_a_verificar);
 		//Regla 39
 		char *func = g_queue_peek_head(PFunciones);
 		funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)func);
 	
 		g_queue_pop_head(PFunciones);
 		int contador_parametros = g_queue_pop_head(PParametros);
-		if(g_queue_get_length(ft->parametros) != contador_parametros + 1){
+		
+		if(g_queue_get_length(ft->parametros) != contador_parametros){
 			printf("Error: Menos parámetros de los esperados en la linea %d\n",yylineno);
 			exit(1);
 		}
 		//Regla 40
 		generar_cuadruplo_funcion(24,func,ft->dir_inicial,-1);
+
+		//Regla 47
+		inserta_procs_factor(id_a_verificar);
 	}
-         | {verifica_existe_var(id_a_verificar);
+         | {	//Regla 1
+         	verifica_existe_var(id_a_verificar);
          	
          	};
 	
-varselecciona: ID{verifica_existe_var(yylval.str);}
-		|CTE {insert_constante_to_table(yylval.integer,1);}
-		|CAR {insert_constante_to_table(yylval.str,4);};
+varselecciona: ID{/*Regla 104*/verifica_existe_var(yylval.str);}
+		|CTE {/*Regla 16*/insert_constante_to_table(yylval.integer,1);}
+		|CAR {/*Regla 16*/insert_constante_to_table(yylval.str,4);};
  
 
 %% 
