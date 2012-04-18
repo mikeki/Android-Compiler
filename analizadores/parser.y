@@ -632,8 +632,8 @@ void generar_cuadruplo_expresion(){
 		switch(operador){
 				case 3:
 				case 6:{
-					generar_cuadruplo(operador,operando1,operando2,tmp);
-					generar_cuadruplo(19,tmp,-1,operando1);
+				  g_queue_pop_head(POperadores);
+					generar_cuadruplo(operador,operando1,operando2,operando1);
 				}break;
 				default:{
 					generar_cuadruplo(operador,operando1,operando2,tmp);
@@ -728,8 +728,7 @@ void generar_cuadruplo_expresion_unaria(){
 		switch(operador){
 			case 2:
 			case 5:{
-				generar_cuadruplo(operador,operando1,1,tmp);
-				generar_cuadruplo(19,tmp,-1,operando1);
+				generar_cuadruplo(operador,operando1,-1,operando1);
 			}break;
 			default:{
 				generar_cuadruplo(operador,operando1,-1,tmp);
@@ -1044,9 +1043,9 @@ lea: 	lectura
 ap:		MAS{/*Regla 2*/g_queue_push_head(POperadores,1);/*operador +*/} maiap
 		|MENOS{/*Regla 2*/g_queue_push_head(POperadores,4);/*operador -*/} miap;
 maiap:		MAS{/*Regla 4*/generar_cuadruplo_expresion_unaria();}
-		| IGUALR atipo {/*Regla 5*/generar_cuadruplo_expresion();};
+		| IGUALR {verifica_existe_var(id_a_verificar); g_queue_push_head(POperadores,3);} atipo {/*Regla 5*/generar_cuadruplo_expresion();};
 miap:		MENOS {/*Regla 4*/ generar_cuadruplo_expresion_unaria();}
-		|IGUALR atipo{/*Regla 5*/generar_cuadruplo_expresion();};
+		|IGUALR{verifica_existe_var(id_a_verificar); g_queue_push_head(POperadores,6);} atipo{/*Regla 5*/generar_cuadruplo_expresion();};
 
 atipo:		CTE {/*Regla 16*/insert_constante_to_table(yylval.integer,1);}
 		| CTF {/*Regla 16*/insert_constante_to_table(yylval.integer,2);}
