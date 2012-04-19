@@ -896,10 +896,10 @@ funcion: FUNCION tipof ID{
 	}
 
 	//Generar cuadruplo de RET
-	if(tipo_funcion_actual == 'V'){
-		printf("Genera cuadruplo RET\n");
-		generar_cuadruplo_funcion(27,-1,-1,-1);
-	}
+	
+	printf("Genera cuadruplo RET\n");
+	generar_cuadruplo_funcion(27,-1,-1,-1);
+	
 	};
 funcionv: 	vars funcionv
 		|;
@@ -1019,14 +1019,7 @@ regresa: REGRESA{/*Regla 44*/bandera_return = 1;} mmexp {
 	if(tnuevo == 'E'){//E es error
 		printf("Error: Se espera un valor de tipo %s en el regresa en la linea %d\n",traduce_tipo2(traduce_tipo(tipo_funcion_actual) + 1),yylineno);
 		exit(1);
-	}else{
-		generar_cuadruplo(19,expresion,-1,global->dir_virtual);
-		
 	}
-
-	//Generar cuadruplo de RET
-	printf("Genera cuadruplo RET\n");
-	generar_cuadruplo_funcion(27,-1,-1,-1);
 	
 	}PUNTOCOMA;
 
