@@ -1267,7 +1267,7 @@ params2: exp{
 	
 	if(tipoarg != tipoparam){
 		printf("Error: Se espera un valor %s en la línea %d\n",traduce_tipo2(tipoparam),yylineno);
-			exit(1);
+		exit(1);
 	}
 	//Generar cuadruplo parametro
 	printf("Genera cuadruplo parametro \n");
@@ -1276,7 +1276,6 @@ params2: exp{
 	int p = GPOINTER_TO_INT(g_queue_pop_head(PParametros));
 	p++;
 	g_queue_push_head(PParametros,GINT_TO_POINTER(p));
-	
 	} params2p;
 params2p: COMA params2
 	| ;
@@ -1373,10 +1372,9 @@ factorppp: ID{/*Regla 17*/id_a_verificar=yylval.str;} fun_var;
 fun_var: APARENTESIS{
 		//Regla 105
 		verifica_existe_procs(id_a_verificar);
-					
 		//Regla 36
 		g_queue_push_head(PFunciones,id_a_verificar);
-		//ERA
+		printf("Genera cuadruplo de funcion: %s \n",id_a_verificar);
 		generar_cuadruplo_funcion(25,id_a_verificar,-1,-1);
 		g_queue_push_head(PParametros,GINT_TO_POINTER(0));
 			
@@ -1385,10 +1383,9 @@ fun_var: APARENTESIS{
 		//Regla 39
 		char *func = g_queue_peek_head(PFunciones);
 		funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)func);
-	
+    
 		g_queue_pop_head(PFunciones);
 		int contador_parametros = GPOINTER_TO_INT(g_queue_pop_head(PParametros));
-		
 		if(g_queue_get_length(ft->parametros) != contador_parametros){
 			printf("Error: Menos parámetros de los esperados en la linea %d\n",yylineno);
 			exit(1);
@@ -1397,7 +1394,7 @@ fun_var: APARENTESIS{
 		generar_cuadruplo_funcion(24,func,ft->dir_inicial,-1);
 
 		//Regla 47
-		inserta_procs_factor(id_a_verificar);
+		inserta_procs_factor(func);
 	}
          | {	//Regla 1
          	verifica_existe_var(id_a_verificar);
