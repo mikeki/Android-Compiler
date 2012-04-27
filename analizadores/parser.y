@@ -11,7 +11,6 @@ static char tipo_actual; //Tipo actual de variables
 static char tipo_funcion_actual;//Tipo actual de las funciones
 static int bandera_return;
 static char *id_a_verificar; //Varibale utilizada para verificar la existencia del id
-static int exp_operador_actual; //Variable utilizada en operaicones logicas con 2 simbolos
 static int contador_cuadruplos = 1; //Contador de cuadruplos realizados
 static int accion;
 extern int yylineno;
@@ -555,12 +554,10 @@ Parámetros: int operador1, int operador2
 Salida: int
 */
 int dame_operador_logico(int operador1, int operador2){
-	if(operador1 == 9 && operador2 == 18){// 9 = .(concatenación), 18 = no(negación)
-		return 11; // 11 = <>(diferente de)
-	}else if(operador1 == 12 && operador2 == 18){// 12 = <= (menor o igual a)
-		return 13;//13 = > (mayor que)
-	}else if(operador1 == 18 && operador2 == 18){
-		return 14; //14 = >= (mayor o igual)
+	if(operador1 == 10 && operador2 == 19){//(menor o igual a)
+		return 12;// (<=) Menor Igual
+	}else if(operador1 == 13 && operador2 == 19){
+		return 14; //(>=) Mayor Igual
 	}
 }
 
@@ -572,7 +569,7 @@ Parámetros: int operador
 Salida: int
 */
 int valida_existencia_logico(int operador){
-	if(operador >= 9 && operador <= 14){// 9 = .(concatenación), 14 = >= (mayor o igual)
+	if(operador >= 10 && operador <= 15){// 10 = (<), 15 == (igual igual)
 		return 1;
 	}else{
 		return 0;
@@ -693,7 +690,7 @@ void generar_cuadruplo_expresion_unaria(){
 	int tipo1 = g_queue_pop_head(PTipos);
 	printf("tipo1: %d\n", tipo1);
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
-	if(operador == 1 || operador == 4){
+	if(operador == 1 || operador == 4){//Indica si es ++ o --
 		operador++;
 	}
 
@@ -737,6 +734,47 @@ void generar_cuadruplo_expresion_unaria(){
 			}
 		}	
 	}
+}
+/*
+Descripción: Se encarga de generar el cuadruplo 
+para la ccion de ver pista.
+
+Parámetros: 
+Salida: void
+*/
+void generar_cuadruplo_verpista(){
+	int operador = 37;
+	printf("oper: %d ", operador);
+	
+	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+	
+	int tmp;
+	tmp = enterostemporales;
+	enterostemporales++;
+	tabla->tamano_temporales[0]++;	
+	generar_cuadruplo(operador,-1,-1,tmp);
+			
+}
+/*
+Descripción: Se encarga de generar el cuadruplo 
+para la accion con Destino temporal.
+
+Parámetros: 
+Salida: void
+*/
+void generar_cuadruplo_accionsi(int accion){
+	int operador = accion;
+	printf("oper: %d ", operador);
+	
+	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+	
+	int tmp;
+	tmp = logicostemporales;
+	logicostemporales++;
+	tabla->tamano_temporales[4]++;	
+	generar_cuadruplo(operador,-1,-1,tmp);
+	g_queue_push_head(POperandos,tmp);
+			
 }
 /*
 Descripción:Funcion que se encarga de insertar las constantes a la 
@@ -803,6 +841,7 @@ Salida: void
 */
 void insert_dir_inicial(){
 	funcion *proc = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+	
 	proc->dir_inicial = contador_cuadruplos;
 	
 }
@@ -826,7 +865,7 @@ char *str;
 } 
 %token ADELANTE ATRAS ROTADERECHA ROTAIZQUIERDA TOMARTESORO TOPA
 %token VERPISTA SI SINO MIENTRAS FUNCION ENTERO FLOTANTE SELECCIONA CUANDO
-%token REGRESA LOGICO PALABRA ESCRIBE LEE PRINCIPAL VACIO VERDADERO FALSO
+%token REGRESA LOGICO PALABRA ESCRIBE LEE PRINCIPAL VERDADERO FALSO
 %token Y O NO PROGRAMA CARACTER COMA PUNTOCOMA IGUALP ALLAVE CLLAVE
 %token IGUALR MAYORQUE MENORQUE DIFERENTE APARENTESIS CPARENTESIS
 %token MAS MENOS POR ENTRE CONCA
@@ -839,7 +878,7 @@ char *str;
 %start programa
 
 %% 
-programa: {/*Regla 43*/generar_cuadruplo(21,-1,-1,-1);/*goto del main*/ }PROGRAMA ID{/* Regla 48*/tipo_actual = 'V'; /*Regla 101*/insert_proc_to_table("programa");} IGUALP programap main;
+programa: {}PROGRAMA ID{/* Regla 48*/tipo_actual = 'V'; /*Regla 101*/insert_proc_to_table("programa"); /*Regla 33*/ insert_dir_inicial();/*Regla 43*/generar_cuadruplo(21,-1,-1,-1);/*goto del main*/ } IGUALP programap main;
 programap: programapp programappp;
 programapp: 	vars programapp
 		| ;
@@ -907,22 +946,20 @@ tipof: tipo{//Regla 49
 		tipo_funcion_actual = tipo_actual;
 		}
 	|  { 	//Regla 48
-		tipo_funcion_actual= 'V';};
+		tipo_funcion_actual= 'V';
+		tipo_actual = 'V';};
 funcionp: estatutofuncion funcionp
 	| ;
 funcionpp: params 
 	| ;
 
-main: PRINCIPAL{/*Regla 101*/insert_proc_to_table(yylval.str);} ALLAVE{
+main: PRINCIPAL{/* Regla 48*/tipo_actual = 'V';/*Regla 101*/insert_proc_to_table(yylval.str);/*Regla 33*/insert_dir_inicial();} ALLAVE{
 		//Regla 50
 		//Rellenar goto inicial del main con el contador de cuadruplos
 		cuadruplo *tmp = g_slice_new(cuadruplo);
 		tmp = g_queue_peek_nth(cuadruplos,0);
 		tmp->destino = contador_cuadruplos;
-		} mainv {
-		//Regla 33
-		insert_dir_inicial();
-		}bloque CLLAVE;
+		} mainv bloque CLLAVE;
 mainv: 		vars mainv
 		|;
 bloque: estatuto bloque
@@ -938,8 +975,7 @@ varcte: CTE {/*Regla 16*/insert_constante_to_table(yylval.integer,1);}
 	| CTESTRING {/*Regla 16*/insert_constante_to_table(yylval.str,3);}
 	| CTF {/*Regla 16*/insert_constante_to_table(yylval.str,2);}
 	| CAR {/*Regla 16*/insert_constante_to_table(yylval.str,4);}
-	| VACIO
-	| VERPISTA
+	| VERPISTA{/*Regla 53*/generar_cuadruplo_verpista(); }
 	| VERDADERO{/*Regla 16*/insert_constante_to_table(yylval.str,5);}
 	| FALSO{/*Regla 16*/insert_constante_to_table(yylval.str,5);};
 
@@ -1191,9 +1227,10 @@ accion: acciones{
 	} APARENTESIS CPARENTESIS PUNTOCOMA;
 	
 accionsi: acciones{
-	//Regla 41
+	//Regla 18
 	printf("Genera cuadruplo de accion\n");
-	generar_cuadruplo(accion,-1,-1,-1);	
+	generar_cuadruplo_accionsi(accion);
+	g_queue_push_head(PTipos,5);
 	} APARENTESIS CPARENTESIS;
 acciones: ADELANTE{/*Regla 52*/accion = 28;}
 	| ATRAS{/*Regla 52*/accion = 29;}
@@ -1266,14 +1303,14 @@ expresion: exp{
 	}} expresionp;
 expresionp: ep expresion 
 		| ;
-ep: 	MAYORQUE{/*Regla 2*/g_queue_push_head(POperadores,13);/*operador mayorque*/ exp_operador_actual = 13;}  epp
-	|MENORQUE{/*Regla 2*/g_queue_push_head(POperadores,10);/*operador menorque*/ exp_operador_actual = 10;} epp
+ep: 	MAYORQUE{/*Regla 2*/g_queue_push_head(POperadores,13);/*operador mayorque*/}  epp
+	|MENORQUE{/*Regla 2*/g_queue_push_head(POperadores,10);/*operador menorque*/} epp
 	| DIFERENTE{/*Regla 2*/g_queue_push_head(POperadores,11);/*operador diferente*/}
 	| IGUALR IGUALR  {/*Regla 2*/g_queue_push_head(POperadores,15);/*operador igual igual*/} ;
 epp: IGUALR {
 		//Regla 6
 		int operadoranterior = g_queue_pop_head(POperadores);
-		int operadorreal = dame_operador_logico(operadoranterior,exp_operador_actual);
+		int operadorreal = dame_operador_logico(operadoranterior,19);
 		g_queue_push_head(POperadores,operadorreal);
 		}
 	| ;
@@ -1315,7 +1352,7 @@ factorp: nf APARENTESIS{/*Regla 12*/g_queue_push_head(POperadores,'(');} mmexp C
 			printf("Genera cuadruplo not\n");
 			generar_cuadruplo_expresion_unaria();
 		}
-		}
+		};
 nf:	NO{/*Regla 2*/g_queue_push_head(POperadores,18);/*operador NOT*/}
 	|;
 factorpp: f varcte {
@@ -1370,10 +1407,10 @@ varselecciona: ID{/*Regla 104*/verifica_existe_var(yylval.str);}
 
 %% 
 main() { 
-objeto = fopen("codigo.obj", "w");
+objeto = fopen("codigo.roid", "w");
 crear_pilas_tablas();
   yyparse(); 
-//Impreison del directorio de procedimeintos en consola
+//Impresion del directorio de procedimeintos en consola
 imprime(dir_procs); 
 
 //Generar cuadruplo final END
@@ -1381,7 +1418,7 @@ generar_cuadruplo(36,-1,-1,-1);
 
 
 
-//Escirbir el directorio de procedimientos
+//Escribir el directorio de procedimientos
 g_hash_table_foreach(dir_procs,(GHFunc)imprime_dir_procs,NULL);
 
 

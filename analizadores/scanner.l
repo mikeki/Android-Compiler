@@ -37,7 +37,6 @@ ctef		[0-9]+"."[0-9]+
 "escribe" {return ESCRIBE;}
 "lee" {return LEE;}
 "principal" {yylval.str = "principal";return PRINCIPAL;}
-"vacio" {return VACIO;}
 "verdadero" {yylval.str = strdup(yytext); return VERDADERO;}
 "falso" {yylval.str = strdup(yytext); return FALSO;}
 "y" {return Y;}

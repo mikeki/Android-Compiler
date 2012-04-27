@@ -1,21 +1,30 @@
 programa holamundo:
 
-funcion hola(){
-	
+funcion uno(){
+	entero a, b, c, d, e;
+	flotante f, g, h, j;
+	palabra i,k,l,m,n;
+	logico p,q,r,s;
 
 }
 
-funcion flotante hola2(){
+funcion dos(){
+	entero a, d, e;
+	flotante f, g, j;
+	palabra i,k,l,m;
+	logico q,r,s;
 
-regresa 1.2 + 1.2;
+	a = 1 +2+3;
+	g = 1.1 + 1.1 + 1.1;
+	r = verdadero o verdadero;
+
 }
-
 
 principal{
 
+	logico a = verdadero o verdadero;
+	si(tomartesoro()){
 
-entero a;
-flotante b;
+	}
 
-b = hola2() + 3.4;
 }

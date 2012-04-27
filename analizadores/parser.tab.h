@@ -60,35 +60,34 @@
      ESCRIBE = 276,
      LEE = 277,
      PRINCIPAL = 278,
-     VACIO = 279,
-     VERDADERO = 280,
-     FALSO = 281,
-     Y = 282,
-     O = 283,
-     NO = 284,
-     PROGRAMA = 285,
-     CARACTER = 286,
-     COMA = 287,
-     PUNTOCOMA = 288,
-     IGUALP = 289,
-     ALLAVE = 290,
-     CLLAVE = 291,
-     IGUALR = 292,
-     MAYORQUE = 293,
-     MENORQUE = 294,
-     DIFERENTE = 295,
-     APARENTESIS = 296,
-     CPARENTESIS = 297,
-     MAS = 298,
-     MENOS = 299,
-     POR = 300,
-     ENTRE = 301,
-     CONCA = 302,
-     CTF = 303,
-     CTESTRING = 304,
-     ID = 305,
-     CAR = 306,
-     CTE = 307
+     VERDADERO = 279,
+     FALSO = 280,
+     Y = 281,
+     O = 282,
+     NO = 283,
+     PROGRAMA = 284,
+     CARACTER = 285,
+     COMA = 286,
+     PUNTOCOMA = 287,
+     IGUALP = 288,
+     ALLAVE = 289,
+     CLLAVE = 290,
+     IGUALR = 291,
+     MAYORQUE = 292,
+     MENORQUE = 293,
+     DIFERENTE = 294,
+     APARENTESIS = 295,
+     CPARENTESIS = 296,
+     MAS = 297,
+     MENOS = 298,
+     POR = 299,
+     ENTRE = 300,
+     CONCA = 301,
+     CTF = 302,
+     CTESTRING = 303,
+     ID = 304,
+     CAR = 305,
+     CTE = 306
    };
 #endif
 
@@ -99,7 +98,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 822 "parser.y"
+#line 861 "parser.y"
  
 char *integer; 
 char *float_n;
@@ -108,7 +107,7 @@ char *str;
 
 
 /* Line 1676 of yacc.c  */
-#line 112 "parser.tab.h"
+#line 111 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
