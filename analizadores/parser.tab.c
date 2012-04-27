@@ -73,6 +73,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
+#include <stdlib.h>
+#define GPOINTER_TO_INT(p) ((gint)  (glong) (p))
+#define GINT_TO_POINTER(i) ((gpointer) (glong) (i))
+
 
 static GHashTable *dir_procs; //Directerio de Procedimientos
 static GHashTable *tabla_constantes; //Tabla de constantes 
@@ -495,14 +499,14 @@ void verifica_existe_var(char *name){
 			exit(1);
 		}else{
 		  int tipot = traduce_tipo(global->tipo)+1;
-		  g_queue_push_head(PTipos,tipot);
+		  g_queue_push_head(PTipos,GINT_TO_POINTER(tipot));
 		  printf("Direccion Variable Global: %s %d\n",name, global->dir_virtual);
-		  g_queue_push_head(POperandos,global->dir_virtual);
+		  g_queue_push_head(POperandos,GINT_TO_POINTER(global->dir_virtual));
 		}
 	}else{
-	  g_queue_push_head(PTipos,traduce_tipo(local->tipo)+1);
+	  g_queue_push_head(PTipos,GINT_TO_POINTER(traduce_tipo(local->tipo)+1));
 	  printf("Direccion Variable Local: %s %d\n",name, local->dir_virtual);
-	  g_queue_push_head(POperandos,local->dir_virtual);
+	  g_queue_push_head(POperandos,GINT_TO_POINTER(local->dir_virtual));
 	}
 }
 
@@ -536,8 +540,8 @@ void inserta_procs_factor(char *name){
 	}
 	funcion *proc_global = g_hash_table_lookup(dir_procs,"programa");
 	variable *modulo = g_hash_table_lookup(proc_global->var_table,(gpointer)name);
-	g_queue_push_head(POperandos,modulo->dir_virtual);
-	g_queue_push_head(PTipos,traduce_tipo(modulo->tipo)+1);
+	g_queue_push_head(POperandos,GINT_TO_POINTER(modulo->dir_virtual));
+	g_queue_push_head(PTipos,GINT_TO_POINTER(traduce_tipo(modulo->tipo)+1));
 	printf("Direccion Variable Global: %s %d\n",name, modulo->dir_virtual);
 	
 }
@@ -592,7 +596,6 @@ void generar_cuadruplo(int operador, int operando1, int operando2, int resultado
 	c->operando2 = operando2;
 	c->destino = resultadotmp;
 	g_queue_push_tail(cuadruplos,(gpointer)c);
-	
 	//fprintf(objeto,"%d,%d,%d,%d\n",operador,operando1,operando2,resultadotmp);
 	contador_cuadruplos++;
 }
@@ -655,15 +658,15 @@ Parámetros:
 Salida: void
 */
 void generar_cuadruplo_expresion(){
-	int operando2 = (int)g_queue_pop_head(POperandos);
+	int operando2 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
 	printf("op2: %d ", operando2);
-	int operando1 = (int)g_queue_pop_head(POperandos);
+	int operando1 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
 	printf("op1: %d ", operando1);
-	int operador = (int)g_queue_pop_head(POperadores);
+	int operador = GPOINTER_TO_INT(g_queue_pop_head(POperadores));
 	printf("oper: %d ", operador);
-	int tipo2 = g_queue_pop_head(PTipos);
+	int tipo2 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
 	printf("tipo2: %d ", tipo2);
-	int tipo1 = g_queue_pop_head(PTipos);
+	int tipo1 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
 	printf("tipo1: %d\n", tipo1);
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 //	printf("op2: %d op1: %d oper: %d tipo1: %d tipo2: %d\n", operando2, operando1, operador, tipo1, tipo2);
@@ -705,8 +708,8 @@ void generar_cuadruplo_expresion(){
 				}break;
 				default:{
 					generar_cuadruplo(operador,operando1,operando2,tmp);
-					g_queue_push_head(POperandos,tmp);	
-					g_queue_push_head(PTipos,traduce_tipo(tnuevo)+1);
+					g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));	
+					g_queue_push_head(PTipos,GINT_TO_POINTER(traduce_tipo(tnuevo)+1));
 				}
 		}
 		
@@ -724,15 +727,15 @@ Parámetros:
 Salida: void
 */
 void generar_cuadruplo_asignacion(){
-	int operando2 = (int)g_queue_pop_head(POperandos);
+	int operando2 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
 	printf("op2: %d ", operando2);
-	int operando1 = (int)g_queue_pop_head(POperandos);
+	int operando1 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
 	printf("op1: %d ", operando1);
-	int operador = (int)g_queue_pop_head(POperadores);
+	int operador = GPOINTER_TO_INT(g_queue_pop_head(POperadores));
 	printf("oper: %d ", operador);
-	int tipo2 = g_queue_pop_head(PTipos);
+	int tipo2 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
 	printf("tipo2: %d ", tipo2);
-	int tipo1 = g_queue_pop_head(PTipos);
+	int tipo1 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
 	printf("tipo1: %d\n", tipo1);
 //	printf("op2: %d op1: %d oper: %d tipo1: %d tipo2: %d\n", operando2, operando1, operador, tipo1, tipo2);
 
@@ -754,11 +757,11 @@ Parámetros:
 Salida: void
 */
 void generar_cuadruplo_expresion_unaria(){
-	int operando1 = g_queue_pop_head(POperandos);
+	int operando1 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
 	printf("op1: %d ", operando1);
-	int operador = g_queue_pop_head(POperadores);
+	int operador = GPOINTER_TO_INT(g_queue_pop_head(POperadores));
 	printf("oper: %d ", operador);
-	int tipo1 = g_queue_pop_head(PTipos);
+	int tipo1 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
 	printf("tipo1: %d\n", tipo1);
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	if(operador == 1 || operador == 4){//Indica si es ++ o --
@@ -800,8 +803,8 @@ void generar_cuadruplo_expresion_unaria(){
 			}break;
 			default:{
 				generar_cuadruplo(operador,operando1,-1,tmp);
-				g_queue_push_head(POperandos,tmp);
-				g_queue_push_head(PTipos,traduce_tipo(tnuevo)+1);
+				g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));
+				g_queue_push_head(PTipos,GINT_TO_POINTER(traduce_tipo(tnuevo)+1));
 			}
 		}	
 	}
@@ -824,8 +827,8 @@ void generar_cuadruplo_verpista(){
 	enterostemporales++;
 	tabla->tamano_temporales[0]++;	
 	generar_cuadruplo(operador,-1,-1,tmp);
-	g_queue_push_head(POperandos,tmp);
-	g_queue_push_head(PTipos,1);
+	g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));
+	g_queue_push_head(PTipos,GINT_TO_POINTER(1));
 			
 }
 /*
@@ -846,7 +849,7 @@ void generar_cuadruplo_accionsi(int accion){
 	logicostemporales++;
 	tabla->tamano_temporales[4]++;	
 	generar_cuadruplo(operador,-1,-1,tmp);
-	g_queue_push_head(POperandos,tmp);
+	g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));
 			
 }
 /*
@@ -881,13 +884,13 @@ void insert_constante_to_table(char *valor, int tipo){
 		cte= g_slice_new(constante);
 		cte->dir_virtual = dir;
 		g_hash_table_insert(tabla_constantes,(gpointer)valor,(gpointer)cte);
-		g_queue_push_head(PTipos,tipo);
+		g_queue_push_head(PTipos,GINT_TO_POINTER(tipo));
 		printf("Direccion Constante: %d %s\n", dir, valor);
-		g_queue_push_head(POperandos,dir);
+		g_queue_push_head(POperandos,GINT_TO_POINTER(dir));
 	}else{
-		g_queue_push_head(PTipos,tipo);
+		g_queue_push_head(PTipos,GINT_TO_POINTER(tipo));
 		printf("Direccion Constante: %d %s\n", cte->dir_virtual, valor);
-		g_queue_push_head(POperandos,cte->dir_virtual);
+		g_queue_push_head(POperandos,GINT_TO_POINTER(cte->dir_virtual));
 	}
 }
 
@@ -901,7 +904,7 @@ Salida: void
 void insert_param_tipo(){
 	funcion *proc = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	
-	g_queue_push_tail(proc->parametros,traduce_tipo(tipo_actual)+1);
+	g_queue_push_tail(proc->parametros,GINT_TO_POINTER(traduce_tipo(tipo_actual)+1));
 	//printf("Se agrego a parametos: %d\n",g_queue_peek_nth(proc->parametros,0));
 	//g_queue_foreach(proc->parametros,(GHFunc)printf,NULL);
 }
@@ -933,7 +936,7 @@ void imprime(GHashTable *a){
 
 
 /* Line 189 of yacc.c  */
-#line 937 "parser.tab.c"
+#line 940 "parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -1019,7 +1022,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 863 "parser.y"
+#line 866 "parser.y"
  
 char *integer; 
 char *float_n;
@@ -1028,7 +1031,7 @@ char *str;
 
 
 /* Line 214 of yacc.c  */
-#line 1032 "parser.tab.c"
+#line 1035 "parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -1040,7 +1043,7 @@ char *str;
 
 
 /* Line 264 of yacc.c  */
-#line 1044 "parser.tab.c"
+#line 1047 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -1392,26 +1395,26 @@ static const yytype_int16 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   883,   883,   883,   883,   884,   885,   886,   887,   888,
-     890,   891,   891,   892,   893,   893,   893,   893,   898,   899,
-     900,   901,   902,   904,   913,   904,   945,   946,   947,   950,
-     953,   954,   955,   956,   958,   958,   958,   965,   966,   967,
-     968,   970,   971,   972,   973,   974,   976,   977,   978,   979,
-     980,   981,   982,   984,   985,   987,   988,   989,   990,   991,
-     993,   993,   994,   995,   997,  1007,   997,  1023,  1024,  1026,
-    1026,  1026,  1064,  1064,  1065,  1066,  1067,  1067,  1071,  1072,
-    1074,  1074,  1075,  1075,  1076,  1077,  1077,  1078,  1079,  1079,
-    1081,  1082,  1083,  1085,  1086,  1087,  1087,  1110,  1111,  1112,
-    1112,  1125,  1126,  1127,  1128,  1128,  1148,  1163,  1148,  1179,
-    1180,  1182,  1182,  1189,  1189,  1196,  1196,  1197,  1199,  1201,
-    1202,  1201,  1225,  1225,  1231,  1231,  1237,  1238,  1239,  1240,
-    1241,  1242,  1244,  1245,  1245,  1246,  1247,  1248,  1248,  1279,
-    1280,  1282,  1282,  1288,  1288,  1289,  1291,  1291,  1297,  1297,
-    1298,  1300,  1300,  1306,  1307,  1308,  1308,  1309,  1309,  1310,
-    1311,  1312,  1318,  1321,  1320,  1326,  1326,  1327,  1327,  1328,
-    1331,  1330,  1337,  1337,  1338,  1338,  1339,  1341,  1342,  1343,
-    1344,  1344,  1358,  1359,  1360,  1367,  1368,  1369,  1370,  1370,
-    1371,  1371,  1400,  1405,  1406,  1407
+       0,   886,   886,   886,   886,   887,   888,   889,   890,   891,
+     893,   894,   894,   895,   896,   896,   896,   896,   901,   902,
+     903,   904,   905,   907,   916,   907,   948,   949,   950,   953,
+     956,   957,   958,   959,   961,   961,   961,   968,   969,   970,
+     971,   973,   974,   975,   976,   977,   979,   980,   981,   982,
+     983,   984,   985,   987,   988,   990,   991,   992,   993,   994,
+     996,   996,   997,   998,  1000,  1010,  1000,  1026,  1027,  1029,
+    1029,  1029,  1067,  1067,  1068,  1069,  1070,  1070,  1074,  1075,
+    1077,  1077,  1078,  1078,  1079,  1080,  1080,  1081,  1082,  1082,
+    1084,  1085,  1086,  1088,  1089,  1090,  1090,  1113,  1114,  1115,
+    1115,  1128,  1129,  1130,  1131,  1131,  1151,  1166,  1151,  1182,
+    1183,  1185,  1185,  1192,  1192,  1199,  1199,  1200,  1202,  1204,
+    1205,  1204,  1228,  1228,  1234,  1234,  1240,  1241,  1242,  1243,
+    1244,  1245,  1247,  1248,  1248,  1249,  1250,  1251,  1251,  1281,
+    1282,  1284,  1284,  1290,  1290,  1291,  1293,  1293,  1299,  1299,
+    1300,  1302,  1302,  1308,  1309,  1310,  1310,  1311,  1311,  1312,
+    1313,  1314,  1320,  1323,  1322,  1328,  1328,  1329,  1329,  1330,
+    1333,  1332,  1339,  1339,  1340,  1340,  1341,  1343,  1344,  1345,
+    1346,  1346,  1360,  1361,  1362,  1369,  1370,  1371,  1372,  1372,
+    1373,  1373,  1402,  1407,  1408,  1409
 };
 #endif
 
@@ -2526,42 +2529,42 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 883 "parser.y"
+#line 886 "parser.y"
     {;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 883 "parser.y"
+#line 886 "parser.y"
     {/* Regla 48*/tipo_actual = 'V'; /*Regla 101*/insert_proc_to_table("programa"); /*Regla 33*/ insert_dir_inicial();/*Regla 43*/generar_cuadruplo(21,-1,-1,-1);/*goto del main*/ ;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 891 "parser.y"
+#line 894 "parser.y"
     {/*Regla 103 y 32*/id_a_verificar = yylval.str; insert_var_to_table(yylval.str,proc_actual);;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 893 "parser.y"
+#line 896 "parser.y"
     {/*Regla 1*/verifica_existe_var(id_a_verificar);;}
     break;
 
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 893 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,19);/*operador asigancion(=)*/;}
+#line 896 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(19));/*operador asigancion(=)*/;}
     break;
 
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 893 "parser.y"
+#line 896 "parser.y"
     {
 		//regla 3
 		printf("Genera cuadruplo =\n");
@@ -2571,7 +2574,7 @@ yyreduce:
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 904 "parser.y"
+#line 907 "parser.y"
     {
 	//Regla 101
 	insert_proc_to_table(yylval.str);
@@ -2587,14 +2590,14 @@ yyreduce:
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 913 "parser.y"
+#line 916 "parser.y"
     {/*Regla 33*/insert_dir_inicial();;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 913 "parser.y"
+#line 916 "parser.y"
     {
 	//Regla 34
 	//Locales
@@ -2624,7 +2627,7 @@ yyreduce:
 	//Generar cuadruplo de RET
 	
 	printf("Genera cuadruplo RET\n");
-	generar_cuadruplo_funcion(27,-1,-1,-1);
+	generar_cuadruplo(27,-1,-1,-1);
 	
 	;}
     break;
@@ -2632,7 +2635,7 @@ yyreduce:
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 947 "parser.y"
+#line 950 "parser.y"
     {//Regla 49
 		tipo_funcion_actual = tipo_actual;
 		;}
@@ -2641,7 +2644,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 950 "parser.y"
+#line 953 "parser.y"
     { 	//Regla 48
 		tipo_funcion_actual= 'V';
 		tipo_actual = 'V';;}
@@ -2650,14 +2653,14 @@ yyreduce:
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 958 "parser.y"
+#line 961 "parser.y"
     {/* Regla 48*/tipo_actual = 'V';/*Regla 101*/insert_proc_to_table(yylval.str);/*Regla 33*/insert_dir_inicial();;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 958 "parser.y"
+#line 961 "parser.y"
     {
 		//Regla 50
 		//Rellenar goto inicial del main con el contador de cuadruplos
@@ -2670,98 +2673,98 @@ yyreduce:
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 970 "parser.y"
+#line 973 "parser.y"
     {/*Regla 102*/tipo_actual= 'I';;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 971 "parser.y"
+#line 974 "parser.y"
     {/*Regla 102*/tipo_actual= 'F';;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 972 "parser.y"
+#line 975 "parser.y"
     {/*Regla 102*/tipo_actual= 'C';;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 973 "parser.y"
+#line 976 "parser.y"
     {/*Regla 102*/tipo_actual= 'S';;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 974 "parser.y"
+#line 977 "parser.y"
     {/*Regla 102*/tipo_actual= 'L';;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 976 "parser.y"
+#line 979 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.integer,1);;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 977 "parser.y"
+#line 980 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.str,3);;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 978 "parser.y"
+#line 981 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.str,2);;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 979 "parser.y"
+#line 982 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.str,4);;}
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 980 "parser.y"
+#line 983 "parser.y"
     {/*Regla 31*/generar_cuadruplo_verpista(); ;}
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 981 "parser.y"
+#line 984 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.str,5);;}
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 982 "parser.y"
+#line 985 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.str,5);;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 993 "parser.y"
+#line 996 "parser.y"
     {/*Regla 17*/id_a_verificar=yylval.str;;}
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 997 "parser.y"
+#line 1000 "parser.y"
     {
 			/*Regla 105*/
 			verifica_existe_procs(id_a_verificar);
@@ -2770,7 +2773,7 @@ yyreduce:
 			g_queue_push_head(PFunciones,id_a_verificar);
 			//ERA
 			generar_cuadruplo_funcion(25,id_a_verificar,-1,-1);
-			g_queue_push_head(PParametros,0);
+			g_queue_push_head(PParametros,GINT_TO_POINTER(0));
 			
 			;}
     break;
@@ -2778,14 +2781,14 @@ yyreduce:
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 1007 "parser.y"
+#line 1010 "parser.y"
     {
 			//Regla 39
 			char *func = g_queue_peek_head(PFunciones);
 			funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)func);
 	
 			g_queue_pop_head(PFunciones);
-			int contador_parametros = g_queue_pop_head(PParametros);
+			int contador_parametros = GPOINTER_TO_INT(g_queue_pop_head(PParametros));
 			if(g_queue_get_length(ft->parametros) != contador_parametros){
 				printf("Error: Menos parámetros de los esperados en la linea %d\n",yylineno);
 				exit(1);
@@ -2799,18 +2802,18 @@ yyreduce:
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 1026 "parser.y"
+#line 1029 "parser.y"
     {/*Regla 44*/bandera_return = 1;;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 1026 "parser.y"
+#line 1029 "parser.y"
     {
 	//Regla 45
-	int expresion = g_queue_pop_head(POperandos);
-	int tipoexp = g_queue_pop_head(PTipos) - 1;
+	int expresion = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
+	int tipoexp = GPOINTER_TO_INT(g_queue_pop_head(PTipos)) - 1;
 
 	if(tipo_funcion_actual == 'V'){
 		printf("Error: En la función %s no debe haber regresa\n",proc_actual);
@@ -2824,7 +2827,7 @@ yyreduce:
 
 	//Generar cuadruplo de RETURN
 	printf("Genera cuadruplo RETURN\n");
-	generar_cuadruplo_funcion(35,expresion,-1,-1);
+	generar_cuadruplo(35,expresion,-1,-1);
 
 	//Generar cuadruplo de asignacion
 	//obtener dir virtual de la golab de la funcion
@@ -2849,21 +2852,21 @@ yyreduce:
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 1064 "parser.y"
+#line 1067 "parser.y"
     {/*Regla 104*/verifica_existe_var(id_a_verificar);;}
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 1067 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,19);/*operador asigancion(=)*/;}
+#line 1070 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(19));/*operador asigancion(=)*/;}
     break;
 
   case 77:
 
 /* Line 1455 of yacc.c  */
-#line 1067 "parser.y"
+#line 1070 "parser.y"
     {
 		//Regla 3
 		printf("Genera cuadruplo =\n");
@@ -2873,96 +2876,96 @@ yyreduce:
   case 80:
 
 /* Line 1455 of yacc.c  */
-#line 1074 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,1);/*operador +*/;}
+#line 1077 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(1));/*operador +*/;}
     break;
 
   case 82:
 
 /* Line 1455 of yacc.c  */
-#line 1075 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,4);/*operador -*/;}
+#line 1078 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(4));/*operador -*/;}
     break;
 
   case 84:
 
 /* Line 1455 of yacc.c  */
-#line 1076 "parser.y"
+#line 1079 "parser.y"
     {/*Regla 4*/generar_cuadruplo_expresion_unaria();;}
     break;
 
   case 85:
 
 /* Line 1455 of yacc.c  */
-#line 1077 "parser.y"
-    {verifica_existe_var(id_a_verificar); g_queue_push_head(POperadores,3);;}
+#line 1080 "parser.y"
+    {verifica_existe_var(id_a_verificar); g_queue_push_head(POperadores,GINT_TO_POINTER(3));;}
     break;
 
   case 86:
 
 /* Line 1455 of yacc.c  */
-#line 1077 "parser.y"
+#line 1080 "parser.y"
     {/*Regla 5*/generar_cuadruplo_expresion();;}
     break;
 
   case 87:
 
 /* Line 1455 of yacc.c  */
-#line 1078 "parser.y"
+#line 1081 "parser.y"
     {/*Regla 4*/ generar_cuadruplo_expresion_unaria();;}
     break;
 
   case 88:
 
 /* Line 1455 of yacc.c  */
-#line 1079 "parser.y"
-    {verifica_existe_var(id_a_verificar); g_queue_push_head(POperadores,6);;}
+#line 1082 "parser.y"
+    {verifica_existe_var(id_a_verificar); g_queue_push_head(POperadores,GINT_TO_POINTER(6));;}
     break;
 
   case 89:
 
 /* Line 1455 of yacc.c  */
-#line 1079 "parser.y"
+#line 1082 "parser.y"
     {/*Regla 5*/generar_cuadruplo_expresion();;}
     break;
 
   case 90:
 
 /* Line 1455 of yacc.c  */
-#line 1081 "parser.y"
+#line 1084 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.integer,1);;}
     break;
 
   case 91:
 
 /* Line 1455 of yacc.c  */
-#line 1082 "parser.y"
+#line 1085 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.integer,2);;}
     break;
 
   case 92:
 
 /* Line 1455 of yacc.c  */
-#line 1083 "parser.y"
+#line 1086 "parser.y"
     {/*Regla 104*/verifica_existe_var(yylval.str);;}
     break;
 
   case 95:
 
 /* Line 1455 of yacc.c  */
-#line 1087 "parser.y"
+#line 1090 "parser.y"
     {
 		//Regla 20
-		int aux = g_queue_pop_head(PTipos);
+		int aux = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
 		
 		if(aux != 5){
 			printf("Error: Se espera un valor lógico en la línea %d\n",yylineno);
 			exit(1);
 		}
-		int resultado = g_queue_pop_head(POperandos);
+		int resultado = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
 		printf("Genera cuadruplo gotof\n");
 		generar_cuadruplo(22,resultado,-1,-1);
-		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+		g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos-1));
 		
 		
 	;}
@@ -2971,10 +2974,10 @@ yyreduce:
   case 96:
 
 /* Line 1455 of yacc.c  */
-#line 1101 "parser.y"
+#line 1104 "parser.y"
     {
 		//Regla 22
-		int final = g_queue_pop_head(PSaltos);
+		int final = GPOINTER_TO_INT(g_queue_pop_head(PSaltos));
 		//Rellenar GoTo con el contador de cuádruplos para el final
 		cuadruplo *tmp = g_slice_new(cuadruplo);
 		tmp = g_queue_pop_nth(cuadruplos,(guint)final-1);
@@ -2986,43 +2989,43 @@ yyreduce:
   case 99:
 
 /* Line 1455 of yacc.c  */
-#line 1112 "parser.y"
+#line 1115 "parser.y"
     {
 		//Regla 21
 		printf("Genera cuadruplo goto\n");
 		generar_cuadruplo(21,-1,-1,-1);
-		int falso = g_queue_pop_head(PSaltos);
+		int falso = GPOINTER_TO_INT(g_queue_pop_head(PSaltos));
 
 		//Rellenar falso con el contador de cuadruplos
 		cuadruplo *tmp = g_slice_new(cuadruplo);
 		tmp = g_queue_pop_nth(cuadruplos,falso-1);
 		tmp->destino = contador_cuadruplos;
 		g_queue_push_nth(cuadruplos,(gpointer)tmp,falso-1);
-		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+		g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos-1));
 	;}
     break;
 
   case 104:
 
 /* Line 1455 of yacc.c  */
-#line 1128 "parser.y"
+#line 1131 "parser.y"
     {
 		//Regla 42
-		g_queue_push_head(PSwitch,0);		
+		g_queue_push_head(PSwitch,GINT_TO_POINTER(0));		
 		;}
     break;
 
   case 105:
 
 /* Line 1455 of yacc.c  */
-#line 1131 "parser.y"
+#line 1134 "parser.y"
     {
 		//Regla 30
 		int p;
-		int acum = g_queue_pop_head(PSwitch);
+		int acum = GPOINTER_TO_INT(g_queue_pop_head(PSwitch));
 		int i = 0;
 		while(i < acum){
-			p = g_queue_pop_head(PSaltos);
+			p = GPOINTER_TO_INT(g_queue_pop_head(PSaltos));
 			cuadruplo *tmp = g_slice_new(cuadruplo);
 			tmp = g_queue_pop_nth(cuadruplos,p-1);
 			tmp->destino = contador_cuadruplos;
@@ -3038,21 +3041,21 @@ yyreduce:
   case 106:
 
 /* Line 1455 of yacc.c  */
-#line 1148 "parser.y"
+#line 1151 "parser.y"
     {
 		//Regla 28
-		g_queue_push_head(POperadores,15);
-		int cte = g_queue_peek_nth(POperandos,1);
-		int tipo = g_queue_peek_nth(PTipos,1);
+		g_queue_push_head(POperadores,GINT_TO_POINTER(15));
+		int cte = GPOINTER_TO_INT(g_queue_peek_nth(POperandos,1));
+		int tipo = GPOINTER_TO_INT(g_queue_peek_nth(PTipos,1));
 		generar_cuadruplo_expresion();
-		int tmp = g_queue_pop_head(POperandos);
+		int tmp = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
 		g_queue_pop_head(PTipos);
 		printf("Genera cuadruplo gotof\n");
 		generar_cuadruplo(22,tmp,-1,-1);
-		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+		g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos-1));
 		//Volver a meter tipo y cte de comparacion
-		g_queue_push_head(POperandos,cte);
-		g_queue_push_head(PTipos,tipo);
+		g_queue_push_head(POperandos,GINT_TO_POINTER(cte));
+		g_queue_push_head(PTipos,GINT_TO_POINTER(tipo));
 		
 	;}
     break;
@@ -3060,10 +3063,10 @@ yyreduce:
   case 107:
 
 /* Line 1455 of yacc.c  */
-#line 1163 "parser.y"
+#line 1166 "parser.y"
     {
 		//Regla29
-		int falso = g_queue_pop_head(PSaltos);
+		int falso = GPOINTER_TO_INT(g_queue_pop_head(PSaltos));
 		printf("Genera cuadruplo goto\n");
 		generar_cuadruplo(21,-1,-1,-1);
 		//Rellenar falso con contador_cuadruplos
@@ -3071,22 +3074,22 @@ yyreduce:
 		tmp = g_queue_pop_nth(cuadruplos,falso-1);
 		tmp->destino = contador_cuadruplos;
 		g_queue_push_nth(cuadruplos,(gpointer)tmp,falso-1);
-		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+		g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos-1));
 		//Regla 51
-		int acum = g_queue_pop_head(PSwitch);
+		int acum = GPOINTER_TO_INT(g_queue_pop_head(PSwitch));
 		acum++;
-		g_queue_push_head(PSwitch,acum);
+		g_queue_push_head(PSwitch,GINT_TO_POINTER(acum));
 	;}
     break;
 
   case 111:
 
 /* Line 1455 of yacc.c  */
-#line 1182 "parser.y"
+#line 1185 "parser.y"
     {
 		//Regla 26
-		int operando1 = (int)g_queue_pop_head(POperandos);	
-		int tipo1 = g_queue_pop_head(PTipos);
+		int operando1 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));	
+		int tipo1 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
 		printf("Genera cuadruplo de escribe\n");
 		generar_cuadruplo(34,operando1,-1,-1);
 		;}
@@ -3095,10 +3098,10 @@ yyreduce:
   case 113:
 
 /* Line 1455 of yacc.c  */
-#line 1189 "parser.y"
+#line 1192 "parser.y"
     { 
 		//Regla 27
-		if(g_queue_peek_head(POperadores) == 9){
+		if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 9){
 		printf("Genera cuadruplo .\n");
 		generar_cuadruplo_expresion();		
 		};}
@@ -3107,50 +3110,50 @@ yyreduce:
   case 115:
 
 /* Line 1455 of yacc.c  */
-#line 1196 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,9);/*operador concatenacion(.)*/;}
+#line 1199 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(9));/*operador concatenacion(.)*/;}
     break;
 
   case 118:
 
 /* Line 1455 of yacc.c  */
-#line 1199 "parser.y"
+#line 1202 "parser.y"
     {/*Regla 16*/insert_constante_to_table("Lectura de pantalla",3);;}
     break;
 
   case 119:
 
 /* Line 1455 of yacc.c  */
-#line 1201 "parser.y"
-    {/* Regla 23*/g_queue_push_head(PSaltos,contador_cuadruplos); ;}
+#line 1204 "parser.y"
+    {/* Regla 23*/g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos)); ;}
     break;
 
   case 120:
 
 /* Line 1455 of yacc.c  */
-#line 1202 "parser.y"
+#line 1205 "parser.y"
     { 	//Regla 24
-		int aux = g_queue_pop_head(PTipos);
+		int aux = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
 		
 		if(aux != 5){
 			printf("Error: Se espera un valor logico en la línea %d\n",yylineno);
 			exit(1);
 		}
-		int resultado = g_queue_pop_head(POperandos);
+		int resultado = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
 		printf("Genera cuadruplo gotof\n");
 		generar_cuadruplo(22,resultado,-1,-1);		
-		g_queue_push_head(PSaltos,contador_cuadruplos-1);
+		g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos-1));
 	;}
     break;
 
   case 121:
 
 /* Line 1455 of yacc.c  */
-#line 1213 "parser.y"
+#line 1216 "parser.y"
     {
 		//Regla 25
-		int falso = g_queue_pop_head(PSaltos);
-		int retorno = g_queue_pop_head(PSaltos);
+		int falso = GPOINTER_TO_INT(g_queue_pop_head(PSaltos));
+		int retorno = GPOINTER_TO_INT(g_queue_pop_head(PSaltos));
 		generar_cuadruplo(21,-1,-1,retorno);
 		//Rellenar falso con el contador de cuadruplos
 		cuadruplo *tmp = g_slice_new(cuadruplo);
@@ -3163,7 +3166,7 @@ yyreduce:
   case 122:
 
 /* Line 1455 of yacc.c  */
-#line 1225 "parser.y"
+#line 1228 "parser.y"
     {
 	//Regla 41
 	printf("Genera cuadruplo de accion\n");
@@ -3174,83 +3177,83 @@ yyreduce:
   case 124:
 
 /* Line 1455 of yacc.c  */
-#line 1231 "parser.y"
+#line 1234 "parser.y"
     {
 	//Regla 18
 	printf("Genera cuadruplo de accion\n");
 	generar_cuadruplo_accionsi(accion);
-	g_queue_push_head(PTipos,5);
+	g_queue_push_head(PTipos,GINT_TO_POINTER(5));
 	;}
     break;
 
   case 126:
 
 /* Line 1455 of yacc.c  */
-#line 1237 "parser.y"
+#line 1240 "parser.y"
     {/*Regla 52*/accion = 28;;}
     break;
 
   case 127:
 
 /* Line 1455 of yacc.c  */
-#line 1238 "parser.y"
+#line 1241 "parser.y"
     {/*Regla 52*/accion = 29;;}
     break;
 
   case 128:
 
 /* Line 1455 of yacc.c  */
-#line 1239 "parser.y"
+#line 1242 "parser.y"
     {/*Regla 52*/accion = 30;;}
     break;
 
   case 129:
 
 /* Line 1455 of yacc.c  */
-#line 1240 "parser.y"
+#line 1243 "parser.y"
     {/*Regla 52*/accion = 31;;}
     break;
 
   case 130:
 
 /* Line 1455 of yacc.c  */
-#line 1241 "parser.y"
+#line 1244 "parser.y"
     {/*Regla 52*/accion = 32;;}
     break;
 
   case 131:
 
 /* Line 1455 of yacc.c  */
-#line 1242 "parser.y"
+#line 1245 "parser.y"
     {/*Regla 52*/accion = 33;;}
     break;
 
   case 133:
 
 /* Line 1455 of yacc.c  */
-#line 1245 "parser.y"
+#line 1248 "parser.y"
     {/*Regla 19*/insert_param_tipo();/*Regla 103*/insert_var_to_table(yylval.str,proc_actual);;}
     break;
 
   case 137:
 
 /* Line 1455 of yacc.c  */
-#line 1248 "parser.y"
+#line 1251 "parser.y"
     { 
 	
 	//Regla 37
 	
-	int argumento = g_queue_pop_head(POperandos);
-	int tipoarg = g_queue_pop_head(PTipos);
+	int argumento = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
+	int tipoarg = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
 	
 	funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)g_queue_peek_head(PFunciones));
-	int contador_parametros = g_queue_peek_head(PParametros);
+	int contador_parametros = GPOINTER_TO_INT(g_queue_peek_head(PParametros));
 	if(g_queue_get_length(ft->parametros) < contador_parametros + 1){
 				printf("Error: Mas parámetros de los esperados en la linea %d\n",yylineno);
 				exit(1);
 			}
 	
-	int tipoparam = g_queue_peek_nth(ft->parametros,contador_parametros);
+	int tipoparam = GPOINTER_TO_INT(g_queue_peek_nth(ft->parametros,contador_parametros));
 	printf("Argumento y tipoarg, tipoparam: %d,%d,%d\n",argumento,tipoarg,tipoparam);
 	
 	if(tipoarg != tipoparam){
@@ -3260,11 +3263,10 @@ yyreduce:
 	//Generar cuadruplo parametro
 	printf("Genera cuadruplo parametro \n");
 	generar_cuadruplo(26,argumento,contador_parametros+1,-1);
-
 	//Regla 38
-	int p = g_queue_pop_head(PParametros);
+	int p = GPOINTER_TO_INT(g_queue_pop_head(PParametros));
 	p++;
-	g_queue_push_head(PParametros,p);
+	g_queue_push_head(PParametros,GINT_TO_POINTER(p));
 	
 	;}
     break;
@@ -3272,10 +3274,10 @@ yyreduce:
   case 141:
 
 /* Line 1455 of yacc.c  */
-#line 1282 "parser.y"
+#line 1284 "parser.y"
     {
 	//Regla 9
-	  if(g_queue_peek_head(POperadores) == 17){
+	  if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 17){
   			printf("Genera cuadruplo or \n");
 			generar_cuadruplo_expresion();		
 	};}
@@ -3284,17 +3286,17 @@ yyreduce:
   case 143:
 
 /* Line 1455 of yacc.c  */
-#line 1288 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,17);/*operador or*/;}
+#line 1290 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(17));/*operador or*/;}
     break;
 
   case 146:
 
 /* Line 1455 of yacc.c  */
-#line 1291 "parser.y"
+#line 1293 "parser.y"
     {
 	//Regla 8
-  if(g_queue_peek_head(POperadores) == 16){
+  if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 16){
   			printf("Genera cuadruplo and /\n");
 			generar_cuadruplo_expresion();		
 	};}
@@ -3303,17 +3305,17 @@ yyreduce:
   case 148:
 
 /* Line 1455 of yacc.c  */
-#line 1297 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,16);/*operador and*/;}
+#line 1299 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(16));/*operador and*/;}
     break;
 
   case 151:
 
 /* Line 1455 of yacc.c  */
-#line 1300 "parser.y"
+#line 1302 "parser.y"
     {
 	//Regla 7
-  if(valida_existencia_logico(g_queue_peek_head(POperadores))){
+  if(valida_existencia_logico(GPOINTER_TO_INT(g_queue_peek_head(POperadores)))){
   			printf("Genera cuadruplo < > <= >= <>\n");
 			generar_cuadruplo_expresion();		
 	};}
@@ -3322,49 +3324,49 @@ yyreduce:
   case 155:
 
 /* Line 1455 of yacc.c  */
-#line 1308 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,13);/*operador mayorque*/;}
+#line 1310 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(13));/*operador mayorque*/;}
     break;
 
   case 157:
 
 /* Line 1455 of yacc.c  */
-#line 1309 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,10);/*operador menorque*/;}
+#line 1311 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(10));/*operador menorque*/;}
     break;
 
   case 159:
 
 /* Line 1455 of yacc.c  */
-#line 1310 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,11);/*operador diferente*/;}
+#line 1312 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(11));/*operador diferente*/;}
     break;
 
   case 160:
 
 /* Line 1455 of yacc.c  */
-#line 1311 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,15);/*operador igual igual*/;}
+#line 1313 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(15));/*operador igual igual*/;}
     break;
 
   case 161:
 
 /* Line 1455 of yacc.c  */
-#line 1312 "parser.y"
+#line 1314 "parser.y"
     {
 		//Regla 6
-		int operadoranterior = g_queue_pop_head(POperadores);
+		int operadoranterior = GPOINTER_TO_INT(g_queue_pop_head(POperadores));
 		int operadorreal = dame_operador_logico(operadoranterior,19);
-		g_queue_push_head(POperadores,operadorreal);
+		g_queue_push_head(POperadores,GINT_TO_POINTER(operadorreal));
 		;}
     break;
 
   case 163:
 
 /* Line 1455 of yacc.c  */
-#line 1321 "parser.y"
+#line 1323 "parser.y"
     {	//Regla 10
-  	if(g_queue_peek_head(POperadores) == 1 || g_queue_peek_head(POperadores) == 4){
+  	if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 1 || GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 4){
 		printf("Genera cuadruplo + o -\n");
 		generar_cuadruplo_expresion();		
 	};}
@@ -3373,23 +3375,23 @@ yyreduce:
   case 165:
 
 /* Line 1455 of yacc.c  */
-#line 1326 "parser.y"
-    { /*Regla 2*/g_queue_push_head(POperadores,1);printf("Push +\n");/*operador suma*/;}
+#line 1328 "parser.y"
+    { /*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(1));printf("Push +\n");/*operador suma*/;}
     break;
 
   case 167:
 
 /* Line 1455 of yacc.c  */
-#line 1327 "parser.y"
-    { /*Regla 2*/g_queue_push_head(POperadores,4);printf("Push -\n");/*operador resta*/;}
+#line 1329 "parser.y"
+    { /*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(4));printf("Push -\n");/*operador resta*/;}
     break;
 
   case 170:
 
 /* Line 1455 of yacc.c  */
-#line 1331 "parser.y"
+#line 1333 "parser.y"
     {	//Regla 11
-  	if(g_queue_peek_head(POperadores) == 7 || g_queue_peek_head(POperadores) == 8){
+  	if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 7 || GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 8){
     	printf("Genera cuadruplo * o /\n");
 		generar_cuadruplo_expresion();		
 	};}
@@ -3398,38 +3400,38 @@ yyreduce:
   case 172:
 
 /* Line 1455 of yacc.c  */
-#line 1337 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,7);/*operador multiplica*/;}
+#line 1339 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(7));/*operador multiplica*/;}
     break;
 
   case 174:
 
 /* Line 1455 of yacc.c  */
-#line 1338 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,8);/*operador division*/;}
+#line 1340 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(8));/*operador division*/;}
     break;
 
   case 180:
 
 /* Line 1455 of yacc.c  */
-#line 1344 "parser.y"
-    {/*Regla 12*/g_queue_push_head(POperadores,'(');;}
+#line 1346 "parser.y"
+    {/*Regla 12*/g_queue_push_head(POperadores,GINT_TO_POINTER('('));;}
     break;
 
   case 181:
 
 /* Line 1455 of yacc.c  */
-#line 1344 "parser.y"
+#line 1346 "parser.y"
     {
 		/*Regla 13*/
-		if(g_queue_peek_head(POperadores) == '('){
+		if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == '('){
 			g_queue_pop_head(POperadores);
 		}else{
 			printf("Error: Mala construccion de expresión en la línea %d\n",yylineno);
 			exit(1);
 		}
 		//Regla 14
-		if(g_queue_peek_head(POperadores) == 18){
+		if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 18){
 			printf("Genera cuadruplo not\n");
 			generar_cuadruplo_expresion_unaria();
 		}
@@ -3439,17 +3441,17 @@ yyreduce:
   case 182:
 
 /* Line 1455 of yacc.c  */
-#line 1358 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,18);/*operador NOT*/;}
+#line 1360 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(18));/*operador NOT*/;}
     break;
 
   case 184:
 
 /* Line 1455 of yacc.c  */
-#line 1360 "parser.y"
+#line 1362 "parser.y"
     {
 	//Regla 15
-  	if(g_queue_peek_head(POperadores) == 18 || g_queue_peek_head(POperadores) == 20){
+  	if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 18 || GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 20){
 		printf("Genera cuadruplo not o - \n");
 		generar_cuadruplo_expresion_unaria();
 	}
@@ -3459,28 +3461,28 @@ yyreduce:
   case 185:
 
 /* Line 1455 of yacc.c  */
-#line 1367 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,20);/*operador multiplica*/;}
+#line 1369 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(20));/*operador multiplica*/;}
     break;
 
   case 186:
 
 /* Line 1455 of yacc.c  */
-#line 1368 "parser.y"
-    {/*Regla 2*/g_queue_push_head(POperadores,18);/*operador NOT*/;}
+#line 1370 "parser.y"
+    {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(18));/*operador NOT*/;}
     break;
 
   case 188:
 
 /* Line 1455 of yacc.c  */
-#line 1370 "parser.y"
+#line 1372 "parser.y"
     {/*Regla 17*/id_a_verificar=yylval.str;;}
     break;
 
   case 190:
 
 /* Line 1455 of yacc.c  */
-#line 1371 "parser.y"
+#line 1373 "parser.y"
     {
 		//Regla 105
 		verifica_existe_procs(id_a_verificar);
@@ -3489,7 +3491,7 @@ yyreduce:
 		g_queue_push_head(PFunciones,id_a_verificar);
 		//ERA
 		generar_cuadruplo_funcion(25,id_a_verificar,-1,-1);
-		g_queue_push_head(PParametros,0);
+		g_queue_push_head(PParametros,GINT_TO_POINTER(0));
 			
 	;}
     break;
@@ -3497,7 +3499,7 @@ yyreduce:
   case 191:
 
 /* Line 1455 of yacc.c  */
-#line 1381 "parser.y"
+#line 1383 "parser.y"
     {
 		//verifica_existe_procs(id_a_verificar);
 		//Regla 39
@@ -3505,7 +3507,7 @@ yyreduce:
 		funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)func);
 	
 		g_queue_pop_head(PFunciones);
-		int contador_parametros = g_queue_pop_head(PParametros);
+		int contador_parametros = GPOINTER_TO_INT(g_queue_pop_head(PParametros));
 		
 		if(g_queue_get_length(ft->parametros) != contador_parametros){
 			printf("Error: Menos parámetros de los esperados en la linea %d\n",yylineno);
@@ -3522,7 +3524,7 @@ yyreduce:
   case 192:
 
 /* Line 1455 of yacc.c  */
-#line 1400 "parser.y"
+#line 1402 "parser.y"
     {	//Regla 1
          	verifica_existe_var(id_a_verificar);
          	
@@ -3532,28 +3534,28 @@ yyreduce:
   case 193:
 
 /* Line 1455 of yacc.c  */
-#line 1405 "parser.y"
+#line 1407 "parser.y"
     {/*Regla 104*/verifica_existe_var(yylval.str);;}
     break;
 
   case 194:
 
 /* Line 1455 of yacc.c  */
-#line 1406 "parser.y"
+#line 1408 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.integer,1);;}
     break;
 
   case 195:
 
 /* Line 1455 of yacc.c  */
-#line 1407 "parser.y"
+#line 1409 "parser.y"
     {/*Regla 16*/insert_constante_to_table(yylval.str,4);;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 3557 "parser.tab.c"
+#line 3559 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3765,7 +3767,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 1410 "parser.y"
+#line 1412 "parser.y"
  
 main() { 
 objeto = fopen("codigo.roid", "w");
