@@ -753,6 +753,8 @@ void generar_cuadruplo_verpista(){
 	enterostemporales++;
 	tabla->tamano_temporales[0]++;	
 	generar_cuadruplo(operador,-1,-1,tmp);
+	g_queue_push_head(POperandos,tmp);
+	g_queue_push_head(PTipos,1);
 			
 }
 /*
@@ -975,7 +977,7 @@ varcte: CTE {/*Regla 16*/insert_constante_to_table(yylval.integer,1);}
 	| CTESTRING {/*Regla 16*/insert_constante_to_table(yylval.str,3);}
 	| CTF {/*Regla 16*/insert_constante_to_table(yylval.str,2);}
 	| CAR {/*Regla 16*/insert_constante_to_table(yylval.str,4);}
-	| VERPISTA{/*Regla 53*/generar_cuadruplo_verpista(); }
+	| VERPISTA APARENTESIS CPARENTESIS{/*Regla 31*/generar_cuadruplo_verpista(); }
 	| VERDADERO{/*Regla 16*/insert_constante_to_table(yylval.str,5);}
 	| FALSO{/*Regla 16*/insert_constante_to_table(yylval.str,5);};
 
