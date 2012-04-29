@@ -22,6 +22,8 @@ ctef		[0-9]+"."[0-9]+
 "rotaizquierda" {return ROTAIZQUIERDA;}
 "tomartesoro" {return TOMARTESORO;}
 "topa" {return TOPA;}
+"topaderecha" {return TOPADERECHA;}
+"topaizquierda" {return TOPAIZQUIERDA;}
 "verpista" {return VERPISTA;}
 "si" {return SI;}
 "sino" {return SINO;}

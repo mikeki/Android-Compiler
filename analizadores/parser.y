@@ -746,7 +746,26 @@ void generar_cuadruplo_verpista(){
 /*
 Descripción: Se encarga de generar el cuádruplo 
 para la acción con Destino temporal.
-Parámetros: 
+Parámetros: int accion 
+Salida: void
+*/
+void generar_cuadruplo_accion_expresion(int accion){
+	int operador = accion;
+	printf("oper: %d ", operador);
+	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+	int tmp;
+	tmp = logicostemporales;
+	logicostemporales++;
+	tabla->tamano_temporales[4]++;	
+	generar_cuadruplo(operador,-1,-1,tmp);
+	g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));
+	g_queue_push_head(PTipos,GINT_TO_POINTER(5));			
+}
+
+/*
+Descripción: Se encarga de generar el cuádruplo 
+para la acción con Destino temporal.
+Parámetros: int accion
 Salida: void
 */
 void generar_cuadruplo_accionsi(int accion){
@@ -758,7 +777,8 @@ void generar_cuadruplo_accionsi(int accion){
 	logicostemporales++;
 	tabla->tamano_temporales[4]++;	
 	generar_cuadruplo(operador,-1,-1,tmp);
-	g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));			
+	g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));
+	g_queue_push_head(PTipos,GINT_TO_POINTER(5));			
 }
 
 /*
@@ -844,7 +864,7 @@ char *integer;
 char *float_n;
 char *str; 
 } 
-%token ADELANTE ATRAS ROTADERECHA ROTAIZQUIERDA TOMARTESORO TOPA
+%token ADELANTE ATRAS ROTADERECHA ROTAIZQUIERDA TOMARTESORO TOPA TOPADERECHA TOPAIZQUIERDA
 %token VERPISTA SI SINO MIENTRAS FUNCION ENTERO FLOTANTE SELECCIONA CUANDO
 %token REGRESA LOGICO PALABRA ESCRIBE LEE PRINCIPAL VERDADERO FALSO
 %token Y O NO PROGRAMA CARACTER COMA PUNTOCOMA IGUALP ALLAVE CLLAVE
@@ -1229,14 +1249,16 @@ accionsi: acciones{
 	//Regla 18
 	printf("Genera cuádruplo de acción\n");
 	generar_cuadruplo_accionsi(accion);
-	g_queue_push_head(PTipos,GINT_TO_POINTER(5));
+	
 	} APARENTESIS CPARENTESIS;
 acciones: ADELANTE{/*Regla 52*/accion = 28;}
 	| ATRAS{/*Regla 52*/accion = 29;}
 	| ROTADERECHA{/*Regla 52*/accion = 30;}
 	| ROTAIZQUIERDA{/*Regla 52*/accion = 31;}
 	| TOMARTESORO{/*Regla 52*/accion = 32;}
-	| TOPA{/*Regla 52*/accion = 33;};
+	| TOPA{/*Regla 52*/accion = 33;}
+	| TOPADERECHA{/*Regla 52*/accion = 38;}
+	| TOPAIZQUIERDA{/*Regla 52*/accion = 39;};
 
 params: tipo paramsp;
 paramsp: ID{/*Regla 19*/insert_param_tipo();/*Regla 103*/insert_var_to_table(yylval.str,proc_actual);} paramspp;
@@ -1335,7 +1357,8 @@ terminop: POR{/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(7));/*ope
 
 factor: factorp 
 	| factorpp
-	| factorppp;
+	| factorppp
+	| factorpppp;
 factorp: nf APARENTESIS{/*Regla 12*/g_queue_push_head(POperadores,GINT_TO_POINTER('('));} mmexp CPARENTESIS {
 		/*Regla 13*/
 		if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == '('){
@@ -1424,6 +1447,17 @@ fun_var: APARENTESIS{
          	verifica_existe_var(id_a_verificar);
          	
          	};
+
+factorpppp: nf accionsi {
+		//Regla 53
+		//printf("Generar cuadruplo de accion \n");
+		//generar_cuadruplo_accion_expresion(accion);
+
+		if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 18){
+			printf("Genera cuádruplo not o - \n");
+			generar_cuadruplo_expresion_unaria();
+		}
+		};
 	
 varselecciona: ID{/*Regla 104*/verifica_existe_var(yylval.str);}
 		|CTE {/*Regla 16*/insert_constante_to_table(yylval.integer,1);}

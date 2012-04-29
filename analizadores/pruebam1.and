@@ -2,8 +2,22 @@ programa pruebam1:
 
 principal{
 	entero a = 0;
-	mientras(a < 15){
+	
+	adelante();
+	rotaderecha();
+	adelante();
+	rotaizquierda();
+
+	
+	mientras(no(topa())){
 		adelante();
+		si(topaderecha()){
+			escribe("tope en la derecha");
+		}
+		si(topaizquierda()){
+			escribe("tope en la derecha");
+		}
+
 		a++;
 	}
 
