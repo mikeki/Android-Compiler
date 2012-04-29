@@ -1,0 +1,24 @@
+programa holamundo:
+
+funcion entero fibonacci(entero a){
+	escribe("a=".a);
+	si(a <= 2){
+		regresa 1;
+	}sino{
+		regresa fibonacci(a-1) + fibonacci(a-2);
+	}
+}
+
+principal{
+	entero a;
+
+	a = fibonacci(2);
+	escribe(a);
+	a = fibonacci(3);
+	escribe(a);
+	a = fibonacci(4);
+	escribe(a);
+	a = fibonacci(5);
+	escribe(a);
+	
+}

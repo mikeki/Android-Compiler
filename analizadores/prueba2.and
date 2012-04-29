@@ -1,0 +1,18 @@
+programa prueba2:
+
+principal{
+	entero a = 15;
+	flotante acum = 0;
+	
+	mientras(a > 0){
+		si(a > 5 Y a < 10){
+			acum+=1;
+		}sino{
+			acum = 2 + acum;
+		}
+			
+		a--;
+	}
+
+	escribe("acumulador: ".acum);
+}

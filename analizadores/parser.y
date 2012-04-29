@@ -18,6 +18,7 @@ static char *id_a_verificar; //Varibale utilizada para verificar la existencia d
 static int contador_cuadruplos = 1; //Contador de cuadruplos realizados
 static int accion;
 extern int yylineno;
+static char *nombreobj;//El archivo obj tendrá el mismo nombre que el ID del programa
 //Declaracion de las pilas.
 static GQueue *POperandos;
 static GQueue *POperadores;
@@ -274,7 +275,7 @@ Salida: void
 void imprime_dir_procs(char *key, funcion *value, gpointer user_data){
 	funcion *f = value;
 
-	fprintf(objeto,"%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",key,f->tipo,f->dir_inicial,f->tamano_locales[0],f->tamano_locales[1]
+	fprintf(objeto,"%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",key,traduce_tipo(f->tipo),f->dir_inicial,f->tamano_locales[0],f->tamano_locales[1]
 		,f->tamano_locales[2],f->tamano_locales[3],f->tamano_locales[4],f->tamano_temporales[0],f->tamano_temporales[1],
 		f->tamano_temporales[2],f->tamano_temporales[3],f->tamano_temporales[4]);
 
@@ -331,7 +332,7 @@ void insert_proc_to_table(char *name){
 	funcion *temp = g_slice_new(funcion);
 	temp->parametros = g_queue_new();
 	temp->var_table = g_hash_table_new(g_str_hash, g_str_equal);
-	temp->tipo = traduce_tipo(tipo_actual);
+	temp->tipo = tipo_actual;
 	g_hash_table_insert(dir_procs,(gpointer)name,(gpointer)temp);
 	proc_actual = name;
 	}
@@ -461,15 +462,16 @@ el tipo correspondiente.
 Parámetros: char *name
 Salida: void
 */
-void inserta_procs_factor(char *name){
+void inserta_procs_factor(char *name, int tmp){
 	funcion *f = g_hash_table_lookup(dir_procs,(gpointer)name);
+	printf("tipo en factor: %c\n",f->tipo);
 	if(f->tipo == 'V'){//Valida si un modulo llamdo en la expresion es de tipo void
 		printf("Error: Expresion invalida en la línea %d\n",yylineno);
 		exit(1);
 	}
 	funcion *proc_global = g_hash_table_lookup(dir_procs,"programa");
 	variable *modulo = g_hash_table_lookup(proc_global->var_table,(gpointer)name);
-	g_queue_push_head(POperandos,GINT_TO_POINTER(modulo->dir_virtual));
+	g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));
 	g_queue_push_head(PTipos,GINT_TO_POINTER(traduce_tipo(modulo->tipo)+1));
 	printf("Direccion Variable Global: %s %d\n",name, modulo->dir_virtual);
 	
@@ -883,7 +885,9 @@ char *str;
 %start programa
 
 %% 
-programa: {}PROGRAMA ID{/* Regla 48*/tipo_actual = 'V'; /*Regla 101*/insert_proc_to_table("programa"); /*Regla 33*/ insert_dir_inicial();/*Regla 43*/generar_cuadruplo(21,-1,-1,-1);/*goto del main*/ } IGUALP programap main;
+
+programa: {}PROGRAMA ID{nombreobj = yylval.str;
+/* Regla 48*/tipo_actual = 'V'; /*Regla 101*/insert_proc_to_table("programa"); /*Regla 33*/ insert_dir_inicial();/*Regla 43*/generar_cuadruplo(21,-1,-1,-1);/*goto del main*/ } IGUALP programap main;
 programap: programapp programappp;
 programapp: 	vars programapp
 		| ;
@@ -958,16 +962,30 @@ funcionp: estatutofuncion funcionp
 funcionpp: params 
 	| ;
 
-main: PRINCIPAL{/* Regla 48*/tipo_actual = 'V';/*Regla 101*/insert_proc_to_table(yylval.str);/*Regla 33*/insert_dir_inicial();} ALLAVE{
+main: PRINCIPAL{/* Regla 48*/tipo_actual = 'V';
+		/*Regla 101*/insert_proc_to_table(yylval.str);
+		/*Regla 33*/insert_dir_inicial();
+		//Regla 35
+		bandera_return = 0;
+		} ALLAVE{
 		//Regla 50
 		//Rellenar goto inicial del main con el contador de cuadruplos
 		cuadruplo *tmp = g_slice_new(cuadruplo);
 		tmp = g_queue_peek_nth(cuadruplos,0);
 		tmp->destino = contador_cuadruplos;
-		} mainv bloque CLLAVE;
+		} mainv bloque CLLAVE
+		{
+		
+		//Checar si hubo return
+		if(bandera_return == 1){
+			printf("Error: En principal no debe haber regresa\n");
+			exit(1);
+		}
+		}
+		;
 mainv: 		vars mainv
 		|;
-bloque: estatuto bloque
+bloque: estatutofuncion bloque
 	| ;
 
 tipo:	 ENTERO {/*Regla 102*/tipo_actual= 'I';}
@@ -1020,6 +1038,9 @@ ejecuta_funcion:  APARENTESIS{
 			}
 			//Regla 40
 			//GOSUB
+			printf("Genera cuadruplo GOSUB \n");
+			//printf("Tipo: %c \n",ft->tipo);
+			
 			generar_cuadruplo_funcion(24,func,ft->dir_inicial,-1);
 			} PUNTOCOMA;
 
@@ -1271,7 +1292,7 @@ params2: exp{
 	}
 	//Generar cuadruplo parametro
 	printf("Genera cuadruplo parametro \n");
-	generar_cuadruplo(26,argumento,contador_parametros+1,-1);
+	generar_cuadruplo(26,argumento,contador_parametros,-1);
 	//Regla 38
 	int p = GPOINTER_TO_INT(g_queue_pop_head(PParametros));
 	p++;
@@ -1377,12 +1398,14 @@ fun_var: APARENTESIS{
 		printf("Genera cuadruplo de funcion: %s \n",id_a_verificar);
 		generar_cuadruplo_funcion(25,id_a_verificar,-1,-1);
 		g_queue_push_head(PParametros,GINT_TO_POINTER(0));
+		g_queue_push_head(POperadores,GINT_TO_POINTER('('));
 			
 	} paramsf CPARENTESIS{
 		//verifica_existe_procs(id_a_verificar);
 		//Regla 39
 		char *func = g_queue_peek_head(PFunciones);
 		funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)func);
+		funcion *factual = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
     
 		g_queue_pop_head(PFunciones);
 		int contador_parametros = GPOINTER_TO_INT(g_queue_pop_head(PParametros));
@@ -1390,11 +1413,39 @@ fun_var: APARENTESIS{
 			printf("Error: Menos parámetros de los esperados en la linea %d\n",yylineno);
 			exit(1);
 		}
-		//Regla 40
-		generar_cuadruplo_funcion(24,func,ft->dir_inicial,-1);
+		//Regla 40 
+		//GENERAR GOSUB
+		printf("Genera cuadruplo GOSUB \n");
+		int tmp;
+		switch(ft->tipo){
+			case 'I': tmp = enterostemporales;
+				enterostemporales++;
+				factual->tamano_temporales[0]++;
+				break;
+			case 'F': tmp = flotantestemporales;
+				flotantestemporales++;
+				factual->tamano_temporales[1]++;
+				break;
+			case 'S': tmp = stringstemporales;
+				stringstemporales++;
+				factual->tamano_temporales[2]++;
+				break;
+			case 'C': tmp = caracterestemporales;
+				caracterestemporales++;
+				factual->tamano_temporales[3]++;
+				break;
+			case 'L': tmp = logicostemporales;
+				logicostemporales++;
+				factual->tamano_temporales[4]++;
+				break;
+		}
+		generar_cuadruplo_funcion(24,func,ft->dir_inicial,tmp);
 
 		//Regla 47
-		inserta_procs_factor(func);
+		inserta_procs_factor(func,tmp);
+
+		//SE saca el fondo falso
+		g_queue_pop_head(POperadores);
 	}
          | {	//Regla 1
          	verifica_existe_var(id_a_verificar);
@@ -1408,9 +1459,9 @@ varselecciona: ID{/*Regla 104*/verifica_existe_var(yylval.str);}
 
 %% 
 main() { 
-objeto = fopen("codigo.roid", "w");
 crear_pilas_tablas();
   yyparse(); 
+  objeto = fopen(strcat(nombreobj,".roid"), "w");
 //Impresion del directorio de procedimeintos en consola
 imprime(dir_procs); 
 

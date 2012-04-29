@@ -98,7 +98,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 866 "parser.y"
+#line 868 "parser.y"
  
 char *integer; 
 char *float_n;

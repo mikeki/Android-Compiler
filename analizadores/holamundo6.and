@@ -1,0 +1,17 @@
+programa holamundo:
+
+funcion entero dos(entero a){
+	escribe("a=".a);
+	si(a == 0){
+		regresa 1;
+	}sino{
+		regresa 2 + dos(a-1);
+	}
+}
+
+principal{
+	entero a;
+
+	a = dos(2);
+	escribe(a);
+}

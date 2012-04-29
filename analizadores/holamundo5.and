@@ -1,7 +1,0 @@
-programa holamundo:
-
-principal{
-
-	entero a = verpista();
-
-}

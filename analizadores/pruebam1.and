@@ -1,0 +1,10 @@
+programa pruebam1:
+
+principal{
+	entero a = 0;
+	mientras(a < 15){
+		adelante();
+		a++;
+	}
+
+}

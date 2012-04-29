@@ -1,0 +1,22 @@
+programa holamundo:
+
+funcion entero factorial(entero a){
+	escribe("a=".a);
+	si(a < 2){
+		regresa 1;
+	}sino{
+		regresa a * factorial(a-1);
+	}
+}
+
+principal{
+	entero a;
+
+	a = factorial(2);
+	escribe(a);
+	a = factorial(3);
+	escribe(a);
+	a = factorial(4);
+	escribe(a);
+	
+}

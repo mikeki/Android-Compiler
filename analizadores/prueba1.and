@@ -1,0 +1,18 @@
+programa prueba1:
+
+**funcion entero a(){
+
+}**
+
+principal{
+	entero a = 2;
+	flotante acum = 5.6;
+
+	selecciona(a){
+		cuando 1=>{ acum+=1;}
+		cuando 2=>{acum=acum*4;}
+		cuando 3=> {acum = -5;}
+	}	
+	
+	escribe(a." = ".acum);
+}
