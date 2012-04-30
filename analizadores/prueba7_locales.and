@@ -1,0 +1,16 @@
+programa prueba7_locales:
+principal{
+
+	entero local1 = 1;
+	flotante local2 = 1.5;
+	palabra local3 = "hola";
+	caracter local4 = 'c';
+	logico local5 = verdadero;
+	
+	local2 = local1 + local2;
+	
+	si(local5){
+	escribe(local3.local4);
+	}	
+}
+

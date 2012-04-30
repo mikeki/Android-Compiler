@@ -1,4 +1,4 @@
-programa prueba2:
+programa prueba19_while:
 
 principal{
 	entero a = 15;

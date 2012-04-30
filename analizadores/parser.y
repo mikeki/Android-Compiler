@@ -595,29 +595,7 @@ void generar_cuadruplo_expresion(){
 			traduce_tipo2(tipo2),yylineno);
 		exit(1);
 	}else{
-		int tmp;
-		switch(tnuevo){
-			case 'I': tmp = enterostemporales;
-				enterostemporales++;
-				tabla->tamano_temporales[0]++;
-				break;
-			case 'F': tmp = flotantestemporales;
-				flotantestemporales++;
-				tabla->tamano_temporales[1]++;
-				break;
-			case 'S': tmp = stringstemporales;
-				stringstemporales++;
-				tabla->tamano_temporales[2]++;
-				break;
-			case 'C': tmp = caracterestemporales;
-				caracterestemporales++;
-				tabla->tamano_temporales[3]++;
-				break;
-			case 'L': tmp = logicostemporales;
-				logicostemporales++;
-				tabla->tamano_temporales[4]++;
-				break;
-		}
+		
 		switch(operador){
 				case 3:
 				case 6:{
@@ -625,6 +603,29 @@ void generar_cuadruplo_expresion(){
 					generar_cuadruplo(operador,operando1,operando2,operando1);
 				}break;
 				default:{
+					int tmp;
+					switch(tnuevo){
+						case 'I': tmp = enterostemporales;
+							enterostemporales++;
+							tabla->tamano_temporales[0]++;
+							break;
+						case 'F': tmp = flotantestemporales;
+							flotantestemporales++;
+							tabla->tamano_temporales[1]++;
+							break;
+						case 'S': tmp = stringstemporales;
+							stringstemporales++;
+							tabla->tamano_temporales[2]++;
+							break;
+						case 'C': tmp = caracterestemporales;
+							caracterestemporales++;
+							tabla->tamano_temporales[3]++;
+							break;
+						case 'L': tmp = logicostemporales;
+							logicostemporales++;
+							tabla->tamano_temporales[4]++;
+							break;
+					}
 					generar_cuadruplo(operador,operando1,operando2,tmp);
 					g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));	
 					g_queue_push_head(PTipos,GINT_TO_POINTER(traduce_tipo(tnuevo)+1));
@@ -687,35 +688,36 @@ void generar_cuadruplo_expresion_unaria(){
 		printf("Error: No se puede hacer la operación con %s en la línea %d \n",traduce_tipo2(tipo1),yylineno);
 		exit(1);
 	}else{
-		int tmp;
-		switch(tnuevo){
-			case 'I': tmp = enterostemporales;
-				enterostemporales++;
-				tabla->tamano_temporales[0]++;
-				break;
-			case 'F': tmp = flotantestemporales;
-				flotantestemporales++;
-				tabla->tamano_temporales[1]++;
-				break;
-			case 'S': tmp = stringstemporales;
-				stringstemporales++;
-				tabla->tamano_temporales[2]++;
-				break;
-			case 'C': tmp = caracterestemporales;
-				caracterestemporales++;
-				tabla->tamano_temporales[3]++;
-				break;
-			case 'L': tmp = logicostemporales;
-				logicostemporales++;
-				tabla->tamano_temporales[4]++;
-				break;
-		}
+		
 		switch(operador){
 			case 2:
 			case 5:{
 				generar_cuadruplo(operador,operando1,-1,operando1);
 			}break;
 			default:{
+				int tmp;
+				switch(tnuevo){
+					case 'I': tmp = enterostemporales;
+						enterostemporales++;
+						tabla->tamano_temporales[0]++;
+						break;
+					case 'F': tmp = flotantestemporales;
+						flotantestemporales++;
+						tabla->tamano_temporales[1]++;
+						break;
+					case 'S': tmp = stringstemporales;
+						stringstemporales++;
+						tabla->tamano_temporales[2]++;
+						break;
+					case 'C': tmp = caracterestemporales;
+						caracterestemporales++;
+						tabla->tamano_temporales[3]++;
+						break;
+					case 'L': tmp = logicostemporales;
+						logicostemporales++;
+						tabla->tamano_temporales[4]++;
+						break;
+				}
 				generar_cuadruplo(operador,operando1,-1,tmp);
 				g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));
 				g_queue_push_head(PTipos,GINT_TO_POINTER(traduce_tipo(tnuevo)+1));

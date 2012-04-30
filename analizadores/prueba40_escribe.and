@@ -1,0 +1,5 @@
+programa prueba40_escribe:
+
+principal{
+	escribe("holamundo");
+}

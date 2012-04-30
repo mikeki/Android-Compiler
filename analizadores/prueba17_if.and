@@ -1,0 +1,10 @@
+programa prueba17_if:
+
+principal{
+
+	si(topa()){
+		escribe("topo");
+	}sino{
+		escribe("no topo");
+	}
+}

@@ -1,0 +1,5 @@
+programa prueba13_accion:
+principal{
+	logico b = topa();
+}
+

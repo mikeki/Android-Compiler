@@ -1,0 +1,6 @@
+programa prueba20_expresion:
+
+principal{
+	entero a = 1,b = 2,x = 3;
+	a = a + b * x;
+}

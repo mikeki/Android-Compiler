@@ -1,0 +1,19 @@
+programa prueba39_expresionesunarias:
+
+principal{
+	entero a = 1;
+	logico b = verdadero;
+
+
+	a++;
+
+	a--;
+
+	a+=1;
+
+	a-=1;
+
+	a=-1;
+	b= no(b);
+	
+}

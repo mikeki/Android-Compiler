@@ -1,0 +1,5 @@
+programa prueba41_conca:
+
+principal{
+	escribe("holamundo"."holamundo2");
+}

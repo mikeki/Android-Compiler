@@ -1,0 +1,15 @@
+programa prueba38_expresioneslogicas:
+
+principal{
+	logico b = verdadero;
+
+	b = 1 < 2;
+	b = 1 > 2;
+	b = 1 >= 2;
+	b = 1 <= 2;
+	b = 1 <> 2;
+	b = 1 == 2;
+	b = verdadero y verdadero;
+	b = verdadero o verdadero;
+	
+}

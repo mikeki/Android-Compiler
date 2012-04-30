@@ -1,8 +1,4 @@
-programa prueba1:
-
-**funcion entero a(){
-
-}**
+programa prueba18_Switch:
 
 principal{
 	entero a = 2;

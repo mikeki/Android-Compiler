@@ -1,0 +1,10 @@
+programa prueba15_afuncion:
+
+funcion logico hola(){
+	regresa verdadero;
+}
+
+principal{
+	logico a;
+	a = hola();
+}
