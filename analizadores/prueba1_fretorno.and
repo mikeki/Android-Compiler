@@ -1,0 +1,11 @@
+programa prueba1_fretorno:
+
+funcion entero a(entero c){
+	regresa 1;
+}
+
+principal{
+	entero b;
+	b = a(1);	
+}
+

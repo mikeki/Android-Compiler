@@ -1,0 +1,11 @@
+programa pruebamv2:
+principal{
+
+	mientras(topaderecha()){
+		adelante();
+		si(topa()){
+			rotaizquierda();
+		}
+	}
+}
+

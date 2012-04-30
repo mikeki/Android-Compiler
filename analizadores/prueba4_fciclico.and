@@ -1,0 +1,29 @@
+programa prueba4_fciclico:
+
+funcion entero factorial(entero a){
+	escribe("a=".a);
+	si(a < 2){
+		regresa 1;
+	}sino{
+		regresa a * factorial(a-1);
+	}
+}
+
+funcion entero fciclico(entero a){
+	entero acum = a;
+	mientras(a>1){
+		acum = acum * (a-1);
+		a--;
+	}
+	regresa acum;
+}
+
+principal{
+	entero a;
+	a = 4;
+	
+	escribe("Factorial normal:".factorial(a));
+	escribe("Factorial ciclico:".fciclico(a));
+	
+}
+

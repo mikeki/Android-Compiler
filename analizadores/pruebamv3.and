@@ -1,0 +1,11 @@
+programa pruebamv3:
+
+principal{
+
+	entero a;
+
+	a = verpista();
+	escribe("Una pista de blue: ".a);
+	
+}
+

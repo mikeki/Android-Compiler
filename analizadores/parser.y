@@ -422,7 +422,7 @@ void verifica_existe_var(char *name){
 		tabla = g_hash_table_lookup(dir_procs,"programa");
 		global = g_hash_table_lookup(tabla->var_table,(gpointer)name);
 		if(global == NULL){
-			printf("Error: Variable %s no declarada en la línea\n",name,yylineno);
+			printf("Error: Variable %s no declarada en la línea %d\n",name,yylineno);
 			exit(1);
 		}else{
 		  int tipot = traduce_tipo(global->tipo)+1;
@@ -1213,7 +1213,43 @@ escriturap: exp {
 e: 	CONCA {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(9));/*operador concatenacion(.)*/} escriturap
 	| ;
 
-lectura: LEE APARENTESIS CPARENTESIS {/*Regla 16*/insert_constante_to_table("Lectura de pantalla",3);};
+lectura: LEE APARENTESIS CPARENTESIS {/*Regla 54*/
+					int tipo_var = g_queue_peek_head(PTipos);
+					funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
+					int tmp2;
+					switch(tipo_var){
+						case 1: tmp2 = enterostemporales;
+							enterostemporales++;
+							tabla->tamano_temporales[0]++;
+							break;
+						case 2: tmp2 = flotantestemporales;
+							flotantestemporales++;
+							tabla->tamano_temporales[1]++;
+							break;
+						case 3: tmp2 = stringstemporales;
+							stringstemporales++;
+							tabla->tamano_temporales[2]++;
+							break;
+						case 4: tmp2 = caracterestemporales;
+							caracterestemporales++;
+							tabla->tamano_temporales[3]++;
+							break;
+						case 5: tmp2 = logicostemporales;
+							logicostemporales++;
+							tabla->tamano_temporales[4]++;
+							break;
+					}
+					printf("tipo var: %d y tmp: %d enterostemp: %d\n",tipo_var,tmp2,enterostemporales);
+					
+					printf("Genera cuadruplo lee \n");
+					generar_cuadruplo(40,-1,-1,tmp2);
+
+					//Se agrega el temporal a la pila
+					g_queue_push_head(POperandos,GINT_TO_POINTER(tmp2));
+					g_queue_push_head(PTipos,GINT_TO_POINTER(tipo_var));
+					//insert_constante_to_table("Lectura de pantalla",3);
+					
+					};
 
 ciclo: MIENTRAS{/* Regla 23*/g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos)); } APARENTESIS mmexp CPARENTESIS ALLAVE
 	{ 	//Regla 24

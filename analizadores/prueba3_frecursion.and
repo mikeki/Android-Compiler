@@ -1,4 +1,4 @@
-programa holamundo:
+programa prueba3_frecursion:
 
 funcion entero factorial(entero a){
 	escribe("a=".a);

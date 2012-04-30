@@ -1,0 +1,11 @@
+programa pruebamv4:
+
+principal{
+
+	logico a;
+
+	a = tomartesoro();
+	escribe("un tesoro?: ");
+	escribe(a);
+	
+}

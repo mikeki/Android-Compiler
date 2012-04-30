@@ -1,0 +1,7 @@
+programa prueba5_parametros:
+funcion uno(entero a, flotante b, palabra c, caracter d, logico e){
+}
+
+principal{
+      uno(1,1.2,"hola",'c',verdadero); 
+}

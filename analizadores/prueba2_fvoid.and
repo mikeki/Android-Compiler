@@ -1,0 +1,10 @@
+programa prueba2_fvoid:
+
+funcion hola(palabra c){
+	escribe("hola".c);
+}
+
+principal{
+	hola("prueba2");
+}
+

@@ -1,0 +1,15 @@
+programa pruebalee:
+
+
+principal{
+	entero a;
+	
+	entero b = lee();
+
+	a = lee();
+	
+	escribe("Var a:".a);
+	escribe("Var b:".b);
+	
+}
+

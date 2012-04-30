@@ -1,0 +1,16 @@
+programa prueba6_globales:
+
+entero global1 = 1;
+flotante global2 = 1.5;
+palabra global3 = "hola";
+caracter global4 = 'c';
+logico global5 = verdadero;
+
+principal{
+	global2 = global1 + global2;
+	
+	si(global5){
+	escribe(global3.global4);
+	}	
+}
+
