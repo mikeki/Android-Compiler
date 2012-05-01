@@ -1,5 +1,13 @@
 %{
+/**
+Autores: Luz del Carmen Nangullasmú Plasencia A00973172
+	 Miguel Ángel Patricio Cervera Castaldi A00973172
+	 Eugenio Rafael García García A01033529
 
+Clase: Compiladores
+Profesora: Elda Guadalupe Quiroga González
+Fecha: Miercoles 2 de Mayo 2012
+**/
 #include <stdlib.h>
 #include "parser.tab.h"
 
