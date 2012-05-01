@@ -1,0 +1,38 @@
+programa pruebamv6:
+
+
+principal{
+	entero b;
+
+	escribe("Menu:");
+	escribe("1=>adelante");
+	escribe("2=>atras");
+	escribe("3=>rotaderecha");
+	escribe("4=>rotaizquierda");
+	escribe("5=>tomartesoro");
+	escribe("6=>topaderecha");
+	escribe("7=>topaizquierda");
+	escribe("8=>verpista");
+	b = lee();
+
+	
+	mientras(b < 7 y b > 0){
+		selecciona(b){
+			cuando 1 => {adelante();}
+			cuando 2 => {atras();}
+			cuando 3 => {rotaderecha();}
+			cuando 4 => {rotaizquierda();}
+			cuando 5 => {tomartesoro();}
+			cuando 6 => {escribe("Topa derecha:");
+				     escribe(topaderecha());}
+			cuando 7 => {escribe("Topa izquierda:");
+				      escribe(topaizquierda());}
+			cuando 8 => {escribe("Pista de blue:".verpista());}			
+
+		}
+	
+		b = lee();
+	}
+	
+	
+}

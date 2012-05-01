@@ -1,0 +1,36 @@
+programa prueba36_expresionlogico:
+
+principal{
+	logico a = verdadero,b = falso,x = verdadero;
+	
+	
+	a = 1 < 2;
+	escribe("Res 1 < 2: ");
+	escribe(a);
+	a = 1 > 2;
+	escribe("Res 1 > 2: ");
+	escribe(a);
+	a = 2 <= 2;
+	escribe("Res 2<=2: ");
+	escribe(a);
+	a = 1 >= 2;
+	escribe("Res 1>=2: ");
+	escribe(a);
+	a = 'c' == 'c';
+	escribe("Res: 'c' == 'c':");
+	escribe(a);
+	a = 1 <> 1;
+	escribe("Res: 1 <> 1:");
+	escribe(a);
+	a = b y x;
+	escribe("Res: b y x");
+	escribe(a);
+	a = b o x;
+	escribe("Res: b o x");
+	escribe(a);
+	a = no(b);
+	escribe("Res no(b): ");
+	escribe(a);
+
+	
+}

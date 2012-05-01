@@ -1,0 +1,27 @@
+**
+Prueba para la maquina virtual en donde el usuario puede mover 
+el android dependienod de la entrada.
+**
+programa pruebamv5:
+
+
+principal{
+	entero a;
+	entero b = lee();
+	
+	mientras(b < 7 y b > 0){
+		selecciona(b){
+			cuando 1 => {adelante();}
+			cuando 2 => {atras();}
+			cuando 3 => {rotaderecha();}
+			cuando 4 => {rotaizquierda();}
+			cuando 5 => {tomartesoro();}
+			cuando 6 => {escribe(verpista());}
+
+		}
+	
+		b = lee();
+	}
+	
+	
+}

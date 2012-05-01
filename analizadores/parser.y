@@ -1,4 +1,13 @@
 %{
+/**
+Autores: Luz del Carmen Nangullasmú Plasencia A00973172
+	 Miguel Ángel Patricio Cervera Castaldi A00973172
+	 Eugenio Rafael García García A01033529
+
+Clase: Compiladores
+Profesora: Elda Guadalupe Quiroga González
+Fecha: Miercoles 2 de Mayo 2012
+**/
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
@@ -9,25 +18,26 @@
 
 static GHashTable *dir_procs; //Directorio de procedimientos
 static GHashTable *tabla_constantes; //Tabla de constantes 
-static GQueue *cuadruplos; //Tabla de cuadruplos se maneja como lista empezando con el índice 0
+static GQueue *cuadruplos; //Tabla de cuádruplos se maneja como lista empezando con el índice 0
 static char *proc_actual; //Procedimiento actual mientras recorre sintaxis
 static char tipo_actual; //Tipo actual de variables
 static char tipo_funcion_actual;//Tipo actual de las funciones
 static int bandera_return;//Bandera de retorno de funciones
 static char *id_a_verificar; //Varibale utilizada para verificar la existencia del id
 static int contador_cuadruplos = 1; //Contador de cuadruplos realizados
-static int accion;
-extern int yylineno;
+static int accion; //Número de la accion actual llamada 
+extern int yylineno; //Numero de linea actual que está analizando el parser
 static char *nombreobj;//El archivo obj tendrá el mismo nombre que el ID del programa
+static int bandera_mensajes = 0; //Bandera que indica si mostrará mensajes de compilación
 
-//Declaracion de las pilas.
-static GQueue *POperandos;
-static GQueue *POperadores;
-static GQueue *PTipos;
-static GQueue *PSaltos;
-static GQueue *PSwitch;
-static GQueue *PFunciones;
-static GQueue *PParametros;
+//Declaración de las pilas.
+static GQueue *POperandos;//Pila de Operandos
+static GQueue *POperadores;//Pila de Operadores
+static GQueue *PTipos;//Pila de Tipos
+static GQueue *PSaltos;//Pila de Saltos
+static GQueue *PSwitch;//Pila de Switch
+static GQueue *PFunciones;//Pila de Funciones
+static GQueue *PParametros;//Pila de Parámetros
 
 //Declaración de rangos de memoria
 //Globales
@@ -56,11 +66,12 @@ static GQueue *PParametros;
 	int stringsconstantes = 430000;
 	int caracteresconstantes = 440000;
 	int logicosconstantes = 450000;
-//Declaracion del archivo objeto
+
+//Declaración del archivo objeto
 FILE *objeto;
 
 /*
-Estructuras para las tablas de procedimientos y tabla de variables
+Estructuras para las tablas
 */
 typedef struct{
 GHashTable *var_table;
@@ -265,6 +276,7 @@ char cubo[20][6][6] =
 			{'E','E','E','E','E','E'}
 		}
 	};
+
 /*
 Descripción: Se encarga de escribir en el código objeto
 el directorio de procedimientos. La función será utilizada en 
@@ -291,10 +303,7 @@ Salida: void
 */
 void imprime_tabla_constantes(char *key, constante *value, gpointer user_data){
 	constante *c = value;
-
-	fprintf(objeto,"%s,%d\n",key,c->dir_virtual);
-
-	
+	fprintf(objeto,"%s,%d\n",key,c->dir_virtual);	
 }
 
 /*
@@ -326,12 +335,12 @@ void insert_proc_to_table(char *name){
 		printf("Error: Función %s redeclarada en la línea %d\n",name,yylineno);
 		exit(1);
 	}else{
-	funcion *temp = g_slice_new(funcion);
-	temp->parametros = g_queue_new();
-	temp->var_table = g_hash_table_new(g_str_hash, g_str_equal);
-	temp->tipo = tipo_actual;
-	g_hash_table_insert(dir_procs,(gpointer)name,(gpointer)temp);
-	proc_actual = name;
+		funcion *temp = g_slice_new(funcion);
+		temp->parametros = g_queue_new();
+		temp->var_table = g_hash_table_new(g_str_hash, g_str_equal);
+		temp->tipo = tipo_actual;
+		g_hash_table_insert(dir_procs,(gpointer)name,(gpointer)temp);
+		proc_actual = name;
 	}
 }
 
@@ -343,7 +352,6 @@ Salida:void
 */	
 void insert_var_to_table(char *name, char * proc){
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc);
-	//printf("%s", tabla->var_table);
 	if(g_hash_table_lookup(tabla->var_table,(gpointer)name) != NULL){
 		printf("Error: Variable %s redeclarada en la línea %d\n",name,yylineno);
 		exit(1);
@@ -401,8 +409,10 @@ void insert_var_to_table(char *name, char * proc){
 		}
 		temp->dir_virtual = virtual;
 		g_hash_table_insert(tabla->var_table,(gpointer)name,(gpointer)temp);
-		g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
-		printf("Alta variable: %s %d\n",name, virtual);
+		if(bandera_mensajes){
+			g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
+			printf("Alta variable: %s %d\n",name, virtual);
+		}
 	}	
 }
 
@@ -427,12 +437,16 @@ void verifica_existe_var(char *name){
 		}else{
 		  int tipot = traduce_tipo(global->tipo)+1;
 		  g_queue_push_head(PTipos,GINT_TO_POINTER(tipot));
-		  printf("Dirección variable global: %s %d\n",name, global->dir_virtual);
+		  if(bandera_mensajes){
+		  	printf("Dirección variable global: %s %d\n",name, global->dir_virtual);
+		  }
 		  g_queue_push_head(POperandos,GINT_TO_POINTER(global->dir_virtual));
 		}
 	}else{
 	  g_queue_push_head(PTipos,GINT_TO_POINTER(traduce_tipo(local->tipo)+1));
-	  printf("Dirección variable local: %s %d\n",name, local->dir_virtual);
+	  if(bandera_mensajes){
+	  	printf("Dirección variable local: %s %d\n",name, local->dir_virtual);
+	  }
 	  g_queue_push_head(POperandos,GINT_TO_POINTER(local->dir_virtual));
 	}
 }
@@ -453,12 +467,14 @@ void verifica_existe_procs(char *name){
 /*
 Descripción: Inserta el procedieminto en la pila de operandos, asimismo inserta 
 el tipo correspondiente.
-Parámetros: char *name
+Parámetros: char *name, int tmp
 Salida: void
 */
 void inserta_procs_factor(char *name, int tmp){
 	funcion *f = g_hash_table_lookup(dir_procs,(gpointer)name);
-	printf("Tipo en factor: %c\n",f->tipo);
+	 if(bandera_mensajes){
+		printf("Tipo en factor: %c\n",f->tipo);
+	}
 	if(f->tipo == 'V'){//Valida si un modulo llamdo en la expresion es de tipo void
 		printf("Error: Expresión inválida en la línea %d\n",yylineno);
 		exit(1);
@@ -467,7 +483,9 @@ void inserta_procs_factor(char *name, int tmp){
 	variable *modulo = g_hash_table_lookup(proc_global->var_table,(gpointer)name);
 	g_queue_push_head(POperandos,GINT_TO_POINTER(tmp));
 	g_queue_push_head(PTipos,GINT_TO_POINTER(traduce_tipo(modulo->tipo)+1));
-	printf("Dirección variable global: %s %d\n",name, modulo->dir_virtual);
+	if(bandera_mensajes){
+		printf("Dirección variable global: %s %d\n",name, modulo->dir_virtual);
+	}
 	
 }
 
@@ -518,7 +536,6 @@ void generar_cuadruplo(int operador, int operando1, int operando2, int resultado
 	c->operando2 = operando2;
 	c->destino = resultadotmp;
 	g_queue_push_tail(cuadruplos,(gpointer)c);
-	//fprintf(objeto,"%d,%d,%d,%d\n",operador,operando1,operando2,resultadotmp);
 	contador_cuadruplos++;
 }
 
@@ -535,14 +552,12 @@ void generar_cuadruplo_funcion(int operador, char *operando1, int operando2, int
 	c->operando2 = operando2;
 	c->destino = resultadotmp;
 	g_queue_push_tail(cuadruplos,(gpointer)c);
-	
-	//fprintf(objeto,"%d,%d,%d,%d\n",operador,operando1,operando2,resultadotmp);
 	contador_cuadruplos++;
 }
 
 /*
 Descripción: Función que se encarga de  regresar el operador al cual corresponde
-dependiendo de los 2 últimos operadores. Aplica exclusiavmente para los 
+dependiendo de los 2 últimos operadores. Aplica exclusivamente para los 
 operadores con 2 caracteres.
 Parámetros: int operador1, int operador2
 Salida: int
@@ -577,29 +592,38 @@ Salida: void
 */
 void generar_cuadruplo_expresion(){
 	int operando2 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
-	printf("op2: %d ", operando2);
+	if(bandera_mensajes){
+		printf("op2: %d ", operando2);
+	}
 	int operando1 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
-	printf("op1: %d ", operando1);
+	if(bandera_mensajes){
+		printf("op1: %d ", operando1);
+	}
 	int operador = GPOINTER_TO_INT(g_queue_pop_head(POperadores));
-	printf("oper: %d ", operador);
+	if(bandera_mensajes){
+		printf("oper: %d ", operador);
+	}
 	int tipo2 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
-	printf("tipo2: %d ", tipo2);
+	if(bandera_mensajes){
+		printf("tipo2: %d ", tipo2);
+	}
 	int tipo1 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
-	printf("tipo1: %d\n", tipo1);
+	if(bandera_mensajes){
+		printf("tipo1: %d\n", tipo1);
+	}
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
-//	printf("op2: %d op1: %d oper: %d tipo1: %d tipo2: %d\n", operando2, operando1, operador, tipo1, tipo2);
 
 	char tnuevo = cubo[operador-1][tipo1-1][tipo2-1];
 	if(tnuevo == 'E'){
 		printf("Error: No se puede hacer la operación entre %s y %s en la línea %d \n",traduce_tipo2(tipo1),
-			traduce_tipo2(tipo2),yylineno);
+		traduce_tipo2(tipo2),yylineno);
 		exit(1);
 	}else{
 		
 		switch(operador){
 				case 3:
 				case 6:{
-				  g_queue_pop_head(POperadores);
+					g_queue_pop_head(POperadores);
 					generar_cuadruplo(operador,operando1,operando2,operando1);
 				}break;
 				default:{
@@ -636,29 +660,38 @@ void generar_cuadruplo_expresion(){
 
 /*
 Descripción: Se encarga de obtener los operandos, tipos de operandos
-y el operador para generar el cuádruplo para asignacionde variables. 
-Asimismo durante la declaracion de variables se distingue por no usar
+y el operador para generar el cuádruplo para asignación de variables. 
+Asimismo durante la declaración de variables se distingue por no usar
 temporales.
 Parámetros: 
 Salida: void
 */
 void generar_cuadruplo_asignacion(){
 	int operando2 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
-	printf("op2: %d ", operando2);
+	if(bandera_mensajes){
+		printf("op2: %d ", operando2);
+	}
 	int operando1 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
-	printf("op1: %d ", operando1);
+	if(bandera_mensajes){
+		printf("op1: %d ", operando1);
+	}
 	int operador = GPOINTER_TO_INT(g_queue_pop_head(POperadores));
-	printf("oper: %d ", operador);
+	if(bandera_mensajes){
+		printf("oper: %d ", operador);
+	}
 	int tipo2 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
-	printf("tipo2: %d ", tipo2);
+	if(bandera_mensajes){
+		printf("tipo2: %d ", tipo2);
+	}
 	int tipo1 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
-	printf("tipo1: %d\n", tipo1);
-//	printf("op2: %d op1: %d oper: %d tipo1: %d tipo2: %d\n", operando2, operando1, operador, tipo1, tipo2);
+	if(bandera_mensajes){
+		printf("tipo1: %d\n", tipo1);
+	}
 
 	char tnuevo = cubo[operador-1][tipo1-1][tipo2-1];
 	if(tnuevo == 'E'){//E es error
 		printf("Error: No se puede hacer la asignación de %s a %s en la línea %d \n",traduce_tipo2(tipo2),
-			traduce_tipo2(tipo1),yylineno);
+		traduce_tipo2(tipo1),yylineno);
 		exit(1);
 	}else{
 		generar_cuadruplo(operador,operando2,-1,operando1);
@@ -674,11 +707,17 @@ Salida: void
 */
 void generar_cuadruplo_expresion_unaria(){
 	int operando1 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
-	printf("op1: %d ", operando1);
+	if(bandera_mensajes){
+		printf("op1: %d ", operando1);
+	}
 	int operador = GPOINTER_TO_INT(g_queue_pop_head(POperadores));
-	printf("oper: %d ", operador);
+	if(bandera_mensajes){
+		printf("oper: %d ", operador);
+	}
 	int tipo1 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
-	printf("tipo1: %d\n", tipo1);
+	if(bandera_mensajes){
+		printf("tipo1: %d\n", tipo1);
+	}
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	if(operador == 1 || operador == 4){//Indica si es ++ o --
 		operador++;
@@ -688,7 +727,6 @@ void generar_cuadruplo_expresion_unaria(){
 		printf("Error: No se puede hacer la operación con %s en la línea %d \n",traduce_tipo2(tipo1),yylineno);
 		exit(1);
 	}else{
-		
 		switch(operador){
 			case 2:
 			case 5:{
@@ -734,7 +772,9 @@ Salida: void
 */
 void generar_cuadruplo_verpista(){
 	int operador = 37;
-	printf("oper: %d ", operador);
+	if(bandera_mensajes){
+		printf("oper: %d ", operador);
+	}
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	int tmp;
 	tmp = enterostemporales;
@@ -753,7 +793,9 @@ Salida: void
 */
 void generar_cuadruplo_accion_expresion(int accion){
 	int operador = accion;
-	printf("oper: %d ", operador);
+	if(bandera_mensajes){
+		printf("oper: %d ", operador);
+	}
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	int tmp;
 	tmp = logicostemporales;
@@ -772,7 +814,9 @@ Salida: void
 */
 void generar_cuadruplo_accionsi(int accion){
 	int operador = accion;
-	printf("oper: %d ", operador);
+	if(bandera_mensajes){
+		printf("oper: %d ", operador);
+	}
 	funcion *tabla = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	int tmp;
 	tmp = logicostemporales;
@@ -815,11 +859,15 @@ void insert_constante_to_table(char *valor, int tipo){
 		cte->dir_virtual = dir;
 		g_hash_table_insert(tabla_constantes,(gpointer)valor,(gpointer)cte);
 		g_queue_push_head(PTipos,GINT_TO_POINTER(tipo));
-		printf("Dirección constante: %d %s\n", dir, valor);
+		if(bandera_mensajes){
+			printf("Dirección constante: %d %s\n", dir, valor);
+		}
 		g_queue_push_head(POperandos,GINT_TO_POINTER(dir));
 	}else{
 		g_queue_push_head(PTipos,GINT_TO_POINTER(tipo));
-		printf("Dirección constante: %d %s\n", cte->dir_virtual, valor);
+		if(bandera_mensajes){
+			printf("Dirección constante: %d %s\n", cte->dir_virtual, valor);
+		}
 		g_queue_push_head(POperandos,GINT_TO_POINTER(cte->dir_virtual));
 	}
 }
@@ -833,8 +881,6 @@ Salida: void
 void insert_param_tipo(){
 	funcion *proc = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
 	g_queue_push_tail(proc->parametros,GINT_TO_POINTER(traduce_tipo(tipo_actual)+1));
-	//printf("Se agrego a parametos: %d\n",g_queue_peek_nth(proc->parametros,0));
-	//g_queue_foreach(proc->parametros,(GHFunc)printf,NULL);
 }
 
 /*
@@ -845,7 +891,6 @@ Salida: void
 */
 void insert_dir_inicial(){
 	funcion *proc = g_hash_table_lookup(dir_procs,(gpointer)proc_actual);
-	
 	proc->dir_inicial = contador_cuadruplos;	
 }
 
@@ -855,9 +900,11 @@ Parámetros: GHashTable *a
 Salida:void
 */
 void imprime(GHashTable *a){
-	printf("Lista:");
-	g_hash_table_foreach(a,(GHFunc)printf,NULL);
-	printf("\n");
+	if(bandera_mensajes){
+		printf("Lista:");
+		g_hash_table_foreach(a,(GHFunc)printf,NULL);
+		printf("\n");
+	}
 }
 
 %}
@@ -895,7 +942,9 @@ vars_id: ID{/*Regla 103 y 32*/id_a_verificar = yylval.str; insert_var_to_table(y
 varsip: COMA vars_id
         | {/*Regla 1*/verifica_existe_var(id_a_verificar);} IGUALR {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(19));/*operador asigancion(=)*/} var_init {
 		//Regla 3
-		printf("Genera cuádruplo =\n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo =\n");
+		}
 		generar_cuadruplo_asignacion();	}
 	var_initp
         | ;
@@ -940,8 +989,9 @@ funcion: FUNCION tipof ID{
 	}
 
 	//Generar cuadruplo de RET
-	
-	printf("Genera cuádruplo RET\n");
+	if(bandera_mensajes){
+		printf("Genera cuádruplo RET\n");
+	}
 	generar_cuadruplo(27,-1,-1,-1);
 	
 	};
@@ -1034,8 +1084,9 @@ ejecuta_funcion:  APARENTESIS{
 			}
 			//Regla 40
 			//GOSUB
-			printf("Genera cuádruplo GOSUB \n");
-			//printf("Tipo: %c \n",ft->tipo);
+			if(bandera_mensajes){
+				printf("Genera cuádruplo GOSUB \n");
+			}
 			
 			generar_cuadruplo_funcion(24,func,ft->dir_inicial,-1);
 			} PUNTOCOMA;
@@ -1059,18 +1110,20 @@ regresa: REGRESA{/*Regla 44*/bandera_return = 1;} mmexp {
 	}
 
 	//Generar cuadruplo de RETURN
-	printf("Genera cuádruplo RETURN\n");
+	if(bandera_mensajes){
+		printf("Genera cuádruplo RETURN\n");
+	}
 	generar_cuadruplo(35,expresion,-1,-1);
 
 	//Generar cuadruplo de asignacion
 	//obtener dir virtual de la golab de la funcion
 	char *p = "programa";
 	funcion *tabla = g_hash_table_lookup(dir_procs,p);
-	g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
+	if(bandera_mensajes){
+		g_hash_table_foreach(tabla->var_table,(GHFunc)printf,NULL);
+	}
 	variable *global = g_slice_new(variable);
 	global = g_hash_table_lookup(tabla->var_table,(gpointer)proc_actual);
-	//printf("Direccion Variable Global: %s %d\n",proc_actual, global->dir_virtual);
-	  //printf("Hola\n");
 	
 	char tnuevo = cubo[19-1][traduce_tipo(tipo_funcion_actual)][tipoexp];
 	if(tnuevo == 'E'){//E es error
@@ -1085,7 +1138,9 @@ asignacionp: 	asigp
 		| ap;
 asigp: 		IGUALR {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(19));/*operador asigancion(=)*/}lea {
 		//Regla 3
-		printf("Genera cuadruplo =\n");
+		if(bandera_mensajes){
+			printf("Genera cuadruplo =\n");
+		}
 		generar_cuadruplo_asignacion();	};
 lea: 	lectura
 		  |mmexp;
@@ -1112,7 +1167,9 @@ c:	SI APARENTESIS condicion_exp {
 			exit(1);
 		}
 		int resultado = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
-		printf("Genera cuádruplo GoToF\n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo GoToF\n");
+		}
 		generar_cuadruplo(22,resultado,-1,-1);
 		g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos-1));
 		
@@ -1130,7 +1187,9 @@ condicion_exp: mmexp
 		| accionsi;
 sip:	SINO{
 		//Regla 21
-		printf("Genera cuádruplo GoTo\n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo GoTo\n");
+		}
 		generar_cuadruplo(21,-1,-1,-1);
 		int falso = GPOINTER_TO_INT(g_queue_pop_head(PSaltos));
 
@@ -1172,7 +1231,9 @@ cuandop: CUANDO varselecciona{
 		generar_cuadruplo_expresion();
 		int tmp = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
 		g_queue_pop_head(PTipos);
-		printf("Genera cuádruplo GoToF\n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo GoToF\n");
+		}
 		generar_cuadruplo(22,tmp,-1,-1);
 		g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos-1));
 		//Volver a meter tipo y cte de comparacion
@@ -1182,7 +1243,9 @@ cuandop: CUANDO varselecciona{
 	} IGUALR MAYORQUE ALLAVE bloque CLLAVE{
 		//Regla29
 		int falso = GPOINTER_TO_INT(g_queue_pop_head(PSaltos));
-		printf("Genera cuádruplo GoTo\n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo GoTo\n");
+		}
 		generar_cuadruplo(21,-1,-1,-1);
 		//Rellenar falso con contador_cuadruplos
 		cuadruplo *tmp = g_slice_new(cuadruplo);
@@ -1202,13 +1265,17 @@ escritura: ESCRIBE APARENTESIS escriturap CPARENTESIS{
 		//Regla 26
 		int operando1 = GPOINTER_TO_INT(g_queue_pop_head(POperandos));	
 		int tipo1 = GPOINTER_TO_INT(g_queue_pop_head(PTipos));
-		printf("Genera cuádruplo de escribe\n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo de escribe\n");
+		}
 		generar_cuadruplo(34,operando1,-1,-1);
 		} PUNTOCOMA;
 escriturap: exp { 
 		//Regla 27
 		if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 9){
-		printf("Genera cuádruplo .\n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo .\n");
+		}
 		generar_cuadruplo_expresion();		
 		}} 
 		e;
@@ -1241,9 +1308,11 @@ lectura: LEE APARENTESIS CPARENTESIS {/*Regla 54*/
 							tabla->tamano_temporales[4]++;
 							break;
 					}
-					printf("tipo var: %d y tmp: %d enterostemp: %d\n",tipo_var,tmp2,enterostemporales);
+					if(bandera_mensajes){
+						printf("tipo var: %d y tmp: %d enterostemp: %d\n",tipo_var,tmp2,enterostemporales);
 					
-					printf("Genera cuadruplo lee \n");
+						printf("Genera cuadruplo lee \n");
+					}
 					generar_cuadruplo(40,-1,-1,tmp2);
 
 					//Se agrega el temporal a la pila
@@ -1262,7 +1331,9 @@ ciclo: MIENTRAS{/* Regla 23*/g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_
 			exit(1);
 		}
 		int resultado = GPOINTER_TO_INT(g_queue_pop_head(POperandos));
-		printf("Genera cuádruplo GoToF\n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo GoToF\n");
+		}
 		generar_cuadruplo(22,resultado,-1,-1);		
 		g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_cuadruplos-1));
 	} bloque CLLAVE {
@@ -1279,13 +1350,17 @@ ciclo: MIENTRAS{/* Regla 23*/g_queue_push_head(PSaltos,GINT_TO_POINTER(contador_
 
 accion: acciones{
 	//Regla 41
-	printf("Genera cuádruplo de acción\n");
+	if(bandera_mensajes){
+		printf("Genera cuádruplo de acción\n");
+	}
 	generar_cuadruplo(accion,-1,-1,-1);
 	} APARENTESIS CPARENTESIS PUNTOCOMA;
 	
 accionsi: acciones{
 	//Regla 18
-	printf("Genera cuádruplo de acción\n");
+	if(bandera_mensajes){
+		printf("Genera cuádruplo de acción\n");
+	}
 	generar_cuadruplo_accionsi(accion);
 	
 	} APARENTESIS CPARENTESIS;
@@ -1317,14 +1392,18 @@ params2: exp{
 			}
 	
 	int tipoparam = GPOINTER_TO_INT(g_queue_peek_nth(ft->parametros,contador_parametros));
-	printf("Argumento y tipoarg, tipoparam: %d,%d,%d\n",argumento,tipoarg,tipoparam);
+	if(bandera_mensajes){
+		printf("Argumento y tipoarg, tipoparam: %d,%d,%d\n",argumento,tipoarg,tipoparam);
+	}
 	
 	if(tipoarg != tipoparam){
 		printf("Error: Se espera un valor %s en la línea %d\n",traduce_tipo2(tipoparam),yylineno);
 		exit(1);
 	}
 	//Generar cuadruplo parametro
-	printf("Genera cuádruplo parámetro \n");
+	if(bandera_mensajes){
+		printf("Genera cuádruplo parámetro \n");
+	}
 	generar_cuadruplo(26,argumento,contador_parametros,-1);
 	//Regla 38
 	int p = GPOINTER_TO_INT(g_queue_pop_head(PParametros));
@@ -1337,7 +1416,9 @@ params2p: COMA params2
 mmexp: mexp {
 	//Regla 9
 	  if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 17){
-  			printf("Genera cuádruplo or \n");
+	  		if(bandera_mensajes){
+  				printf("Genera cuádruplo or \n");
+  			}
 			generar_cuadruplo_expresion();		
 	}} mmexpp;
 mmexpp: O {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(17));/*operador or*/} mmexp 
@@ -1346,7 +1427,9 @@ mmexpp: O {/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(17));/*opera
 mexp: expresion{
 	//Regla 8
   if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 16){
-  			printf("Genera cuádruplo and /\n");
+  			if(bandera_mensajes){
+  				printf("Genera cuádruplo and /\n");
+  			}
 			generar_cuadruplo_expresion();		
 	}} mexpp;
 mexpp: Y{/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(16));/*operador and*/} mexp
@@ -1355,7 +1438,9 @@ mexpp: Y{/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(16));/*operado
 expresion: exp{
 	//Regla 7
   if(valida_existencia_logico(GPOINTER_TO_INT(g_queue_peek_head(POperadores)))){
-  			printf("Genera cuádruplo < > <= >= <>\n");
+  			if(bandera_mensajes){
+	  			printf("Genera cuádruplo < > <= >= <>\n");
+	  		}
 			generar_cuadruplo_expresion();		
 	}} expresionp;
 expresionp: ep expresion 
@@ -1375,17 +1460,21 @@ epp: IGUALR {
 exp: termino
   {	//Regla 10
   	if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 1 || GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 4){
-		printf("Genera cuádruplo + o -\n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo + o -\n");
+		}
 		generar_cuadruplo_expresion();		
 	}} expp;
-expp: MAS{ /*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(1));printf("Push +\n");/*operador suma*/}  exp
-	| MENOS{ /*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(4));printf("Push -\n");/*operador resta*/}  exp 
+expp: MAS{ /*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(1));if(bandera_mensajes){printf("Push +\n");}/*operador suma*/}  exp
+	| MENOS{ /*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(4));if(bandera_mensajes){printf("Push -\n");}/*operador resta*/}  exp 
 	| ;
 
 termino: factor
   {	//Regla 11
   	if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 7 || GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 8){
-    	printf("Genera cuádruplo * o /\n");
+  	if(bandera_mensajes){
+    		printf("Genera cuádruplo * o /\n");
+    	}
 		generar_cuadruplo_expresion();		
 	}} 
 	terminop;
@@ -1407,7 +1496,9 @@ factorp: nf APARENTESIS{/*Regla 12*/g_queue_push_head(POperadores,GINT_TO_POINTE
 		}
 		//Regla 14
 		if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 18){
-			printf("Genera cuádruplo not\n");
+			if(bandera_mensajes){
+				printf("Genera cuádruplo not\n");
+			}
 			generar_cuadruplo_expresion_unaria();
 		}
 		};
@@ -1416,7 +1507,9 @@ nf:	NO{/*Regla 2*/g_queue_push_head(POperadores,GINT_TO_POINTER(18));/*operador 
 factorpp: f varcte {
 	//Regla 15
   	if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 18 || GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 20){
-		printf("Genera cuádruplo not o - \n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo not o - \n");
+		}
 		generar_cuadruplo_expresion_unaria();
 	}
 	};
@@ -1429,13 +1522,14 @@ fun_var: APARENTESIS{
 		verifica_existe_procs(id_a_verificar);
 		//Regla 36
 		g_queue_push_head(PFunciones,id_a_verificar);
-		printf("Genera cuádruplo de función: %s \n",id_a_verificar);
+		if(bandera_mensajes){
+			printf("Genera cuádruplo de función: %s \n",id_a_verificar);
+		}
 		generar_cuadruplo_funcion(25,id_a_verificar,-1,-1);
 		g_queue_push_head(PParametros,GINT_TO_POINTER(0));
 		g_queue_push_head(POperadores,GINT_TO_POINTER('('));
 			
 	} paramsf CPARENTESIS{
-		//verifica_existe_procs(id_a_verificar);
 		//Regla 39
 		char *func = g_queue_peek_head(PFunciones);
 		funcion *ft = g_hash_table_lookup(dir_procs,(gpointer)func);
@@ -1449,7 +1543,9 @@ fun_var: APARENTESIS{
 		}
 		//Regla 40 
 		//GENERAR GOSUB
-		printf("Genera cuádruplo GOSUB \n");
+		if(bandera_mensajes){
+			printf("Genera cuádruplo GOSUB \n");
+		}
 		int tmp;
 		switch(ft->tipo){
 			case 'I': tmp = enterostemporales;
@@ -1478,7 +1574,7 @@ fun_var: APARENTESIS{
 		//Regla 47
 		inserta_procs_factor(func,tmp);
 
-		//SE saca el fondo falso
+		//Se saca el fondo falso
 		g_queue_pop_head(POperadores);
 	}
          | {	//Regla 1
@@ -1488,11 +1584,11 @@ fun_var: APARENTESIS{
 
 factorpppp: nf accionsi {
 		//Regla 53
-		//printf("Generar cuadruplo de accion \n");
-		//generar_cuadruplo_accion_expresion(accion);
 
 		if(GPOINTER_TO_INT(g_queue_peek_head(POperadores)) == 18){
-			printf("Genera cuádruplo not o - \n");
+			if(bandera_mensajes){
+				printf("Genera cuádruplo not o - \n");
+			}
 			generar_cuadruplo_expresion_unaria();
 		}
 		};
@@ -1504,48 +1600,47 @@ varselecciona: ID{/*Regla 104*/verifica_existe_var(yylval.str);}
 
 %% 
 main() { 
-crear_pilas_tablas();
-  yyparse(); 
-  objeto = fopen(strcat(nombreobj,".roid"), "w");
-//Impresion del directorio de procedimientos en consola
-imprime(dir_procs); 
+	crear_pilas_tablas();
+	yyparse(); 
+	objeto = fopen(strcat(nombreobj,".roid"), "w");
+	  
+	//Impresion del directorio de procedimientos en consola
+	imprime(dir_procs); 
 
-//Generar cuadruplo final END
-generar_cuadruplo(36,-1,-1,-1);
-
-
-//Escribir el directorio de procedimientos
-g_hash_table_foreach(dir_procs,(GHFunc)imprime_dir_procs,NULL);
+	//Generar cuadruplo final END
+	generar_cuadruplo(36,-1,-1,-1);
 
 
-fprintf(objeto,"--\n");
-//Escribir en el archivo la tabla de constantes
-g_hash_table_foreach(tabla_constantes,(GHFunc)imprime_tabla_constantes,NULL);
-fprintf(objeto,"--\n");
-
-//Escribir en el archivo los cuádruplos
-cuadruplo *a = g_slice_new(cuadruplo);
-cuadruplofuncion *b = g_slice_new(cuadruplofuncion);
-cuadruplo *fin = g_slice_new(cuadruplo);
-fin = g_queue_peek_head(cuadruplos);
+	//Escribir el directorio de procedimientos
+	g_hash_table_foreach(dir_procs,(GHFunc)imprime_dir_procs,NULL);
 
 
-while(fin){
-	a = g_queue_peek_head(cuadruplos);
-	if(a->operador == 24 || a->operador == 25){
-		b = g_queue_pop_head(cuadruplos);
-		//printf("cuadruplo funcion\n");
-		fprintf(objeto,"%d,%s,%d,%d\n",b->operador,b->operando1,b->operando2,b->destino);	
-	}else{
-		a = g_queue_pop_head(cuadruplos);
-		//printf("cuadruplo normal\n");
-		fprintf(objeto,"%d,%d,%d,%d\n",a->operador,a->operando1,a->operando2,a->destino);	
-	}
+	fprintf(objeto,"--\n");
+	//Escribir en el archivo la tabla de constantes
+	g_hash_table_foreach(tabla_constantes,(GHFunc)imprime_tabla_constantes,NULL);
+	fprintf(objeto,"--\n");
+
+	//Escribir en el archivo los cuádruplos
+	cuadruplo *a = g_slice_new(cuadruplo);
+	cuadruplofuncion *b = g_slice_new(cuadruplofuncion);
+	cuadruplo *fin = g_slice_new(cuadruplo);
 	fin = g_queue_peek_head(cuadruplos);
-}
 
-fclose(objeto);
-free(dir_procs);
+
+	while(fin){
+		a = g_queue_peek_head(cuadruplos);
+		if(a->operador == 24 || a->operador == 25){
+			b = g_queue_pop_head(cuadruplos);
+			fprintf(objeto,"%d,%s,%d,%d\n",b->operador,b->operando1,b->operando2,b->destino);	
+		}else{
+			a = g_queue_pop_head(cuadruplos);
+			fprintf(objeto,"%d,%d,%d,%d\n",a->operador,a->operando1,a->operando2,a->destino);	
+		}
+		fin = g_queue_peek_head(cuadruplos);
+	}
+
+	fclose(objeto);
+	free(dir_procs);
 }
 
 yyerror(char *s){

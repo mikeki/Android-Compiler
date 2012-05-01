@@ -1,0 +1,29 @@
+programa prueba37_expresion:
+
+principal{
+	entero a = 1,b = 2,x = 3;
+
+	escribe("variables enteras a =".a." b =".b." x=".x);
+	
+	
+	a = a + b;
+	escribe("Res a + b: ".a);
+	a = b -1;
+	escribe("Res b - 1: ".a);
+	a++;
+	escribe("Res a++: ".a);
+	a--;
+	escribe("Res a--: ".a);
+	a+=x;
+	escribe("Res: a+=x".a);
+	a-=b;
+	escribe("Res: a-=b".a);
+	a = b * x;
+	escribe("Res: b*x".a);
+	a = b / x;
+	escribe("Res: b/x".a);
+	a = -1;
+	escribe("Res -1: ".a);
+
+	
+}

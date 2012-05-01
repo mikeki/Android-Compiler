@@ -1,0 +1,9 @@
+programa pruebamv7:
+
+
+principal{
+	mientras(no(topa())){
+		adelante();
+	}
+	
+}

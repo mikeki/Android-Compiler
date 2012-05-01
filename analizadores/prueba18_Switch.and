@@ -3,7 +3,6 @@ programa prueba18_Switch:
 principal{
 	entero a = 2;
 	flotante acum = 5.6;
-
 	selecciona(a){
 		cuando 1=>{ acum+=1;}
 		cuando 2=>{acum=acum*4;}

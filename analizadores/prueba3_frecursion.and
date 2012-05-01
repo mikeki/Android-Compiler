@@ -11,12 +11,14 @@ funcion entero factorial(entero a){
 
 principal{
 	entero a;
-
-	a = factorial(2);
-	escribe(a);
-	a = factorial(3);
-	escribe(a);
-	a = factorial(4);
-	escribe(a);
-	
+	entero i = 1;
+	entero lectura;
+	escribe("¿hasta que numero calculo el factorial?");
+	lectura = lee();
+	mientras(i <= lectura){
+		
+		a = factorial(i);
+		escribe(a);
+		i++;
+	}
 }
